@@ -2143,12 +2143,14 @@
       </div>
       <div class="section-label">Conta e sincronização</div>
       <div class="panel panel--pad" id="syncPanel"></div>
+      <div id="profilesSection">
       <div class="section-label">Perfis de usuário</div>
       <div class="panel panel--pad" style="--accent:var(--amber)">
         <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
           <button class="btn" id="btnNewProfile">+ Novo perfil</button>
           <button class="btn" id="btnManageProfiles">Trocar perfil</button>
         </div>
+      </div>
       </div>
       <div class="section-label">Painel de navegação</div>
       <div class="panel panel--pad" style="--accent:var(--blue)">
@@ -5499,7 +5501,25 @@ function renderAll(){
 // ============================================================
 
 function getProfileIndex(){ return lsGet('profiles', []); }
-function saveProfileIndex(list){ lsSet('profiles', list); }
+function saveProfileIndex(list){ lsSet('profiles', list); updateProfileControls(); }
+
+// Com conta, cada pessoa usa a própria conta: criar perfil vira entrar com outra conta,
+// e trocar de perfil só aparece para contas antigas que ainda têm mais de um.
+const cloudUser = () => (window.Sync && Sync.user) || null;
+function updateProfileControls(){
+  const user = cloudUser();
+  const many = getProfileIndex().length > 1;
+  const show = (id, on) => { const el = document.getElementById(id); if(el) el.style.display = on ? '' : 'none'; };
+  show('btnNewProfile', !user);
+  show('btnManageProfiles', !user || many);
+  show('btnSwitchProfile', !user || many);
+  show('profilesSection', !user || many);
+}
+async function switchAccount(){
+  if(!confirm('Para outra pessoa usar o app, saia desta conta e entre (ou crie) a conta dela. Seus dados continuam salvos na nuvem. Sair agora?')) return;
+  try{ await Sync.signOut(); location.reload(); }
+  catch(err){ showToast(err.message, 'error', 5000); }
+}
 function getActiveProfileId(){ return lsGet('active_profile', null); }
 function saveActiveProfileId(id){ lsSet('active_profile', id); }
 
@@ -5582,12 +5602,15 @@ function showProfilePicker(){
       <div class="pc-curso">${p.curso||''}</div>
       ${since ? `<div class="pc-since">${since}</div>` : ''}
     </div>`;
-  }).join('') + `<button class="profile-new-btn" id="profileNewBtn"><span class="ic">＋</span>Novo perfil</button>`;
+  }).join('') + (cloudUser()
+    ? `<button class="profile-new-btn" id="profileNewBtn"><span class="ic">＋</span>Outra pessoa</button>`
+    : `<button class="profile-new-btn" id="profileNewBtn"><span class="ic">＋</span>Novo perfil</button>`);
 
   cards.querySelectorAll('.profile-card').forEach(card => {
     card.addEventListener('click', () => selectProfile(card.dataset.profileId));
   });
   document.getElementById('profileNewBtn').addEventListener('click', () => {
+    if(cloudUser()){ switchAccount(); return; }
     screen.style.display = 'none';
     showWizard(null);
   });
@@ -6904,6 +6927,7 @@ function renderSyncUI(s){
   }
   const note = document.getElementById('profileStorageNote');
   if(note) note.textContent = s.user ? `Sincronizado com a conta ${s.user.email}.` : 'Os dados de cada perfil ficam salvos somente neste aparelho.';
+  updateProfileControls();
   const panel = document.getElementById('syncPanel');
   if(!panel) return;
   if(!(window.Sync && Sync.enabled)){
