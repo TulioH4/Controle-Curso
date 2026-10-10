@@ -4043,7 +4043,7 @@ function renderFaltas(){
       `Ainda pode faltar <b>${restam}×</b>`;
     return `<div class="panel falta-card" style="--accent:var(--${badgeCls})">
       <div class="disc">${d.nome}</div>
-      <div class="disc-ch mono">${d.sigla}, Limite: <span class="limite-text">${limite} faltas${temCustom?' ✎':''}</span> <button class="btn-limite-edit" data-limite-edit="${d.sigla}" data-limite-atual="${limite}" title="Editar limite de faltas" style="background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:12px;padding:0 2px;opacity:.6;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='.6'">${ico('edit')}</button>${presencaPct!==null?`<span style="margin-left:8px;color:var(--text-faint);">· ${presencaPct}% presença</span>`:''}</div>
+      <div class="disc-ch mono">${d.sigla}, Limite: <span class="limite-text">${limite} faltas${temCustom?' ✎':''}</span> <button class="btn-limite-edit" data-limite-edit="${d.sigla}" data-limite-atual="${limite}" title="Editar limite de faltas" style="background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:12px;padding:0 2px;opacity:.6;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='.6'">${ico('edit')}</button>${presencaPct!==null?`<span style="margin-left:8px;color:var(--text-faint);">${presencaPct}% de presença</span>`:''}</div>
       <div class="counter-row">
         <button class="counter-btn sub" data-f-dec="${d.sigla}" title="Remover falta">−</button>
         <div class="counter-val">${faltas}</div>
@@ -4054,9 +4054,6 @@ function renderFaltas(){
         <span class="badge badge-${badgeCls}" style="font-size:10px;">${badgeLabel}</span>
       </div>
       <div class="falta-bar"><div class="falta-bar-fill" style="width:${pct}%; background:${barColor};"></div></div>
-      ${faltas > 0 && pct < 100 ? `<div class="falta-forecast" style="color:var(--${pct>=75?'red':pct>=50?'amber':'text-faint'})">
-        ${restam <= 2 ? 'Margem crítica' : restam <= 5 ? 'Atenção' : '✓ Margem segura'}: ${restam} falta${restam!==1?'s':''} restantes (~${restam} semana${restam!==1?'s':''} a 1/semana)
-      </div>` : ''}
     </div>`;
   }).join('');
 
