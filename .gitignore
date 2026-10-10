@@ -6,7 +6,7 @@ backup-centro-de-controle*.json
 index.backup-*.html
 
 # Local notes (out of date)
-README.md
+README.local.md
 
 # Build output (GitHub Actions builds it)
 dist/
