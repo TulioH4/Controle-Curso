@@ -1,26 +1,18 @@
 <div align="center">
 
-<img src="icons/icon.svg" width="96" alt="Ícone do Centro de Controle">
+<img src="docs/banner.png" width="880" alt="Centro de Controle: notas, faltas, provas e tarefas da graduação num só lugar">
 
-# Centro de Controle
-
-**Controle pessoal da graduação: notas, faltas, provas, tarefas e horários em um só lugar.**<br>
 Funciona no computador e no celular, offline, com os mesmos dados nos dois.
 
-[**Abrir o app**](https://tulioh4.github.io/centro-de-controle/) &nbsp;·&nbsp;
-[Instalar](#instalar) &nbsp;·&nbsp;
-[Funcionalidades](#funcionalidades) &nbsp;·&nbsp;
-[Como funciona](#como-funciona)
+<a href="https://tulioh4.github.io/centro-de-controle/"><img src="docs/abrir-app.png" height="46" alt="Abrir o app"></a>
+
+[Instalar](#instalar) &nbsp;&nbsp; [Funcionalidades](#funcionalidades) &nbsp;&nbsp; [Seus dados](#seus-dados) &nbsp;&nbsp; [Como funciona](#como-funciona)
 
 <br>
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/painel-escuro.png">
-  <source media="(prefers-color-scheme: light)" srcset="docs/painel-claro.png">
-  <img src="docs/painel-escuro.png" width="900" alt="Painel principal com aulas do dia, próximas provas, prazos de laboratório, tarefas urgentes e lembretes">
-</picture>
+<img src="docs/painel.png" width="900" alt="Painel no tema claro: recado do dia, resumo com aulas, próxima aula, próxima prova e prazos, próximas provas, prazos de laboratório e agenda da semana">
 
-<sub>Capturas com um perfil fictício.</sub>
+<sub>Captura com um perfil fictício.</sub>
 
 </div>
 
@@ -42,7 +34,8 @@ Atualizações chegam sozinhas: a cada nova versão publicada, o app instalado s
 ## Funcionalidades
 
 **Painel**
-- Resumo do dia: aulas, próxima aula, tarefas atrasadas e prazos da semana
+- Um recado curto do dia: provas de hoje e amanhã, tarefas atrasadas ou vencendo e relatórios perto do prazo
+- Resumo do dia: aulas, próxima aula, próxima prova e prazos da semana
 - Próximas provas com data, horário e sala; prazos de laboratório em aberto
 - Agenda da semana em grade, juntando aulas, provas, entregas e tarefas (no dia de uma prova, a aula da disciplina dá lugar a ela)
 - Post-its de lembrete fixados no topo
@@ -50,7 +43,7 @@ Atualizações chegam sozinhas: a cada nova versão publicada, o app instalado s
 
 **Acompanhamento acadêmico**
 - **Notas:** notas parciais com peso, meta por disciplina, calculadora de quanto falta na prova final, simulador de IRA e gráficos de desempenho
-- **Faltas:** limite por disciplina, previsão de quantas ainda cabem e ranking de risco
+- **Faltas:** contador com limite editável por disciplina, aviso quando chega perto do limite e ranking de risco
 - **Histórico** do curso inteiro, com busca, filtros e edição
 - **Mapa de Sucesso:** o currículo organizado semestre a semestre
 - **Horas complementares** e **Laboratório** (turmas e entrega de relatórios)
@@ -67,11 +60,13 @@ Atualizações chegam sozinhas: a cada nova versão publicada, o app instalado s
 - Atalhos no ícone (clique direito no Windows, toque longo no Android): nova tarefa, provas, tarefas
 - Notificações de provas e prazos do dia e do dia seguinte
 - Tema claro e escuro, no estilo *Liquid Glass*
-- Vários perfis no mesmo aparelho, backup em arquivo e assistente de configuração para novos usuários, com importação da grade via Excel ou texto
+- Assistente de configuração para novos usuários: a grade de Engenharia de Produção do INATEL é montada com toques (escolha o semestre e ajuste as disciplinas); outros cursos importam via Excel ou texto
+- Backup em arquivo e, sem conta, vários perfis no mesmo aparelho
 
 ## Seus dados
 
 - **Com conta:** os dados ficam na sua conta (Supabase), protegidos por regras que só permitem a cada usuário ler e gravar os próprios registros. O app trabalha sempre com uma cópia local, então abre na hora e funciona sem internet; as alterações sobem em segundo plano e aparecem nos outros aparelhos em poucos segundos.
+- **Cada pessoa, sua conta:** para outra pessoa usar o app no mesmo aparelho, basta sair e entrar com a conta dela.
 - **Sem conta:** tudo fica só no navegador daquele aparelho.
 - **Backup:** em *Configurações → Backup dos dados*, exporte ou importe um arquivo `.json` com tudo do perfil.
 - Este repositório é público, mas **não contém dados de ninguém**. A versão publicada leva apenas um modelo vazio (`dados_curso.template.js`), e o build é interrompido se encontrar dados pessoais no pacote.
