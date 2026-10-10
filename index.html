@@ -512,6 +512,16 @@
   .falta-card .disc{font-weight:600; font-size:13px; margin-bottom:4px;}
   .falta-card .disc-ch{font-size:11px; color:var(--text-faint); font-family:var(--mono);}
   .counter-row{display:flex; align-items:center; gap:8px; margin:10px 0 6px;}
+  .falta-card .disc{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .falta-main{display:flex; align-items:center; justify-content:space-between; gap:12px; margin:12px 0 12px;}
+  .falta-main .counter-row{margin:0;}
+  .falta-pres{display:flex; flex-direction:column; align-items:flex-end; line-height:1.15;}
+  .falta-pres b{font-size:17px; font-weight:600; color:var(--text); font-variant-numeric:tabular-nums;}
+  .falta-pres span{font-size:11px; color:var(--text-faint);}
+  .falta-foot{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:8px; font-size:11.5px; color:var(--text-dim);}
+  .falta-lim{display:inline-flex; align-items:center; gap:4px; color:var(--text-faint); white-space:nowrap;}
+  .btn-limite-edit{background:none; border:none; padding:2px; color:var(--text-faint); cursor:pointer; opacity:.7; display:inline-flex;}
+  .btn-limite-edit:hover{opacity:1; color:var(--text);}
   .counter-btn{
     width:28px; height:28px; border-radius:4px; border:1px solid var(--line);
     background:var(--panel-2); color:var(--text); cursor:pointer; font-size:14px; font-weight:700;
@@ -594,10 +604,13 @@
   @media(max-width:880px){
     .horas-form{grid-template-columns:1fr 1fr;}
     .horas-resumo{grid-template-columns:repeat(2,1fr);}
-    .faltas-grid{grid-template-columns:1fr 1fr;}
+    .faltas-grid{grid-template-columns:repeat(2, minmax(0, 1fr));}
     .modal-row{grid-template-columns:1fr 1fr 1fr;}
     .hist-add-form{grid-template-columns:1fr 1fr;}
     #btnNotifications{display:none;}
+  }
+  @media(max-width:560px){
+    .faltas-grid{grid-template-columns:minmax(0, 1fr);}
   }
 
   #loading{
@@ -4037,23 +4050,25 @@ function renderFaltas(){
     const chEst = d.ch || limite * 4;
     const presencaPct = chEst > 0 ? Math.max(0, Math.round((chEst - faltas) / chEst * 100)) : null;
     const restam = Math.max(0, limite - faltas);
-    const restamTxt = pct >= 100 ? 'Limite atingido!' :
-      restam === 1 ? '<b style="color:var(--red)">Mais 1 falta = reprovado</b>' :
+    const restamTxt = pct >= 100 ? '<b style="color:var(--red)">Limite atingido</b>' :
+      restam === 1 ? '<b style="color:var(--red)">Mais 1 falta reprova</b>' :
       restam <= 3 ? `<b style="color:var(--amber)">Ainda pode faltar ${restam}×</b>` :
       `Ainda pode faltar <b>${restam}×</b>`;
     return `<div class="panel falta-card" style="--accent:var(--${badgeCls})">
-      <div class="disc">${d.nome}</div>
-      <div class="disc-ch mono">${d.sigla}, Limite: <span class="limite-text">${limite} faltas${temCustom?' ✎':''}</span> <button class="btn-limite-edit" data-limite-edit="${d.sigla}" data-limite-atual="${limite}" title="Editar limite de faltas" style="background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:12px;padding:0 2px;opacity:.6;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='.6'">${ico('edit')}</button>${presencaPct!==null?`<span style="margin-left:8px;color:var(--text-faint);">${presencaPct}% de presença</span>`:''}</div>
-      <div class="counter-row">
-        <button class="counter-btn sub" data-f-dec="${d.sigla}" title="Remover falta">−</button>
-        <div class="counter-val">${faltas}</div>
-        <button class="counter-btn" data-f-inc="${d.sigla}" title="Adicionar falta">+</button>
-      </div>
-      <div style="display:flex; align-items:center; justify-content:space-between; font-size:11px; color:var(--text-faint); font-family:var(--mono); margin-bottom:4px;">
-        <span>${restamTxt}</span>
-        <span class="badge badge-${badgeCls}" style="font-size:10px;">${badgeLabel}</span>
+      <div class="disc" title="${esc(d.sigla)}">${esc(d.nome)}</div>
+      <div class="falta-main">
+        <div class="counter-row">
+          <button class="counter-btn sub" data-f-dec="${d.sigla}" title="Remover falta">−</button>
+          <div class="counter-val">${faltas}</div>
+          <button class="counter-btn" data-f-inc="${d.sigla}" title="Adicionar falta">+</button>
+        </div>
+        ${presencaPct!==null?`<div class="falta-pres"><b>${presencaPct}%</b><span>de presença</span></div>`:''}
       </div>
       <div class="falta-bar"><div class="falta-bar-fill" style="width:${pct}%; background:${barColor};"></div></div>
+      <div class="falta-foot">
+        <span>${restamTxt}</span>
+        <span class="falta-lim" title="${temCustom?'Limite ajustado por você':'Limite padrão'}">Limite <span class="limite-text">${limite}</span><button class="btn-limite-edit" data-limite-edit="${d.sigla}" data-limite-atual="${limite}" title="Editar limite de faltas" aria-label="Editar limite de faltas">${ico('edit')}</button></span>
+      </div>
     </div>`;
   }).join('');
 
