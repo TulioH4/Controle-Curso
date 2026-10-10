@@ -3093,7 +3093,7 @@ function renderPainel(){
       <div class="dash-task-check" data-dash-done="${t.id}" role="button" tabindex="0" aria-label="Concluir ${esc(t.nome)}"></div>
       <div class="dash-task-info">
         <div class="t">${esc(t.nome)}</div>
-        <div class="s">${esc(t.categoria)}${t.prazo?', prazo '+fmtDate(t.prazo)+(overdue?' (atrasado)':''):''}${t.disciplina?', '+esc(t.disciplina):''}</div>
+        <div class="s">${esc(t.categoria)}${t.prazo?', '+fmtDate(t.prazo)+(overdue?' (atrasado)':''):''}${t.disciplina?', '+esc(t.disciplina):''}</div>
       </div>
       <span class="badge badge-${stCls}">${t.status}</span>
     </div>`;
@@ -5012,7 +5012,7 @@ function renderTarefas(){
       <span class="badge badge-${prCls}">${t.prioridade}</span>
       <div class="name">
         <div class="t">${esc(t.nome)}</div>
-        <div class="meta">${esc(t.categoria)}${t.disciplina?(', '+esc(t.disciplina)):''}${t.prazo?(', prazo '+fmtDate(t.prazo)+(overdue?' (atrasado)':'')):''}</div>
+        <div class="meta">${esc(t.categoria)}${t.disciplina?(', '+esc(t.disciplina)):''}${t.prazo?(', '+fmtDate(t.prazo)+(overdue?' (atrasado)':'')):''}</div>
       </div>
       <span class="badge badge-${stCls} status-btn" data-toggle="${t.id}" tabindex="0" role="button" aria-label="Mudar status de ${esc(t.nome)}, atual ${t.status}">${t.status}</span>
       <button class="btn btn-ghost" data-edit-tarefa="${t.id}" title="Editar" aria-label="Editar ${esc(t.nome)}">${ico('edit')}</button>
