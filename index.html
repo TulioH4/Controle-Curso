@@ -1617,6 +1617,104 @@
   .day-overview__hi{color:var(--text); font-weight:600;}
   .stat__sub{display:block; margin-top:3px; font-size:12.5px; font-weight:500; color:var(--text-faint);}
 
+  /* ---------- Estudos (recurso em teste) ---------- */
+  .est-empty{text-align:center; padding:36px 24px; color:var(--text-dim); font-size:13.5px; line-height:1.55;}
+  .est-empty p{margin:0 auto 14px; max-width:46ch;}
+  .est-empty__t{font-size:16px; font-weight:600; color:var(--text);}
+  .est-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:12px; margin-bottom:8px;}
+  .est-card{display:flex; flex-direction:column; align-items:flex-start; gap:4px; padding:16px 18px; text-align:left; font:inherit; color:var(--text); cursor:pointer;}
+  .est-card__t{font-size:14px; font-weight:600; line-height:1.35;}
+  .est-card__s{font-size:12.5px; color:var(--text-dim);}
+  .est-card__d{font-size:11.5px; color:var(--text-faint);}
+  .est-add{display:flex; flex-direction:column; gap:4px; max-width:720px;}
+  .est-drop{
+    display:flex; flex-direction:column; align-items:center; gap:4px; padding:26px 16px; margin:4px 0 14px;
+    border:1.5px dashed var(--line); border-radius:16px; cursor:pointer; text-align:center; transition:border-color .15s, background .15s;
+  }
+  .est-drop:hover, .est-drop.is-over, .est-drop:focus-visible{border-color:var(--blue); background:var(--blue-dim); outline:none;}
+  .est-drop.has-file{border-style:solid; border-color:var(--blue);}
+  .est-drop__ic{color:var(--text-faint);}
+  .est-drop__t{font-size:13.5px; font-weight:600; color:var(--text); word-break:break-word;}
+  .est-drop__s{font-size:12px; color:var(--text-faint);}
+  .est-add textarea{resize:vertical; min-height:90px;}
+  .est-add__foot{display:flex; align-items:center; gap:8px; margin-top:6px; flex-wrap:wrap;}
+  .est-status{flex:1; min-width:180px; font-size:12.5px; color:var(--text-dim);}
+  .est-status.is-error{color:var(--red);}
+  .est-status.is-busy{color:var(--blue);}
+  .est-back{background:none; border:none; padding:0; font:inherit; font-size:13px; color:var(--blue); cursor:pointer; margin-bottom:10px;}
+  .est-back:hover{text-decoration:underline; text-underline-offset:3px;}
+  .est-head{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:16px;}
+  .est-title{margin:0; overflow-wrap:anywhere; font-size:20px; font-weight:650; letter-spacing:-.01em;}
+  .est-meta{font-size:12.5px; color:var(--text-faint); margin-top:4px;}
+  .est-seg{display:inline-flex; gap:2px; padding:3px; border-radius:12px; background:var(--lg-fill); box-shadow:var(--lg-inner); margin-bottom:18px; max-width:100%; overflow-x:auto;}
+  .est-seg button{border:none; background:none; font:inherit; font-size:13px; color:var(--text-dim); padding:7px 14px; border-radius:9px; cursor:pointer; white-space:nowrap;}
+  .est-seg button.active{background:var(--lg-fill-active); color:var(--text); font-weight:600; box-shadow:var(--lg-inner), 0 1px 4px rgba(0,0,0,.12);}
+  .est-resumo h4{margin:18px 0 8px; font-size:14px; font-weight:600;}
+  .est-resumo h4:first-child{margin-top:0;}
+  .est-resumo ul{margin:0; padding-left:18px; color:var(--text-dim); font-size:13.5px; line-height:1.6;}
+  .est-resumo li + li{margin-top:4px;}
+  .est-conceitos{display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:10px;}
+  .est-conceito{display:flex; flex-direction:column; gap:4px; padding:14px 16px; font-size:12.5px; color:var(--text-dim); line-height:1.5;}
+  .est-conceito b{font-size:13.5px; color:var(--text);}
+  .est-fc-wrap{display:flex; flex-direction:column; align-items:center; gap:14px; max-width:620px; margin:0 auto;}
+  .est-fc{
+    width:100%; min-height:240px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px;
+    padding:28px 26px; font:inherit; color:var(--text); text-align:center; cursor:pointer;
+  }
+  .est-fc.is-flipped{box-shadow:var(--lg-drop), var(--lg-inner), inset 0 0 0 1.5px var(--blue);}
+  .est-fc__lbl{font-size:11.5px; font-weight:600; color:var(--text-faint); text-transform:uppercase; letter-spacing:.06em;}
+  .est-fc.is-flipped .est-fc__lbl{color:var(--blue);}
+  .est-fc__txt{font-size:17px; line-height:1.5; font-weight:500; text-wrap:pretty;}
+  .est-fc__hint{font-size:12px; color:var(--text-faint);}
+  .est-fc-nav{display:flex; align-items:center; gap:14px;}
+  .est-fc-count{font-size:13px; color:var(--text-dim); font-variant-numeric:tabular-nums; min-width:64px; text-align:center;}
+  .est-quiz-top{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; font-size:13px; color:var(--text-dim);}
+  .est-quiz-top b{color:var(--text);}
+  .est-q{margin-bottom:12px;}
+  .est-q__n{font-size:11.5px; font-weight:600; color:var(--text-faint); text-transform:uppercase; letter-spacing:.06em;}
+  .est-q__p{margin:6px 0 12px; font-size:14px; line-height:1.55; font-weight:500;}
+  .est-q__alts{display:flex; flex-direction:column; gap:6px;}
+  .est-alt{
+    display:flex; align-items:flex-start; gap:10px; width:100%; padding:10px 12px; text-align:left; font:inherit; font-size:13.5px; line-height:1.45;
+    color:var(--text); background:var(--lg-fill); border:1px solid var(--line-soft); border-radius:12px; cursor:pointer; transition:background .15s, border-color .15s;
+  }
+  .est-alt:hover:not(:disabled){background:var(--lg-fill-hover); border-color:var(--line);}
+  .est-alt:disabled{cursor:default;}
+  .est-alt__l{flex-shrink:0; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:600; background:var(--lg-fill-active); color:var(--text-dim);}
+  .est-alt.is-right{border-color:var(--green); background:var(--green-dim);}
+  .est-alt.is-right .est-alt__l{background:var(--green); color:#fff;}
+  .est-alt.is-wrong{border-color:var(--red); background:var(--red-dim);}
+  .est-alt.is-wrong .est-alt__l{background:var(--red); color:#fff;}
+  .est-alt.is-dim{opacity:.6;}
+  .est-q__exp{margin-top:10px; padding:10px 12px; border-radius:12px; background:var(--lg-fill); font-size:13px; line-height:1.55; color:var(--text-dim);}
+  .est-q__exp b{color:var(--text);}
+  .est-q__exp.is-ok b{color:var(--green);}
+  .est-q__exp.is-bad b{color:var(--red);}
+  .est-ans{
+    width:100%; box-sizing:border-box; margin-bottom:10px; padding:10px 12px; font:inherit; font-size:13.5px; line-height:1.5; resize:vertical;
+    color:var(--text); background:var(--lg-fill); border:1px solid var(--line); border-radius:12px;
+  }
+  .est-ans:focus{outline:none; border-color:var(--blue);}
+  .labs-row{display:flex; align-items:center; justify-content:space-between; gap:16px; cursor:pointer;}
+  .labs-row__t{display:block; font-size:13.5px; font-weight:600; color:var(--text);}
+  .labs-row__s{display:block; font-size:12.5px; color:var(--text-dim); margin-top:2px;}
+  .switch{
+    appearance:none; -webkit-appearance:none; flex-shrink:0; width:44px; height:26px; margin:0; border-radius:999px; cursor:pointer; position:relative;
+    background:var(--lg-fill-active); box-shadow:inset 0 0 0 1px var(--line); transition:background .2s;
+  }
+  .switch::after{content:''; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.3); transition:transform .2s;}
+  .switch:checked{background:var(--green); box-shadow:none;}
+  .switch:checked::after{transform:translateX(18px);}
+  .switch:focus-visible{outline:2px solid var(--blue); outline-offset:2px;}
+  .labs-key{margin-top:16px; padding-top:16px; border-top:1px solid var(--line-soft);}
+  .labs-key__row{display:flex; gap:8px;}
+  .labs-key__row input{flex:1; min-width:0;}
+  .labs-key__msg{min-height:18px; margin:6px 0 4px; font-size:12.5px; color:var(--text-dim);}
+  .labs-key__msg.is-ok{color:var(--green);}
+  .labs-key__msg.is-error{color:var(--red);}
+  .labs-key__help{font-size:12px; line-height:1.55; color:var(--text-faint); margin:4px 0 10px; max-width:70ch;}
+  .labs-key__help a{color:var(--blue);}
+
   /* notas: add button and goal on one aligned row, same height */
   .nota-foot{display:flex; align-items:center; gap:10px; margin-top:8px;}
   .nota-foot .nota-add-btn{flex:1; margin:0; height:30px; padding:0 10px; border-radius:8px;}
@@ -2205,6 +2303,14 @@
     </section>
 
     <!-- CONFIG -->
+    <section class="tab" id="tab-estudos">
+      <div class="screen__header">
+        <h2>Estudos</h2>
+        <button class="btn btn-sm" id="estNovoBtn">+ Adicionar material</button>
+      </div>
+      <div id="estBody"></div>
+    </section>
+
     <section class="tab" id="tab-config">
       <div class="screen__header">
         <h2>Configurações</h2>
@@ -2260,6 +2366,9 @@
       <div class="panel panel--pad" style="--accent:var(--green)">
         <div id="metaNotasGrid"></div>
       </div>
+
+      <div class="section-label">Recursos em teste</div>
+      <div class="panel panel--pad" id="labsPanel"></div>
     </section>
 
   </main>
@@ -2583,6 +2692,10 @@ async function init(opts = {}){
   STATE.discNotes = await storeGet('disc_notes', {});
   STATE.tema = await storeGet('tema', 'dark');
   STATE.lembretes = await storeGet('lembretes', []);
+  STATE.labs = await storeGet('labs', {});
+  STATE.estudos = await storeGet('estudos_materiais', []);
+  STATE.geminiKey = await storeGet('gemini_key', '');
+  STATE.geminiModel = await storeGet('gemini_model', '');
   applyTheme(STATE.tema);
 
   let provas = await storeGet('provas', null);
@@ -2654,6 +2767,7 @@ function updateOperatorPlate(){
 
 // ---------------- nav ----------------
 const ICONS = {
+  book:'<path d="M5 4.5A1.5 1.5 0 0 1 6.5 3h12.5v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 7.5h6"/>',
   home:'<path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9v11.5h13V9"/><path d="M10 20.5v-6h4v6"/>',
   exam:'<rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M9 3.5V6h6V3.5"/><path d="M9 11h6M9 15h4"/>',
   check:'<rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><path d="m8.5 12.2 2.4 2.4 4.8-5"/>',
@@ -2698,13 +2812,17 @@ const TABS = [
   {id:'mapa',      label:'Mapa de Sucesso',icon:'map'},
   {id:'horas',     label:'Horas Comp.',    icon:'award'},
   {id:'historico', label:'Histórico',      icon:'cap'},
+  {id:'estudos',   label:'Estudos',        icon:'book', lab:true},
   {id:'config',    label:'Configurações',  icon:'sliders'},
 ];
 let _activeTabIdx = 0;
+// Tabs marked lab only show when switched on in Configurações > Recursos em teste
+const tabVisible = t => !t.lab || !!(STATE.labs && STATE.labs[t.id]);
 function renderNav(){
   const nav = document.getElementById('navRail');
-  nav.innerHTML = TABS.map(t => `
-    <button class="navbtn${t.id==='painel'?' active':''}" data-tab="${t.id}">
+  const cur = ((document.querySelector('.tab.active') || {}).id || 'tab-painel').slice(4);
+  nav.innerHTML = TABS.filter(tabVisible).map(t => `
+    <button class="navbtn${t.id===cur?' active':''}" data-tab="${t.id}">
       <span class="ic">${ico(t.icon)}</span><span>${t.label}</span>
       <span class="nav-badge" data-badge="${t.id}" style="display:none;"></span>
       <span class="led"></span>
@@ -2729,6 +2847,7 @@ function switchTab(id){
   if(id==='mapa') renderMapaSucesso();
   if(id==='faltas') renderFaltas();
   if(id==='horas') renderHorasComp();
+  if(id==='estudos') renderEstudos();
 }
 
 // ---------------- multi-tab sync (A-6) ----------------
@@ -2737,7 +2856,7 @@ function switchTab(id){
     'config','historico_overrides','historico_custom','historico_removidos',
     'tarefas','lab_concluido','relatorios_ocultos','relatorios_overrides',
     'provas','faltas','faltas_limites','horas_comp','horas_global',
-    'aulas_custom','turmas_custom','notas_parciais','tema','lembretes','pom_sessions','disc_notes'
+    'aulas_custom','turmas_custom','notas_parciais','tema','lembretes','pom_sessions','disc_notes','estudos_materiais'
   ]);
   let _syncTimeout = null;
   window.addEventListener('storage', async (e) => {
@@ -2771,6 +2890,7 @@ function switchTab(id){
         if(bareKey === 'lembretes')             STATE.lembretes = fresh;
         if(bareKey === 'pom_sessions')          STATE.pomSessions = fresh;
         if(bareKey === 'disc_notes')            STATE.discNotes = fresh;
+        if(bareKey === 'estudos_materiais')     STATE.estudos = fresh;
         if(bareKey === 'tema'){ STATE.tema = fresh; document.documentElement.setAttribute('data-theme', fresh); return; }
         // Rebuild merged historico if overrides/custom/removidos changed
         if(['historico_overrides','historico_custom','historico_removidos'].includes(bareKey)){
@@ -5478,6 +5598,7 @@ document.getElementById('btnExport').addEventListener('click', async () => {
     lembretes: STATE.lembretes,
     pom_sessions: STATE.pomSessions,
     disc_notes: STATE.discNotes,
+    estudos_materiais: STATE.estudos,
     base_data: currentBaseData(),
   };
   const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
@@ -5541,6 +5662,7 @@ document.getElementById('fileImport').addEventListener('change', (e) => {
       if(backup.lembretes) await storeSet('lembretes', backup.lembretes);
       if(backup.pom_sessions) await storeSet('pom_sessions', backup.pom_sessions);
       if(backup.disc_notes) await storeSet('disc_notes', backup.disc_notes);
+      if(backup.estudos_materiais) await storeSet('estudos_materiais', backup.estudos_materiais);
       const msg = document.getElementById('importMsg'); msg.classList.add('show');
       setTimeout(()=>msg.classList.remove('show'), 1800);
       showToast('Backup restaurado! Recarregando…', 'success', 900);
@@ -5638,6 +5760,446 @@ function updateDiscSuggestList(){
   }).join('');
 }
 
+// ============================================================
+// ESTUDOS (recurso em teste): resumo, flashcards e questões gerados
+// pelo Gemini com a chave gratuita do próprio usuário
+// ============================================================
+const GEMINI_API = 'https://generativelanguage.googleapis.com/v1beta';
+const EST_MAX_BYTES = 18 * 1024 * 1024;
+const EST = {view:'list', id:null, sub:'resumo', card:0, flipped:false, quiz:{}, quizSaved:false, revealed:{}, file:null, busy:false};
+const EST_SCHEMA = (() => {
+  const S = {type:'STRING'};
+  const obj = (props) => ({type:'OBJECT', properties:props, required:Object.keys(props)});
+  const list = (item) => ({type:'ARRAY', items:item});
+  return obj({
+    titulo: S,
+    resumo: list(obj({topico:S, pontos:list(S)})),
+    conceitos: list(obj({termo:S, definicao:S})),
+    flashcards: list(obj({frente:S, verso:S})),
+    quiz: list(obj({pergunta:S, alternativas:list(S), correta:{type:'INTEGER'}, explicacao:S})),
+    dissertativas: list(obj({pergunta:S, resposta:S})),
+  });
+})();
+
+function estDiscName(sigla){
+  const h = (STATE.historico || []).find(i => i.sigla === sigla);
+  return h ? h.disciplina : (sigla || 'Geral');
+}
+async function estSave(){ await storeSet('estudos_materiais', STATE.estudos); }
+function estReset(view, id){ Object.assign(EST, {view, id: id || null, sub:'resumo', card:0, flipped:false, quiz:{}, quizSaved:false, revealed:{}}); }
+
+async function geminiErr(r){
+  let msg = '';
+  try{ msg = ((await r.json()).error || {}).message || ''; }catch(e){}
+  if(r.status === 400 && /api key/i.test(msg)) return new Error('A chave não foi aceita. Confira se copiou ela inteira.');
+  if(r.status === 403) return new Error('Essa chave não tem permissão para usar o Gemini.');
+  if(r.status === 429) return new Error('O limite gratuito do Gemini foi atingido por agora. Tente de novo em alguns minutos.');
+  if(r.status >= 500) return new Error('O Gemini está instável no momento. Tente de novo daqui a pouco.');
+  return new Error(msg || ('Erro ' + r.status + ' ao falar com o Gemini.'));
+}
+// Escolhe o modelo Flash estável mais novo que a chave enxerga, para não quebrar quando o Google aposentar um
+async function geminiPickModel(key){
+  let r;
+  try{ r = await fetch(`${GEMINI_API}/models?pageSize=200`, {headers:{'x-goog-api-key': key}}); }
+  catch(e){ throw new Error('Sem conexão com o Gemini. Verifique a internet.'); }
+  if(!r.ok) throw await geminiErr(r);
+  const names = ((await r.json()).models || [])
+    .filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
+    .map(m => m.name.replace(/^models\//, ''));
+  const ver = n => Number((/gemini-(\d+(?:\.\d+)?)/.exec(n) || [])[1] || 0);
+  const byVer = (a, b) => ver(b) - ver(a);
+  const stable = names.filter(n => /^gemini-\d+(\.\d+)?-flash$/.test(n)).sort(byVer);
+  const other = names.filter(n => /flash/.test(n) && !/(lite|image|tts|live|audio|exp)/.test(n)).sort(byVer);
+  const pick = stable[0] || other[0];
+  if(!pick) throw new Error('Nenhum modelo do Gemini disponível para essa chave.');
+  return pick;
+}
+async function geminiGenerate(parts){
+  const key = STATE.geminiKey;
+  if(!key) throw new Error('Cadastre sua chave do Gemini em Configurações.');
+  for(let tentativa = 0; tentativa < 2; tentativa++){
+    if(!STATE.geminiModel){ STATE.geminiModel = await geminiPickModel(key); await storeSet('gemini_model', STATE.geminiModel); }
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 180000);
+    let r;
+    try{
+      r = await fetch(`${GEMINI_API}/models/${STATE.geminiModel}:generateContent`, {
+        method:'POST', signal: ctrl.signal,
+        headers:{'Content-Type':'application/json', 'x-goog-api-key': key},
+        body: JSON.stringify({
+          contents:[{role:'user', parts}],
+          generationConfig:{responseMimeType:'application/json', responseSchema:EST_SCHEMA, temperature:0.4},
+        }),
+      });
+    }catch(e){
+      throw new Error(e.name === 'AbortError' ? 'Demorou demais para responder. Tente com um material menor.' : 'Sem conexão com o Gemini. Verifique a internet.');
+    }finally{ clearTimeout(timer); }
+    // modelo aposentado: escolhe outro e tenta de novo uma vez
+    if(r.status === 404 && tentativa === 0){ STATE.geminiModel = ''; continue; }
+    if(!r.ok) throw await geminiErr(r);
+    const data = await r.json();
+    const cand = (data.candidates || [])[0];
+    const text = cand && cand.content ? (cand.content.parts || []).map(p => p.text || '').join('') : '';
+    if(!text) throw new Error(cand && cand.finishReason === 'SAFETY' ? 'O Gemini recusou esse material.' : 'O Gemini não devolveu conteúdo. Tente de novo.');
+    try{ return JSON.parse(text); }
+    catch(e){ throw new Error('A resposta veio incompleta. Tente de novo ou use um material menor.'); }
+  }
+}
+function estPrompt(disc, foco){
+  return `Você é um tutor universitário. Use apenas o material enviado, da disciplina "${disc}", e escreva tudo em português do Brasil.
+Gere:
+- titulo: um título curto para o material, com até 60 caracteres;
+- resumo: de 4 a 8 tópicos, cada um com 2 a 5 pontos objetivos e completos;
+- conceitos: de 6 a 12 termos-chave com definição curta;
+- flashcards: de 12 a 20 cartões, com uma pergunta direta na frente e a resposta em até 2 frases no verso;
+- quiz: de 8 a 10 questões de múltipla escolha com exatamente 4 alternativas, o índice da correta (0 a 3) e uma explicação curta;
+- dissertativas: de 3 a 5 questões abertas, cada uma com uma resposta-modelo.
+Escreva fórmulas em texto simples (por exemplo x^2, sqrt(x), a/b). Não invente conteúdo que não esteja no material.${foco ? `\nFoco pedido pelo aluno: ${foco}` : ''}`;
+}
+// A resposta da IA é tratada como dado não confiável: normaliza tipos e descarta itens quebrados
+function estClean(o){
+  const arr = v => Array.isArray(v) ? v : [];
+  const str = v => String(v ?? '').trim();
+  o = o || {};
+  return {
+    titulo: str(o.titulo).slice(0, 80),
+    resumo: arr(o.resumo).map(t => ({topico: str(t && t.topico), pontos: arr(t && t.pontos).map(str).filter(Boolean)})).filter(t => t.topico || t.pontos.length),
+    conceitos: arr(o.conceitos).map(c => ({termo: str(c && c.termo), definicao: str(c && c.definicao)})).filter(c => c.termo),
+    flashcards: arr(o.flashcards).map(c => ({frente: str(c && c.frente), verso: str(c && c.verso)})).filter(c => c.frente && c.verso),
+    quiz: arr(o.quiz).map(q => ({pergunta: str(q && q.pergunta), alternativas: arr(q && q.alternativas).map(str).filter(Boolean), correta: Number(q && q.correta), explicacao: str(q && q.explicacao)}))
+      .filter(q => q.pergunta && q.alternativas.length >= 2 && Number.isInteger(q.correta) && q.correta >= 0 && q.correta < q.alternativas.length),
+    dissertativas: arr(o.dissertativas).map(d => ({pergunta: str(d && d.pergunta), resposta: str(d && d.resposta)})).filter(d => d.pergunta),
+  };
+}
+const estFileB64 = f => new Promise((ok, no) => {
+  const r = new FileReader();
+  r.onload = () => ok(String(r.result).split(',')[1] || '');
+  r.onerror = () => no(r.error);
+  r.readAsDataURL(f);
+});
+const estSize = b => b > 1048576 ? (b / 1048576).toFixed(1).replace('.', ',') + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB';
+
+function renderEstudos(){
+  const body = document.getElementById('estBody');
+  const novo = document.getElementById('estNovoBtn');
+  if(!body || !STATE.estudos) return;
+  if(!STATE.geminiKey){
+    novo.style.display = 'none';
+    body.innerHTML = `<div class="panel panel--pad est-empty">
+      <p class="est-empty__t">Conecte o Gemini para começar</p>
+      <p>Os resumos, flashcards e questões são gerados pelo Gemini, com a sua chave gratuita do Google. Leva um minuto para criar.</p>
+      <button class="btn btn-primary btn-sm" id="estGoConfig">Configurar chave</button>
+    </div>`;
+    document.getElementById('estGoConfig').onclick = () => {
+      switchTab('config');
+      setTimeout(() => document.getElementById('labsPanel').scrollIntoView({behavior:'smooth', block:'center'}), 250);
+    };
+    return;
+  }
+  novo.style.display = EST.view === 'list' ? '' : 'none';
+  // não apaga o formulário que a pessoa está preenchendo quando chega sincronização
+  if(EST.view === 'add'){ if(!document.getElementById('estAddForm')) estRenderAdd(body); return; }
+  if(EST.view === 'detail'){
+    const m = STATE.estudos.find(x => x.id === EST.id);
+    if(m) return estRenderDetail(body, m);
+    estReset('list');
+  }
+  estRenderList(body);
+}
+
+function estRenderList(body){
+  const mats = [...STATE.estudos].sort((a, b) => (b.criadoEm || 0) - (a.criadoEm || 0));
+  if(!mats.length){
+    body.innerHTML = `<div class="panel panel--pad est-empty">
+      <p class="est-empty__t">Nenhum material ainda</p>
+      <p>Adicione um PDF, uma foto de página ou cole um texto, e o app monta resumo, flashcards e questões para você estudar.</p>
+      <button class="btn btn-primary btn-sm" id="estAddFirst">+ Adicionar material</button>
+    </div>`;
+    document.getElementById('estAddFirst').onclick = () => { estReset('add'); EST.file = null; renderEstudos(); };
+    return;
+  }
+  const grupos = {};
+  mats.forEach(m => { (grupos[m.disciplina || ''] = grupos[m.disciplina || ''] || []).push(m); });
+  body.innerHTML = Object.entries(grupos)
+    .sort((a, b) => estDiscName(a[0]).localeCompare(estDiscName(b[0])))
+    .map(([sig, items]) => `
+      <div class="section-label">${esc(estDiscName(sig))}</div>
+      <div class="est-grid">${items.map(m => {
+        const ult = (m.quizHist || [])[m.quizHist ? m.quizHist.length - 1 : 0];
+        return `<button type="button" class="panel est-card" data-est-open="${esc(m.id)}">
+          <span class="est-card__t">${esc(m.titulo)}</span>
+          <span class="est-card__s">${m.flashcards.length} ${m.flashcards.length === 1 ? 'cartão' : 'cartões'}, ${m.quiz.length} ${m.quiz.length === 1 ? 'questão' : 'questões'}</span>
+          <span class="est-card__d">${fmtDate(localISO(new Date(m.criadoEm)))}${ult ? `, último quiz ${ult.acertos}/${ult.total}` : ''}</span>
+        </button>`;
+      }).join('')}</div>`).join('');
+  body.querySelectorAll('[data-est-open]').forEach(b => b.onclick = () => { estReset('detail', b.dataset.estOpen); renderEstudos(); window.scrollTo({top:0}); });
+}
+
+function estRenderAdd(body){
+  const atuais = (STATE.config.disciplinasAtuais || []);
+  body.innerHTML = `<div class="panel panel--pad est-add" id="estAddForm">
+    <div class="field"><label for="estDisc">Disciplina</label>
+      <select id="estDisc">${atuais.map(s => `<option value="${esc(s)}">${esc(estDiscName(s))}</option>`).join('')}<option value="">Outra ou geral</option></select>
+    </div>
+    <div class="est-drop" id="estDrop" role="button" tabindex="0">
+      <input type="file" id="estFile" accept="application/pdf,image/*" hidden>
+      <div class="est-drop__ic">${ico('upload')}</div>
+      <div class="est-drop__t" id="estDropT">Escolha um PDF ou uma foto</div>
+      <div class="est-drop__s" id="estDropS">ou arraste o arquivo para cá, até 18 MB</div>
+    </div>
+    <div class="field"><label for="estTexto">Ou cole o texto</label>
+      <textarea id="estTexto" rows="5" placeholder="Conteúdo da aula, de um capítulo ou das suas anotações"></textarea>
+    </div>
+    <div class="field"><label for="estFoco">Foco (opcional)</label>
+      <input id="estFoco" placeholder="Ex.: só o capítulo 3, ou questões no estilo da prova">
+    </div>
+    <div class="est-add__foot">
+      <span class="est-status" id="estStatus" role="status"></span>
+      <button class="btn btn-sm" id="estCancel">Cancelar</button>
+      <button class="btn btn-primary btn-sm" id="estGerar">Gerar material</button>
+    </div>
+  </div>`;
+  const drop = document.getElementById('estDrop');
+  const input = document.getElementById('estFile');
+  drop.onclick = () => input.click();
+  drop.onkeydown = e => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); input.click(); } };
+  input.onchange = () => { if(input.files[0]) estSetFile(input.files[0]); };
+  drop.ondragover = e => { e.preventDefault(); drop.classList.add('is-over'); };
+  drop.ondragleave = () => drop.classList.remove('is-over');
+  drop.ondrop = e => { e.preventDefault(); drop.classList.remove('is-over'); if(e.dataTransfer.files[0]) estSetFile(e.dataTransfer.files[0]); };
+  document.getElementById('estCancel').onclick = () => { estReset('list'); EST.file = null; renderEstudos(); };
+  document.getElementById('estGerar').onclick = estGerar;
+}
+function estStatus(text, kind){
+  const el = document.getElementById('estStatus');
+  if(el){ el.textContent = text; el.className = 'est-status' + (kind ? ' is-' + kind : ''); }
+}
+function estSetFile(f){
+  const ok = f.type === 'application/pdf' || /^image\//.test(f.type);
+  if(!ok){ estStatus('Use um PDF ou uma imagem.', 'error'); return; }
+  if(f.size > EST_MAX_BYTES){ estStatus('Esse arquivo passa de 18 MB. Separe as páginas que interessam.', 'error'); return; }
+  EST.file = f;
+  document.getElementById('estDrop').classList.add('has-file');
+  document.getElementById('estDropT').textContent = f.name;
+  document.getElementById('estDropS').textContent = estSize(f.size) + ', toque para trocar';
+  estStatus('');
+}
+async function estGerar(){
+  if(EST.busy) return;
+  const texto = document.getElementById('estTexto').value.trim();
+  const f = EST.file;
+  if(!f && texto.length < 200){ estStatus('Escolha um arquivo ou cole um texto um pouco maior.', 'error'); return; }
+  const sigla = document.getElementById('estDisc').value;
+  const foco = document.getElementById('estFoco').value.trim();
+  const btn = document.getElementById('estGerar');
+  EST.busy = true; btn.disabled = true;
+  estStatus('Lendo o material e montando tudo. Costuma levar de 20 segundos a 1 minuto.', 'busy');
+  try{
+    const parts = [];
+    if(f) parts.push({inline_data:{mime_type: f.type || 'application/pdf', data: await estFileB64(f)}});
+    if(texto) parts.push({text: 'MATERIAL:\n' + texto});
+    parts.push({text: estPrompt(sigla ? estDiscName(sigla) : 'geral', foco)});
+    const out = estClean(await geminiGenerate(parts));
+    if(!out.resumo.length && !out.flashcards.length && !out.quiz.length) throw new Error('Não deu para tirar conteúdo desse material. Tente outro arquivo.');
+    const m = Object.assign({
+      id: 'est-' + Date.now(), disciplina: sigla, criadoEm: Date.now(), quizHist: [],
+      fonte: f ? {tipo: /^image\//.test(f.type) ? 'imagem' : 'pdf', nome: f.name} : {tipo: 'texto'},
+    }, out);
+    if(!m.titulo) m.titulo = f ? f.name.replace(/\.[^.]+$/, '') : 'Material sem título';
+    STATE.estudos.push(m);
+    await estSave();
+    EST.file = null;
+    estReset('detail', m.id);
+    showToast('Material pronto', 'success');
+    renderEstudos();
+  }catch(err){
+    estStatus(err.message, 'error');
+  }finally{
+    EST.busy = false;
+    const b = document.getElementById('estGerar');
+    if(b) b.disabled = false;
+  }
+}
+
+function estRenderDetail(body, m){
+  const subs = [['resumo', 'Resumo'], ['flashcards', 'Flashcards'], ['quiz', 'Quiz'], ['dissertativas', 'Dissertativas']];
+  const fonte = m.fonte && m.fonte.nome ? `, ${esc(m.fonte.nome)}` : '';
+  body.innerHTML = `<div class="est-detail">
+    <button type="button" class="est-back" id="estBack">Todos os materiais</button>
+    <div class="est-head">
+      <div><h3 class="est-title">${esc(m.titulo)}</h3><div class="est-meta">${esc(estDiscName(m.disciplina))}, ${fmtDate(localISO(new Date(m.criadoEm)))}${fonte}</div></div>
+      <button class="btn btn-sm btn-ghost" id="estDel">Excluir</button>
+    </div>
+    <div class="est-seg" role="tablist">${subs.map(([k, l]) => `<button type="button" role="tab" class="${EST.sub === k ? 'active' : ''}" data-est-sub="${k}">${l}</button>`).join('')}</div>
+    <div id="estSub"></div>
+  </div>`;
+  document.getElementById('estBack').onclick = () => { estReset('list'); renderEstudos(); };
+  document.getElementById('estDel').onclick = async () => {
+    if(!confirm(`Excluir "${m.titulo}"? O resumo, os cartões e as questões serão apagados.`)) return;
+    STATE.estudos = STATE.estudos.filter(x => x.id !== m.id);
+    await estSave();
+    estReset('list'); renderEstudos();
+  };
+  body.querySelectorAll('[data-est-sub]').forEach(b => b.onclick = () => {
+    EST.sub = b.dataset.estSub;
+    body.querySelectorAll('[data-est-sub]').forEach(x => x.classList.toggle('active', x === b));
+    estRenderSub(m);
+  });
+  estRenderSub(m);
+}
+
+function estRenderSub(m){
+  const el = document.getElementById('estSub');
+  if(!el) return;
+  const vazio = t => `<div class="panel panel--pad est-empty"><p>${t}</p></div>`;
+
+  if(EST.sub === 'resumo'){
+    el.innerHTML = (m.resumo.length ? `<div class="panel panel--pad est-resumo">${m.resumo.map(t => `
+        <h4>${esc(t.topico)}</h4><ul>${t.pontos.map(p => `<li>${esc(p)}</li>`).join('')}</ul>`).join('')}</div>` : vazio('Sem resumo para este material.'))
+      + (m.conceitos.length ? `<div class="section-label">Conceitos-chave</div>
+        <div class="est-conceitos">${m.conceitos.map(c => `<div class="panel est-conceito"><b>${esc(c.termo)}</b><span>${esc(c.definicao)}</span></div>`).join('')}</div>` : '');
+    return;
+  }
+
+  if(EST.sub === 'flashcards'){
+    const n = m.flashcards.length;
+    if(!n){ el.innerHTML = vazio('Sem flashcards para este material.'); return; }
+    EST.card = Math.min(EST.card, n - 1);
+    const c = m.flashcards[EST.card];
+    el.innerHTML = `<div class="est-fc-wrap">
+      <button type="button" class="panel est-fc${EST.flipped ? ' is-flipped' : ''}" id="estFc" aria-live="polite">
+        <span class="est-fc__lbl">${EST.flipped ? 'Resposta' : 'Pergunta'}</span>
+        <span class="est-fc__txt">${esc(EST.flipped ? c.verso : c.frente)}</span>
+        <span class="est-fc__hint">${EST.flipped ? 'Toque para voltar à pergunta' : 'Toque para ver a resposta'}</span>
+      </button>
+      <div class="est-fc-nav">
+        <button class="btn btn-sm" id="estFcPrev"${EST.card === 0 ? ' disabled' : ''}>Anterior</button>
+        <span class="est-fc-count">${EST.card + 1} de ${n}</span>
+        <button class="btn btn-sm" id="estFcNext"${EST.card === n - 1 ? ' disabled' : ''}>Próximo</button>
+      </div>
+      <button class="btn btn-sm btn-ghost" id="estFcShuffle">Embaralhar</button>
+    </div>`;
+    const go = d => { EST.card = Math.max(0, Math.min(n - 1, EST.card + d)); EST.flipped = false; estRenderSub(m); };
+    document.getElementById('estFc').onclick = () => { EST.flipped = !EST.flipped; estRenderSub(m); };
+    document.getElementById('estFcPrev').onclick = () => go(-1);
+    document.getElementById('estFcNext').onclick = () => go(1);
+    document.getElementById('estFcShuffle').onclick = async () => {
+      for(let i = n - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [m.flashcards[i], m.flashcards[j]] = [m.flashcards[j], m.flashcards[i]]; }
+      EST.card = 0; EST.flipped = false; await estSave(); estRenderSub(m);
+    };
+    return;
+  }
+
+  if(EST.sub === 'quiz'){
+    const n = m.quiz.length;
+    if(!n){ el.innerHTML = vazio('Sem questões para este material.'); return; }
+    const ans = EST.quiz;
+    const feitas = Object.keys(ans).length;
+    const certas = m.quiz.filter((q, i) => ans[i] === q.correta).length;
+    el.innerHTML = `<div class="est-quiz-top">
+        <span><b>${feitas}</b> de ${n} respondidas, <b>${certas}</b> certas</span>
+        ${feitas ? `<button class="btn btn-sm" id="estQuizReset">Refazer</button>` : ''}
+      </div>
+      ${m.quiz.map((q, i) => {
+        const resp = ans[i];
+        const alts = q.alternativas.map((a, j) => {
+          const cls = resp === undefined ? '' : j === q.correta ? ' is-right' : j === resp ? ' is-wrong' : ' is-dim';
+          return `<button type="button" class="est-alt${cls}" data-q="${i}" data-a="${j}"${resp !== undefined ? ' disabled' : ''}>
+            <span class="est-alt__l">${'ABCDEF'[j] || j + 1}</span><span>${esc(a)}</span></button>`;
+        }).join('');
+        const exp = resp === undefined ? '' : `<div class="est-q__exp ${resp === q.correta ? 'is-ok' : 'is-bad'}"><b>${resp === q.correta ? 'Certo.' : 'Não foi dessa vez.'}</b> ${esc(q.explicacao)}</div>`;
+        return `<div class="panel panel--pad est-q"><div class="est-q__n">Questão ${i + 1}</div><p class="est-q__p">${esc(q.pergunta)}</p><div class="est-q__alts">${alts}</div>${exp}</div>`;
+      }).join('')}`;
+    el.querySelectorAll('.est-alt').forEach(b => b.onclick = async () => {
+      EST.quiz[Number(b.dataset.q)] = Number(b.dataset.a);
+      if(Object.keys(EST.quiz).length === n && !EST.quizSaved){
+        EST.quizSaved = true;
+        m.quizHist = [...(m.quizHist || []), {em: Date.now(), acertos: m.quiz.filter((q, i) => EST.quiz[i] === q.correta).length, total: n}].slice(-20);
+        await estSave();
+      }
+      estRenderSub(m);
+    });
+    const reset = document.getElementById('estQuizReset');
+    if(reset) reset.onclick = () => { EST.quiz = {}; EST.quizSaved = false; estRenderSub(m); window.scrollTo({top:0, behavior:'smooth'}); };
+    return;
+  }
+
+  // dissertativas: a resposta do aluno fica só na tela; a revelação não redesenha para não apagar o que foi escrito
+  if(!m.dissertativas.length){ el.innerHTML = vazio('Sem questões dissertativas para este material.'); return; }
+  el.innerHTML = m.dissertativas.map((d, i) => `<div class="panel panel--pad est-q">
+      <div class="est-q__n">Questão ${i + 1}</div><p class="est-q__p">${esc(d.pergunta)}</p>
+      <textarea class="est-ans" rows="3" aria-label="Sua resposta" placeholder="Escreva sua resposta antes de conferir"></textarea>
+      <div data-reveal-slot="${i}">${EST.revealed[i]
+        ? `<div class="est-q__exp"><b>Resposta-modelo.</b> ${esc(d.resposta)}</div>`
+        : `<button class="btn btn-sm" data-reveal="${i}">Ver resposta-modelo</button>`}</div>
+    </div>`).join('');
+  el.querySelectorAll('[data-reveal]').forEach(b => b.onclick = () => {
+    const i = Number(b.dataset.reveal);
+    EST.revealed[i] = true;
+    b.parentElement.innerHTML = `<div class="est-q__exp"><b>Resposta-modelo.</b> ${esc(m.dissertativas[i].resposta)}</div>`;
+  });
+}
+
+document.getElementById('estNovoBtn').addEventListener('click', () => { estReset('add'); EST.file = null; renderEstudos(); });
+
+function renderLabsConfig(){
+  const p = document.getElementById('labsPanel');
+  if(!p || !STATE.labs) return;
+  if(p.contains(document.activeElement)) return; // não redesenha enquanto a pessoa digita a chave
+  const on = !!STATE.labs.estudos;
+  p.innerHTML = `<label class="labs-row">
+      <span><span class="labs-row__t">Aba Estudos</span><span class="labs-row__s">Resumos, flashcards e questões gerados a partir dos seus PDFs, com o Gemini.</span></span>
+      <input type="checkbox" class="switch" id="labEstudos"${on ? ' checked' : ''}>
+    </label>
+    ${on ? `<div class="labs-key">
+      <div class="field"><label for="geminiKey">Chave do Gemini</label>
+        <div class="labs-key__row">
+          <input id="geminiKey" type="password" autocomplete="off" spellcheck="false" placeholder="Cole aqui a sua chave" value="${esc(STATE.geminiKey || '')}">
+          <button class="btn btn-sm btn-primary" id="geminiTest">Salvar e testar</button>
+        </div>
+      </div>
+      <div class="labs-key__msg${STATE.geminiModel ? ' is-ok' : ''}" id="geminiMsg">${STATE.geminiKey ? (STATE.geminiModel ? `Conectado, usando ${esc(STATE.geminiModel)}.` : 'Chave salva.') : ''}</div>
+      <p class="labs-key__help">Crie a chave de graça em <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>, entrando com a sua conta Google. Ela fica salva na sua conta do app e vale em todos os aparelhos. No plano gratuito, o Google pode usar o conteúdo enviado para melhorar os modelos dele, então evite materiais sensíveis.</p>
+      ${STATE.geminiKey ? `<button class="btn btn-sm btn-ghost" id="geminiRemove">Remover chave</button>` : ''}
+    </div>` : ''}`;
+  document.getElementById('labEstudos').onchange = async e => {
+    STATE.labs = Object.assign({}, STATE.labs, {estudos: e.target.checked});
+    await storeSet('labs', STATE.labs);
+    renderNav();
+    if(document.activeElement) document.activeElement.blur();
+    renderLabsConfig();
+    showToast(e.target.checked ? 'Aba Estudos ativada' : 'Aba Estudos desativada', 'info', 2000);
+  };
+  const testBtn = document.getElementById('geminiTest');
+  if(testBtn) testBtn.onclick = async () => {
+    const key = document.getElementById('geminiKey').value.trim();
+    const msg = document.getElementById('geminiMsg');
+    if(!key){ msg.textContent = 'Cole a chave primeiro.'; msg.className = 'labs-key__msg is-error'; return; }
+    testBtn.disabled = true;
+    msg.textContent = 'Testando a chave…'; msg.className = 'labs-key__msg';
+    try{
+      const model = await geminiPickModel(key);
+      STATE.geminiKey = key; STATE.geminiModel = model;
+      await storeSet('gemini_key', key);
+      await storeSet('gemini_model', model);
+      document.activeElement && document.activeElement.blur();
+      renderLabsConfig();
+      renderEstudos();
+      showToast('Gemini conectado', 'success');
+    }catch(err){
+      msg.textContent = err.message; msg.className = 'labs-key__msg is-error';
+    }finally{ testBtn.disabled = false; }
+  };
+  const rm = document.getElementById('geminiRemove');
+  if(rm) rm.onclick = async () => {
+    if(!confirm('Remover a chave do Gemini da sua conta? Os materiais já gerados continuam salvos.')) return;
+    STATE.geminiKey = ''; STATE.geminiModel = '';
+    await storeSet('gemini_key', '');
+    await storeSet('gemini_model', '');
+    renderLabsConfig(); renderEstudos();
+  };
+}
+
 function renderAll(){
   renderPainel(); // inclui renderLembretes internamente
   renderHorario();
@@ -5649,6 +6211,8 @@ function renderAll(){
   renderMapaSucesso();
   renderFaltas();
   renderHorasComp();
+  renderEstudos();
+  renderLabsConfig();
   updateNavBadges();
   updateDiscSuggestList();
 }
