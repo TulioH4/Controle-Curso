@@ -821,7 +821,7 @@
   .pom-toggle-btn{flex:1;}
   .pom-rounds{font-family:var(--mono); font-size:10.5px; color:var(--text-faint); text-align:center;}
   @media(max-width:880px){
-    .pom-float-btn,.pomodoro-widget{display:none !important;}
+    .pom-float-btn{display:none !important;}
   }
 
   /* ===== TOAST ===== */
@@ -1849,6 +1849,182 @@
     *, *::before, *::after{animation-duration:.01ms !important; transition-duration:.01ms !important;}
   }
 
+  /* =====================================================
+     PHONE APP — native-feeling chrome on small screens:
+     top bar that fills in on scroll, tab bar with "Mais",
+     floating add button, bottom sheets, list agenda
+     ===================================================== */
+  .mtabbar, .mfab, .msheet, .msheet-backdrop, .agenda-list{display:none;}
+  @media (max-width:880px){
+    html, body{overscroll-behavior-y:none;}
+    body{-webkit-tap-highlight-color:transparent;}
+    .rail, body:not(.pos-top):not(.pos-bottom):not(.rail-auto) .rail{display:none !important;}
+
+    /* top bar: transparent over the large title, glass once scrolled */
+    .mobile-topbar{
+      position:fixed; top:0; left:0; right:0; z-index:60; display:flex; align-items:center; justify-content:flex-end;
+      height:calc(50px + env(safe-area-inset-top)); padding:env(safe-area-inset-top) 14px 0;
+      background:transparent; border-bottom:.5px solid transparent; backdrop-filter:none; -webkit-backdrop-filter:none;
+      transition:background .25s, border-color .25s;
+    }
+    .mobile-topbar.is-scrolled{
+      background:var(--lg-fill-sheet); border-bottom-color:var(--line-soft);
+      backdrop-filter:var(--lg-blur); -webkit-backdrop-filter:var(--lg-blur);
+    }
+    .mtb-title{
+      position:absolute; left:50%; bottom:15px; transform:translate(-50%, 4px); opacity:0;
+      font-size:15px; font-weight:600; color:var(--text); white-space:nowrap; transition:opacity .2s, transform .2s; pointer-events:none;
+    }
+    .mobile-topbar.is-scrolled .mtb-title{opacity:1; transform:translate(-50%, 0);}
+    .mtb-avatar{
+      width:34px; height:34px; border-radius:50%; border:none; padding:0; cursor:pointer;
+      font:inherit; font-size:12.5px; font-weight:600; color:var(--text);
+      background:var(--lg-fill-active); box-shadow:var(--lg-inner), 0 1px 4px rgba(0,0,0,.12);
+    }
+
+    .screen{padding:calc(58px + env(safe-area-inset-top)) 16px calc(112px + env(safe-area-inset-bottom)) !important;}
+    .screen__header{flex-direction:row; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px;}
+    .screen__header h2{font-size:31px; letter-spacing:-.025em; line-height:1.1;}
+    .section-label{margin-top:26px;}
+
+    /* tab bar */
+    .mtabbar{
+      display:flex; position:fixed; z-index:55; left:12px; right:12px; bottom:calc(10px + env(safe-area-inset-bottom));
+      gap:2px; padding:6px; border-radius:26px;
+      background:var(--lg-fill-sheet); backdrop-filter:var(--lg-blur); -webkit-backdrop-filter:var(--lg-blur);
+      box-shadow:var(--lg-drop), var(--lg-inner);
+    }
+    .mtab{
+      flex:1; min-width:0; position:relative; display:flex; flex-direction:column; align-items:center; gap:3px;
+      padding:7px 0 6px; border:none; background:none; border-radius:20px; cursor:pointer;
+      font:inherit; font-size:10.5px; font-weight:500; color:var(--text-faint); transition:color .15s, background .2s;
+    }
+    .mtab .i{width:23px; height:23px;}
+    .mtab.active{color:var(--blue); background:var(--lg-fill-active); box-shadow:var(--lg-inner);}
+    .mtab:active{transform:scale(.94);}
+    .mtab-badge{
+      position:absolute; top:3px; left:calc(50% + 6px); min-width:16px; height:16px; padding:0 4px; border-radius:8px;
+      background:var(--red); color:#fff; font-size:10px; font-weight:700; line-height:16px; text-align:center;
+    }
+
+    /* floating add button */
+    .mfab{
+      display:flex; align-items:center; justify-content:center; position:fixed; z-index:56;
+      right:18px; bottom:calc(88px + env(safe-area-inset-bottom)); width:54px; height:54px; border-radius:50%;
+      border:none; color:#fff; cursor:pointer;
+      background:linear-gradient(180deg, #3D9BFF 0%, #0A84FF 60%, #0071E8 100%);
+      box-shadow:0 2px 4px rgba(0,60,160,.25), 0 12px 24px -8px rgba(10,100,230,.6), inset 0 1px 0 rgba(255,255,255,.45);
+      transition:transform .15s;
+    }
+    .mfab .i{width:24px; height:24px; stroke-width:2.2;}
+    .mfab:active{transform:scale(.92);}
+    body.sheet-open .mfab{opacity:0; pointer-events:none;}
+    /* the add button only where adding makes sense */
+    body[data-tab]:not([data-tab="painel"]):not([data-tab="provas"]):not([data-tab="tarefas"]) .mfab{display:none;}
+    #app[style*="none"] ~ .mfab{display:none;}
+
+    /* "Mais" bottom sheet */
+    .msheet-backdrop{
+      display:block; position:fixed; inset:0; z-index:1000; background:rgba(0,0,0,.32);
+      opacity:0; pointer-events:none; transition:opacity .28s;
+    }
+    .msheet-backdrop.open{opacity:1; pointer-events:auto;}
+    .msheet{
+      display:block; position:fixed; left:0; right:0; bottom:0; z-index:1001; max-height:86vh; overflow-y:auto;
+      padding:8px 16px calc(22px + env(safe-area-inset-bottom)); border-radius:30px 30px 0 0;
+      background:rgba(30,30,40,.94); backdrop-filter:var(--lg-blur); -webkit-backdrop-filter:var(--lg-blur);
+      box-shadow:0 -10px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.12);
+      transform:translateY(105%); transition:transform .34s cubic-bezier(.32,.72,0,1);
+      overscroll-behavior:contain;
+    }
+    html[data-theme="light"] .msheet{background:rgba(248,248,252,.95); box-shadow:0 -10px 40px rgba(30,40,90,.22), inset 0 1px 0 #fff;}
+    .msheet.open{transform:none;}
+    .msheet__grab{width:38px; height:5px; border-radius:3px; background:var(--line); margin:2px auto 16px;}
+    .msheet__me{display:flex; align-items:center; gap:12px; padding:0 4px 18px;}
+    .msheet__avatar{
+      width:48px; height:48px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+      font-size:16px; font-weight:600; color:#fff; background:linear-gradient(135deg, #5E5CE6, #0A84FF);
+    }
+    .msheet__who{flex:1; min-width:0; display:flex; flex-direction:column; line-height:1.3;}
+    .msheet__who b{font-size:16px; color:var(--text);}
+    .msheet__who span{font-size:12.5px; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .msheet__who .msheet__sync{color:var(--text-faint); font-size:12px;}
+    .msheet__swap{width:40px; height:40px; border-radius:50%; border:none; background:var(--lg-fill-active); color:var(--text-dim); display:flex; align-items:center; justify-content:center; cursor:pointer;}
+    .msheet__grid{display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:10px;}
+    .msheet__tile{
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; min-height:84px; padding:12px 6px;
+      border:none; border-radius:20px; cursor:pointer; text-align:center;
+      font:inherit; font-size:12px; font-weight:500; line-height:1.25; color:var(--text);
+      background:var(--lg-fill-hover); box-shadow:var(--lg-inner);
+    }
+    .msheet__tile .i{width:24px; height:24px; color:var(--blue);}
+    .msheet__tile.active{box-shadow:var(--lg-inner), inset 0 0 0 1.5px var(--blue);}
+    .msheet__tile:active, .msheet__act:active{transform:scale(.96);}
+    .msheet__actions{display:flex; flex-direction:column; gap:2px; margin-top:16px; padding:6px; border-radius:20px; background:var(--lg-fill); box-shadow:var(--lg-inner);}
+    .msheet__act{
+      display:flex; align-items:center; gap:12px; padding:12px 10px; border:none; background:none; border-radius:14px; cursor:pointer;
+      font:inherit; font-size:14px; color:var(--text); text-align:left;
+    }
+    .msheet__act .i{width:21px; height:21px; color:var(--text-dim);}
+    .msheet__act + .msheet__act{border-top:.5px solid var(--line-soft); border-radius:0;}
+
+    /* timer opens as a card above the tab bar */
+    .pomodoro-widget{left:12px !important; right:12px !important; bottom:calc(88px + env(safe-area-inset-bottom)) !important; top:auto !important; width:auto !important; z-index:57;}
+
+    /* dialogs become bottom sheets */
+    #quickAddOverlay{align-items:flex-end !important; padding:0 !important;}
+    #quickAddPanel{max-width:none !important; border-radius:28px 28px 0 0 !important; padding:20px 18px calc(22px + env(safe-area-inset-bottom)) !important; max-height:88vh; overflow-y:auto;}
+    .modal-overlay{align-items:flex-end !important; padding:0 !important;}
+    .modal-overlay .modal{width:100% !important; max-width:none !important; border-radius:28px 28px 0 0 !important; max-height:88vh; overflow-y:auto; padding-bottom:env(safe-area-inset-bottom);}
+
+    /* painel */
+    #painelSub{display:none;}
+    .painel-top{gap:0; margin-bottom:6px !important;}
+    .day-overview{margin-top:4px; font-size:15.5px;}
+    .postits{
+      flex-wrap:nowrap; justify-content:flex-start; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none;
+      max-width:none; margin:16px -16px 0; padding:8px 16px 14px; gap:10px;
+    }
+    .postits::-webkit-scrollbar{display:none;}
+    .postit{flex:0 0 150px; scroll-snap-align:start;}
+    .stat-grid{gap:10px;}
+    .stat{padding:14px 15px !important;}
+    .stat__value{font-size:26px;}
+    .stat__value.small{font-size:16px;}
+
+    /* week agenda as a list */
+    #agendaSemanalPanel .agenda-grid{display:none;}
+    .agenda-list{display:flex; flex-direction:column; gap:14px;}
+    .agenda-list__head{display:flex; align-items:baseline; gap:8px; margin:0 2px 6px; font-size:13.5px; font-weight:600; color:var(--text);}
+    .agenda-list__head span{font-size:12px; font-weight:500; color:var(--text-faint);}
+    .agenda-list__day.is-today .agenda-list__head{color:var(--blue);}
+    .agenda-list .agenda-event{margin:0 0 6px;}
+    .agenda-list__empty{font-size:13px; color:var(--text-faint); text-align:center; padding:8px;}
+
+    /* touch: comfortable targets */
+    .btn{min-height:36px;}
+    .btn-sm{min-height:32px;}
+    input, select, textarea{font-size:16px !important;} /* stops iOS zooming into fields */
+    #toastContainer{top:calc(58px + env(safe-area-inset-top)) !important;}
+
+    /* tarefas: adding goes through the + button; filters scroll sideways; rows stack */
+    .task-add-panel, .exam-add-panel{display:none;}
+    .task-filters{flex-wrap:nowrap !important; overflow-x:auto; scrollbar-width:none; margin:0 -18px 12px !important; padding:2px 18px 4px;}
+    .task-filters::-webkit-scrollbar{display:none;}
+    .task-filters > *{flex:0 0 auto;}
+    .task-filters .stat__label{display:none;}
+    .task-filters .search{width:150px !important;}
+    .task-filters select, .task-filters .search{font-size:14px !important; padding:7px 10px !important; border-radius:999px !important;}
+    .task-row{display:grid !important; grid-template-columns:auto auto minmax(0,1fr) auto auto; column-gap:6px; row-gap:8px; align-items:center; padding:12px 2px !important;}
+    .task-row > .name{grid-column:1 / 4; grid-row:1; min-width:0;}
+    .task-row > [data-edit-tarefa]{grid-column:4; grid-row:1;}
+    .task-row > [data-del]{grid-column:5; grid-row:1;}
+    .task-row > .badge:first-child{grid-column:1; grid-row:2;}
+    .task-row > .status-btn{grid-column:2; grid-row:2;}
+    .task-row .name .t{font-size:14.5px;}
+    .task-edit-panel > div[style*="grid-template-columns"]{grid-template-columns:1fr 1fr !important;}
+  }
+
   /* ---------- PRINT ---------- */
   @media print{
     .rail, .pom-float-btn, #pomodoroWidget, #quickAddOverlay, #shortcutsModal,
@@ -1904,8 +2080,10 @@
 <div id="loading"><div class="spin"></div><div class="loading-text">Carregando…</div></div>
 
 <div id="app" style="display:none;">
-  <div class="mobile-topbar">
-    <span class="dot"></span> <span id="mobileBrand">Engenharia de Produção</span>
+  <div class="mobile-topbar" id="mobileTopbar">
+    <span id="mobileBrand" hidden></span>
+    <span class="mtb-title" id="mobileTitle">Painel</span>
+    <button type="button" class="mtb-avatar" id="mobileAvatar" aria-label="Perfil e mais opções">—</button>
   </div>
   <aside class="rail">
     <div class="rail__head">
@@ -1941,6 +2119,12 @@
       <p id="brandInst">INATEL</p>
     </div>
   </aside>
+
+  <!-- phone: tab bar, add button and the "Mais" sheet -->
+  <nav class="mtabbar" id="mobileTabbar" aria-label="Navegação principal"></nav>
+  <button type="button" class="mfab" id="mobileFab" aria-label="Novo item" onclick="openQuickAdd()" data-ico="plus"></button>
+  <div class="msheet-backdrop" id="moreBackdrop"></div>
+  <div class="msheet" id="moreSheet" role="dialog" aria-modal="true" aria-label="Mais opções"></div>
 
   <main class="screen">
 
@@ -2110,7 +2294,7 @@
     <!-- DESEMPENHO -->
     <section class="tab" id="tab-desempenho">
       <div class="screen__header">
-        <h2>Desempenho</h2>
+        <h2>Notas</h2>
       </div>
       <div class="section-label" style="margin-bottom:14px;">Notas do semestre</div>
       <div id="notasSemestreGrid" class="notas-grid"></div>
@@ -2200,7 +2384,7 @@
       <div class="screen__header">
         <h2>Tarefas</h2>
       </div>
-      <div class="panel panel--pad" style="--accent:var(--green); margin-bottom:18px;">
+      <div class="panel panel--pad task-add-panel" style="--accent:var(--green); margin-bottom:18px;">
         <div class="task-form">
           <div class="field"><label>Tarefa</label><input id="fTarefa" placeholder="Ex: Estudar para P1 de Cálculo"></div>
           <div class="field"><label>Categoria</label>
@@ -2215,7 +2399,7 @@
         </div>
       </div>
       <div class="panel panel--pad" style="--accent:var(--blue)">
-        <div style="display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin-bottom:12px;">
+        <div class="task-filters" style="display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin-bottom:12px;">
           <div class="stat__label" style="margin-right:auto;">Lista de tarefas</div>
           <button class="view-toggle-btn active" id="btnViewList" title="Vista em lista" data-ico="list">Lista</button>
           <button class="view-toggle-btn" id="btnViewKanban" title="Vista Kanban" data-ico="board">Kanban</button>
@@ -2257,7 +2441,7 @@
       </div>
       <div class="meta-row" id="provasSub" style="margin-bottom:18px;"></div>
 
-      <div class="panel panel--pad" style="--accent:var(--red); margin-bottom:18px;">
+      <div class="panel panel--pad exam-add-panel" style="--accent:var(--red); margin-bottom:18px;">
         <div class="exam-form">
           <div class="field">
             <label>Disciplina</label>
@@ -2763,10 +2947,12 @@ function updateOperatorPlate(){
   document.getElementById('operatorName').textContent = name || 'Aluno não identificado';
   const initials = name ? name.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('') : '—';
   document.getElementById('operatorInitials').textContent = initials;
+  document.getElementById('mobileAvatar').textContent = initials;
 }
 
 // ---------------- nav ----------------
 const ICONS = {
+  grid:'<rect x="4" y="4" width="6.5" height="6.5" rx="1.8"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.8"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.8"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.8"/>',
   book:'<path d="M5 4.5A1.5 1.5 0 0 1 6.5 3h12.5v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 7.5h6"/>',
   home:'<path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9v11.5h13V9"/><path d="M10 20.5v-6h4v6"/>',
   exam:'<rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M9 3.5V6h6V3.5"/><path d="M9 11h6M9 15h4"/>',
@@ -2831,6 +3017,7 @@ function renderNav(){
     btn.addEventListener('click', () => switchTab(btn.dataset.tab));
   });
   if(STATE.config) applyRailPosition(STATE.config.railPosition, STATE.config.railAutoHide);
+  renderMobileTabbar();
 }
 function switchTab(id){
   const newIdx = TABS.findIndex(t => t.id === id);
@@ -2843,12 +3030,105 @@ function switchTab(id){
     if(active){ s.classList.add('active', dir); }
   });
   window.scrollTo({top:0, behavior:'smooth'});
+  updateMobileChrome(id);
   if(id==='desempenho') renderCharts();
   if(id==='mapa') renderMapaSucesso();
   if(id==='faltas') renderFaltas();
   if(id==='horas') renderHorasComp();
   if(id==='estudos') renderEstudos();
 }
+
+// ---------------- phone chrome: tab bar, top bar, "Mais" sheet ----------------
+const MOBILE_PRIMARY = ['painel', 'provas', 'tarefas', 'faltas'];
+function currentTabId(){ return ((document.querySelector('.tab.active') || {}).id || 'tab-painel').slice(4); }
+function renderMobileTabbar(){
+  const bar = document.getElementById('mobileTabbar');
+  if(!bar) return;
+  const cur = currentTabId();
+  const btn = (id, label, icon, active) => `<button type="button" class="mtab${active ? ' active' : ''}" data-mtab="${id}"${active ? ' aria-current="page"' : ''}>${ico(icon)}<span>${label}</span><span class="mtab-badge" data-badge="${id}" style="display:none;"></span></button>`;
+  bar.innerHTML = MOBILE_PRIMARY.map(id => { const t = TABS.find(x => x.id === id); return btn(id, t.label, t.icon, cur === id); }).join('')
+    + btn('__mais', 'Mais', 'grid', !MOBILE_PRIMARY.includes(cur));
+  bar.querySelectorAll('[data-mtab]').forEach(b => b.onclick = () => {
+    if(b.dataset.mtab === '__mais') openMoreSheet(); else switchTab(b.dataset.mtab);
+  });
+  if(typeof updateNavBadges === 'function') updateNavBadges();
+}
+function updateMobileChrome(id){
+  document.body.dataset.tab = id;
+  const t = TABS.find(x => x.id === id);
+  const title = document.getElementById('mobileTitle');
+  if(title && t) title.textContent = t.label;
+  document.querySelectorAll('#mobileTabbar .mtab').forEach(b => {
+    const on = b.dataset.mtab === id || (b.dataset.mtab === '__mais' && !MOBILE_PRIMARY.includes(id));
+    b.classList.toggle('active', on);
+    if(on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+  });
+  closeMoreSheet();
+}
+function openMoreSheet(){
+  const sheet = document.getElementById('moreSheet');
+  const cur = currentTabId();
+  const name = (STATE.config.aluno || '').trim() || 'Aluno';
+  const initials = document.getElementById('operatorInitials').textContent;
+  const sync = window.Sync && Sync.user ? (document.getElementById('syncLine').textContent || 'Sincronizado') : 'Salvo só neste aparelho';
+  const outras = TABS.filter(tabVisible).filter(t => !MOBILE_PRIMARY.includes(t.id));
+  const install = document.getElementById('btnInstall');
+  sheet.innerHTML = `
+    <div class="msheet__grab" aria-hidden="true"></div>
+    <div class="msheet__me">
+      <span class="msheet__avatar">${esc(initials)}</span>
+      <span class="msheet__who"><b>${esc(name)}</b><span>${esc(STATE.config.curso || '')}</span><span class="msheet__sync">${esc(sync)}</span></span>
+      ${document.getElementById('btnSwitchProfile').style.display === 'none' ? '' : `<button type="button" class="msheet__swap" id="moreSwap" aria-label="Trocar perfil">${ico('swap')}</button>`}
+    </div>
+    <div class="msheet__grid">${outras.map(t => `<button type="button" class="msheet__tile${t.id === cur ? ' active' : ''}" data-more-tab="${t.id}">${ico(t.icon)}<span>${t.label}</span></button>`).join('')}</div>
+    <div class="msheet__actions">
+      <button type="button" class="msheet__act" data-more-act="timer">${ico('timer')}<span>Timer de estudo</span></button>
+      <button type="button" class="msheet__act" data-more-act="tema">${ico(STATE.tema === 'light' ? 'moon' : 'sun')}<span>${STATE.tema === 'light' ? 'Tema escuro' : 'Tema claro'}</span></button>
+      <button type="button" class="msheet__act" data-more-act="notif">${ico('bell')}<span>Notificações</span></button>
+      ${install && !install.hidden ? `<button type="button" class="msheet__act" data-more-act="install">${ico('download')}<span>Instalar app</span></button>` : ''}
+    </div>`;
+  sheet.querySelectorAll('[data-more-tab]').forEach(b => b.onclick = () => switchTab(b.dataset.moreTab));
+  const act = {
+    timer: () => { closeMoreSheet(); document.getElementById('pomodoroBtn').click(); },
+    tema: () => { document.getElementById('themeToggle').click(); openMoreSheet(); },
+    notif: () => { closeMoreSheet(); document.getElementById('btnNotifications').click(); },
+    install: () => { closeMoreSheet(); install.click(); },
+  };
+  sheet.querySelectorAll('[data-more-act]').forEach(b => b.onclick = act[b.dataset.moreAct]);
+  const swap = document.getElementById('moreSwap');
+  if(swap) swap.onclick = () => { closeMoreSheet(); document.getElementById('btnSwitchProfile').click(); };
+  sheet.classList.add('open');
+  document.getElementById('moreBackdrop').classList.add('open');
+  document.body.classList.add('sheet-open');
+}
+function closeMoreSheet(){
+  const sheet = document.getElementById('moreSheet');
+  if(!sheet || !sheet.classList.contains('open')) return;
+  sheet.classList.remove('open');
+  sheet.style.transform = '';
+  document.getElementById('moreBackdrop').classList.remove('open');
+  document.body.classList.remove('sheet-open');
+}
+(function bindMobileChrome(){
+  document.getElementById('moreBackdrop').addEventListener('click', closeMoreSheet);
+  document.getElementById('mobileAvatar').addEventListener('click', openMoreSheet);
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') closeMoreSheet(); });
+  // arrastar a folha para baixo fecha
+  const sheet = document.getElementById('moreSheet');
+  let y0 = null, dy = 0;
+  sheet.addEventListener('touchstart', e => { if(sheet.scrollTop <= 0){ y0 = e.touches[0].clientY; dy = 0; sheet.style.transition = 'none'; } }, {passive:true});
+  sheet.addEventListener('touchmove', e => { if(y0 === null) return; dy = Math.max(0, e.touches[0].clientY - y0); sheet.style.transform = `translateY(${dy}px)`; }, {passive:true});
+  sheet.addEventListener('touchend', () => {
+    if(y0 === null) return;
+    sheet.style.transition = ''; y0 = null;
+    if(dy > 90) closeMoreSheet(); else sheet.style.transform = '';
+  });
+  // barra do topo ganha vidro e o título da tela depois que o título grande sai de vista
+  const bar = document.getElementById('mobileTopbar');
+  const onScroll = () => bar.classList.toggle('is-scrolled', window.scrollY > 44);
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+})();
 
 // ---------------- multi-tab sync (A-6) ----------------
 (function setupMultiTabSync(){
@@ -4448,7 +4728,21 @@ function renderAgendaSemanal(){
         ? `<div style="grid-column:1/-1;text-align:center;color:var(--text-faint);padding:20px;font-size:13px;">Nenhum evento nesta semana.</div>`
         : eventsPerDay.map((e, i) => `<div class="agenda-cell${localISO(e.d)===todayIso?' today-col':''}${i===eventsPerDay.length-1?' last-col':''}">${cellHtml(e)}</div>`).join('')}
     </div>
+    ${agendaListHtml()}
   `;
+  // no celular a semana vira uma lista de hoje em diante, só com os dias que têm algo
+  function agendaListHtml(){
+    const temAlgo = e => e.aulasDia.length || e.provasDia.length || e.tarefasDia.length || e.relsDia.length;
+    const dias = eventsPerDay.filter(e => localISO(e.d) >= todayIso && (temAlgo(e) || localISO(e.d) === todayIso));
+    if(!dias.some(temAlgo)) return `<div class="agenda-list"><div class="agenda-list__empty">Nada mais nesta semana.</div></div>`;
+    return `<div class="agenda-list">${dias.map(e => {
+      const hoje = localISO(e.d) === todayIso;
+      return `<div class="agenda-list__day${hoje ? ' is-today' : ''}">
+        <div class="agenda-list__head">${hoje ? 'Hoje' : DIAS_FULL[e.d.getDay()]}<span>${e.d.getDate()}/${String(e.d.getMonth()+1).padStart(2,'0')}</span></div>
+        ${temAlgo(e) ? cellHtml(e) : '<div class="agenda-empty">Nada para hoje</div>'}
+      </div>`;
+    }).join('')}</div>`;
+  }
 }
 
 // ---------------- render: Prova Timeline ----------------
@@ -4600,9 +4894,15 @@ function renderIRAEvolution(){
     bySem[s].peso += ch;
     bySem[s].count++;
   });
-  const sems = Object.keys(bySem).map(Number).sort((a,b) => a-b);
+  // semestre pode ser número (3) ou período ("2025/1"): ordena pelos números que aparecem nele
+  const semKey = s => String(s).split(/\D+/).filter(Boolean).map(Number);
+  const sems = Object.keys(bySem).sort((a,b) => {
+    const ka = semKey(a), kb = semKey(b);
+    for(let i = 0; i < Math.max(ka.length, kb.length); i++){ const d = (ka[i]||0) - (kb[i]||0); if(d) return d; }
+    return 0;
+  });
   if(sems.length < 2){ const wrap = document.getElementById('chartIRAEvolWrap'); if(wrap) wrap.innerHTML = `<div class="empty" style="padding:20px;">Histórico insuficiente para traçar evolução (mínimo 2 semestres concluídos).</div>`; return; }
-  const labels = sems.map(s => `${s}º`);
+  const labels = sems.map(s => /^\d+$/.test(s) ? `${s}º` : s);
   const vals = sems.map(s => bySem[s].peso > 0 ? bySem[s].soma/bySem[s].peso : null);
   if(chartIRAEvolRef) chartIRAEvolRef.destroy();
   const isDark = document.documentElement.dataset.theme === 'dark' || (!document.documentElement.dataset.theme && window.matchMedia('(prefers-color-scheme:dark)').matches);
@@ -7310,14 +7610,14 @@ function updateNavBadges(){
   setBadge('faltas', countDisciplinasEmRisco());
 }
 function setBadge(tabId, count){
-  const el = document.querySelector(`[data-badge="${tabId}"]`);
-  if(!el) return;
-  if(count > 0){
-    el.textContent = count > 99 ? '99+' : count;
-    el.style.display = '';
-  } else {
-    el.style.display = 'none';
-  }
+  document.querySelectorAll(`[data-badge="${tabId}"]`).forEach(el => {
+    if(count > 0){
+      el.textContent = count > 99 ? '99+' : count;
+      el.style.display = '';
+    } else {
+      el.style.display = 'none';
+    }
+  });
 }
 
 // ============================================================
