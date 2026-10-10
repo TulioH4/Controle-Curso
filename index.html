@@ -1436,6 +1436,27 @@
   select option{background:#1C1C24; color:#F5F5F7;}
   html[data-theme="light"] select option{background:#FFFFFF; color:#1D1D1F;}
 
+  /* light glass: deeper colour behind, clearer glass edges, so panels read as glass instead of flat white */
+  html[data-theme="light"]{
+    --lg-fill:rgba(255,255,255,.40);
+    --lg-fill-hover:rgba(255,255,255,.60);
+    --lg-fill-active:rgba(255,255,255,.82);
+    --lg-fill-sheet:rgba(255,255,255,.52);
+    --lg-blur:blur(30px) saturate(190%);
+    --lg-sheen:rgba(255,255,255,.65);
+    --lg-inner:inset 0 1px 0 #FFFFFF, inset 0 0 0 1px rgba(255,255,255,.6), inset 0 -1px 0 rgba(30,40,90,.05);
+    --lg-drop:0 0 0 .5px rgba(30,40,90,.10), 0 2px 6px rgba(30,40,90,.06), 0 22px 46px -16px rgba(30,40,90,.28);
+  }
+  html[data-theme="light"] body{background:#E6E8F2;}
+  html[data-theme="light"] body::before{
+    background:
+      radial-gradient(55% 45% at 10% 6%,  rgba(94,92,230,.40) 0%, transparent 70%),
+      radial-gradient(45% 40% at 92% 12%, rgba(255,55,95,.24) 0%, transparent 70%),
+      radial-gradient(55% 50% at 86% 92%, rgba(10,132,255,.34) 0%, transparent 70%),
+      radial-gradient(40% 40% at 16% 90%, rgba(48,209,88,.20) 0%, transparent 70%),
+      radial-gradient(50% 45% at 50% 50%, rgba(191,90,242,.10) 0%, transparent 70%);
+  }
+
   /* "Esta semana" */
 
   /* weekly agenda */
