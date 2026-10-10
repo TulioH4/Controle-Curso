@@ -517,11 +517,19 @@
   .falta-main .counter-row{margin:0;}
   .falta-pres{display:flex; flex-direction:column; align-items:flex-end; line-height:1.15;}
   .falta-pres b{font-size:17px; font-weight:600; color:var(--text); font-variant-numeric:tabular-nums;}
-  .falta-pres span{font-size:11px; color:var(--text-faint);}
-  .falta-foot{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:8px; font-size:11.5px; color:var(--text-dim);}
-  .falta-lim{display:inline-flex; align-items:center; gap:4px; color:var(--text-faint); white-space:nowrap;}
-  .btn-limite-edit{background:none; border:none; padding:2px; color:var(--text-faint); cursor:pointer; opacity:.7; display:inline-flex;}
-  .btn-limite-edit:hover{opacity:1; color:var(--text);}
+  .falta-pres span{font-size:11px; color:var(--text-faint); white-space:nowrap;}
+  .faltas-grid{align-items:start;}
+  .falta-main .counter-val{display:flex; align-items:baseline; justify-content:center; min-width:64px;}
+  .falta-lim-btn{
+    background:none; border:none; padding:0 0 0 2px; font:inherit; font-size:13px; font-weight:500;
+    color:var(--text-faint); cursor:pointer; border-radius:4px;
+  }
+  .falta-lim-btn:hover{color:var(--text); text-decoration:underline; text-underline-offset:3px;}
+  .falta-lim-input{
+    width:48px; margin-left:4px; font-family:var(--mono); font-size:13px; background:var(--bg-alt);
+    border:1px solid var(--blue); border-radius:6px; padding:1px 4px; color:var(--text);
+  }
+  .falta-aviso{margin-top:8px; font-size:12px; font-weight:600;}
   .counter-btn{
     width:28px; height:28px; border-radius:4px; border:1px solid var(--line);
     background:var(--panel-2); color:var(--text); cursor:pointer; font-size:14px; font-weight:700;
@@ -4050,25 +4058,22 @@ function renderFaltas(){
     const chEst = d.ch || limite * 4;
     const presencaPct = chEst > 0 ? Math.max(0, Math.round((chEst - faltas) / chEst * 100)) : null;
     const restam = Math.max(0, limite - faltas);
-    const restamTxt = pct >= 100 ? '<b style="color:var(--red)">Limite atingido</b>' :
-      restam === 1 ? '<b style="color:var(--red)">Mais 1 falta reprova</b>' :
-      restam <= 3 ? `<b style="color:var(--amber)">Ainda pode faltar ${restam}×</b>` :
-      `Ainda pode faltar <b>${restam}×</b>`;
+    // Só fala quando importa: perto do limite ou estourado
+    const aviso = pct >= 100 ? 'Limite atingido' :
+      restam === 1 ? 'Mais 1 falta reprova' :
+      restam <= 3 ? `Restam ${restam} faltas` : '';
     return `<div class="panel falta-card" style="--accent:var(--${badgeCls})">
       <div class="disc" title="${esc(d.sigla)}">${esc(d.nome)}</div>
       <div class="falta-main">
         <div class="counter-row">
-          <button class="counter-btn sub" data-f-dec="${d.sigla}" title="Remover falta">−</button>
-          <div class="counter-val">${faltas}</div>
-          <button class="counter-btn" data-f-inc="${d.sigla}" title="Adicionar falta">+</button>
+          <button class="counter-btn sub" data-f-dec="${d.sigla}" title="Remover falta" aria-label="Remover falta">−</button>
+          <div class="counter-val">${faltas}<button class="falta-lim-btn" data-limite-edit="${d.sigla}" data-limite-atual="${limite}" title="Limite de ${limite} faltas${temCustom?' (ajustado por você)':''}. Clique para editar">/${limite}</button></div>
+          <button class="counter-btn" data-f-inc="${d.sigla}" title="Adicionar falta" aria-label="Adicionar falta">+</button>
         </div>
         ${presencaPct!==null?`<div class="falta-pres"><b>${presencaPct}%</b><span>de presença</span></div>`:''}
       </div>
       <div class="falta-bar"><div class="falta-bar-fill" style="width:${pct}%; background:${barColor};"></div></div>
-      <div class="falta-foot">
-        <span>${restamTxt}</span>
-        <span class="falta-lim" title="${temCustom?'Limite ajustado por você':'Limite padrão'}">Limite <span class="limite-text">${limite}</span><button class="btn-limite-edit" data-limite-edit="${d.sigla}" data-limite-atual="${limite}" title="Editar limite de faltas" aria-label="Editar limite de faltas">${ico('edit')}</button></span>
-      </div>
+      ${aviso ? `<div class="falta-aviso" style="color:var(--${pct>=100 || restam===1 ? 'red' : 'amber'})">${aviso}</div>` : ''}
     </div>`;
   }).join('');
 
@@ -4108,12 +4113,10 @@ function renderFaltas(){
     btn.addEventListener('click', () => {
       const sigla = btn.dataset.limiteEdit;
       const atual = Number(btn.dataset.limiteAtual);
-      const span = btn.previousElementSibling;
       const inp = document.createElement('input');
       inp.type = 'number'; inp.value = atual; inp.min = 1; inp.max = 999;
-      inp.style.cssText = 'width:46px;font-family:var(--mono);font-size:11px;background:var(--bg-alt);border:1px solid var(--blue);border-radius:3px;padding:1px 4px;color:var(--text);';
-      span.replaceWith(inp);
-      btn.style.display = 'none';
+      inp.className = 'falta-lim-input'; inp.setAttribute('aria-label', 'Limite de faltas');
+      btn.replaceWith(inp);
       inp.focus(); inp.select();
       const save = async () => {
         const v = Math.max(1, parseInt(inp.value, 10) || 1);
