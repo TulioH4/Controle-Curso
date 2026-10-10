@@ -1444,8 +1444,27 @@
     --lg-fill-sheet:rgba(255,255,255,.52);
     --lg-blur:blur(30px) saturate(190%);
     --lg-sheen:rgba(255,255,255,.65);
-    --lg-inner:inset 0 1px 0 #FFFFFF, inset 0 0 0 1px rgba(255,255,255,.6), inset 0 -1px 0 rgba(30,40,90,.05);
-    --lg-drop:0 0 0 .5px rgba(30,40,90,.10), 0 2px 6px rgba(30,40,90,.06), 0 22px 46px -16px rgba(30,40,90,.28);
+    /* depth: lit top edge, soft inner shade at the bottom (glass thickness), layered contact + ambient shadow */
+    --lg-inner:inset 0 1px 0 #FFFFFF, inset 1px 0 0 rgba(255,255,255,.7), inset 0 -1px 0 rgba(30,40,90,.07),
+      inset 0 16px 24px -18px rgba(255,255,255,.95), inset 0 -18px 28px -22px rgba(30,40,90,.20);
+    --lg-drop:0 0 0 .5px rgba(30,40,90,.10), 0 1px 1px rgba(30,40,90,.06), 0 6px 12px -4px rgba(30,40,90,.10),
+      0 26px 50px -18px rgba(30,40,90,.32);
+  }
+  /* thicker specular rim: bright top-left, clear middle, light catch at the bottom-right */
+  html[data-theme="light"] .panel::before, html[data-theme="light"] .rail::before, html[data-theme="light"] .modal::before,
+  html[data-theme="light"] .wizard::before, html[data-theme="light"] .pomodoro-widget::before, html[data-theme="light"] .toast::before,
+  html[data-theme="light"] .profile-card::before, html[data-theme="light"] .lg-sheet::before{
+    padding:1.5px;
+    background:linear-gradient(155deg, #FFFFFF 0%, rgba(255,255,255,.45) 22%, rgba(255,255,255,.06) 50%, rgba(255,255,255,.35) 80%, #FFFFFF 100%);
+  }
+  /* top-down sheen across the glass, like light falling on a curved surface */
+  html[data-theme="light"] .panel{
+    background:linear-gradient(180deg, rgba(255,255,255,.42) 0%, rgba(255,255,255,0) 42%),
+      radial-gradient(120% 70% at 0% 0%, var(--lg-sheen) 0%, transparent 55%), var(--lg-fill);
+  }
+  html[data-theme="light"] .stat{
+    background:linear-gradient(180deg, rgba(255,255,255,.42) 0%, rgba(255,255,255,0) 50%),
+      radial-gradient(120% 70% at 0% 0%, var(--lg-sheen) 0%, transparent 55%), var(--lg-fill);
   }
   html[data-theme="light"] body{background:#E6E8F2;}
   html[data-theme="light"] body::before{
