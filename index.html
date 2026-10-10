@@ -512,6 +512,24 @@
   .falta-card .disc{font-weight:600; font-size:13px; margin-bottom:4px;}
   .falta-card .disc-ch{font-size:11px; color:var(--text-faint); font-family:var(--mono);}
   .counter-row{display:flex; align-items:center; gap:8px; margin:10px 0 6px;}
+  .falta-card .disc{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .falta-main{display:flex; align-items:center; justify-content:space-between; gap:12px; margin:12px 0 12px;}
+  .falta-main .counter-row{margin:0;}
+  .falta-pres{display:flex; flex-direction:column; align-items:flex-end; line-height:1.15;}
+  .falta-pres b{font-size:17px; font-weight:600; color:var(--text); font-variant-numeric:tabular-nums;}
+  .falta-pres span{font-size:11px; color:var(--text-faint); white-space:nowrap;}
+  .faltas-grid{align-items:start;}
+  .falta-main .counter-val{display:flex; align-items:baseline; justify-content:center; min-width:64px;}
+  .falta-lim-btn{
+    background:none; border:none; padding:0 0 0 2px; font:inherit; font-size:13px; font-weight:500;
+    color:var(--text-faint); cursor:pointer; border-radius:4px;
+  }
+  .falta-lim-btn:hover{color:var(--text); text-decoration:underline; text-underline-offset:3px;}
+  .falta-lim-input{
+    width:48px; margin-left:4px; font-family:var(--mono); font-size:13px; background:var(--bg-alt);
+    border:1px solid var(--blue); border-radius:6px; padding:1px 4px; color:var(--text);
+  }
+  .falta-aviso{margin-top:8px; font-size:12px; font-weight:600;}
   .counter-btn{
     width:28px; height:28px; border-radius:4px; border:1px solid var(--line);
     background:var(--panel-2); color:var(--text); cursor:pointer; font-size:14px; font-weight:700;
@@ -594,10 +612,13 @@
   @media(max-width:880px){
     .horas-form{grid-template-columns:1fr 1fr;}
     .horas-resumo{grid-template-columns:repeat(2,1fr);}
-    .faltas-grid{grid-template-columns:1fr 1fr;}
+    .faltas-grid{grid-template-columns:repeat(2, minmax(0, 1fr));}
     .modal-row{grid-template-columns:1fr 1fr 1fr;}
     .hist-add-form{grid-template-columns:1fr 1fr;}
     #btnNotifications{display:none;}
+  }
+  @media(max-width:560px){
+    .faltas-grid{grid-template-columns:minmax(0, 1fr);}
   }
 
   #loading{
@@ -1436,6 +1457,46 @@
   select option{background:#1C1C24; color:#F5F5F7;}
   html[data-theme="light"] select option{background:#FFFFFF; color:#1D1D1F;}
 
+  /* light glass: deeper colour behind, clearer glass edges, so panels read as glass instead of flat white */
+  html[data-theme="light"]{
+    --lg-fill:rgba(255,255,255,.40);
+    --lg-fill-hover:rgba(255,255,255,.60);
+    --lg-fill-active:rgba(255,255,255,.82);
+    --lg-fill-sheet:rgba(255,255,255,.52);
+    --lg-blur:blur(30px) saturate(190%);
+    --lg-sheen:rgba(255,255,255,.65);
+    /* depth: lit top edge, soft inner shade at the bottom (glass thickness), layered contact + ambient shadow */
+    --lg-inner:inset 0 1px 0 #FFFFFF, inset 1px 0 0 rgba(255,255,255,.7), inset 0 -1px 0 rgba(30,40,90,.07),
+      inset 0 16px 24px -18px rgba(255,255,255,.95), inset 0 -18px 28px -22px rgba(30,40,90,.20);
+    --lg-drop:0 0 0 .5px rgba(30,40,90,.10), 0 1px 1px rgba(30,40,90,.06), 0 6px 12px -4px rgba(30,40,90,.10),
+      0 26px 50px -18px rgba(30,40,90,.32);
+  }
+  /* thicker specular rim: bright top-left, clear middle, light catch at the bottom-right */
+  html[data-theme="light"] .panel::before, html[data-theme="light"] .rail::before, html[data-theme="light"] .modal::before,
+  html[data-theme="light"] .wizard::before, html[data-theme="light"] .pomodoro-widget::before, html[data-theme="light"] .toast::before,
+  html[data-theme="light"] .profile-card::before, html[data-theme="light"] .lg-sheet::before{
+    padding:1.5px;
+    background:linear-gradient(155deg, #FFFFFF 0%, rgba(255,255,255,.45) 22%, rgba(255,255,255,.06) 50%, rgba(255,255,255,.35) 80%, #FFFFFF 100%);
+  }
+  /* top-down sheen across the glass, like light falling on a curved surface */
+  html[data-theme="light"] .panel{
+    background:linear-gradient(180deg, rgba(255,255,255,.42) 0%, rgba(255,255,255,0) 42%),
+      radial-gradient(120% 70% at 0% 0%, var(--lg-sheen) 0%, transparent 55%), var(--lg-fill);
+  }
+  html[data-theme="light"] .stat{
+    background:linear-gradient(180deg, rgba(255,255,255,.42) 0%, rgba(255,255,255,0) 50%),
+      radial-gradient(120% 70% at 0% 0%, var(--lg-sheen) 0%, transparent 55%), var(--lg-fill);
+  }
+  html[data-theme="light"] body{background:#E6E8F2;}
+  html[data-theme="light"] body::before{
+    background:
+      radial-gradient(55% 45% at 10% 6%,  rgba(94,92,230,.40) 0%, transparent 70%),
+      radial-gradient(45% 40% at 92% 12%, rgba(255,55,95,.24) 0%, transparent 70%),
+      radial-gradient(55% 50% at 86% 92%, rgba(10,132,255,.34) 0%, transparent 70%),
+      radial-gradient(40% 40% at 16% 90%, rgba(48,209,88,.20) 0%, transparent 70%),
+      radial-gradient(50% 45% at 50% 50%, rgba(191,90,242,.10) 0%, transparent 70%);
+  }
+
   /* "Esta semana" */
 
   /* weekly agenda */
@@ -1549,6 +1610,33 @@
   .week-grid .slot{margin:0; border-radius:0; box-shadow:inset 3px 0 0 var(--blue);}
   .week-grid .head{text-transform:none; letter-spacing:0; font-size:12.5px; font-weight:600; color:var(--text-dim);}
   #turmasGrid > :nth-child(6n), #weekGrid > :nth-child(7n){border-right:none;}
+  .painel-top__main{flex:1 1 auto;}
+  .painel-top .postits{flex-shrink:0;}
+  .day-overview{margin:18px 0 0; max-width:68ch; font-size:16px; line-height:1.55; color:var(--text-dim); text-wrap:pretty;}
+  .day-overview b{color:var(--text); font-weight:600;}
+  .day-overview__hi{color:var(--text); font-weight:600;}
+  .stat__sub{display:block; margin-top:3px; font-size:12.5px; font-weight:500; color:var(--text-faint);}
+
+  /* notas: add button and goal on one aligned row, same height */
+  .nota-foot{display:flex; align-items:center; gap:10px; margin-top:8px;}
+  .nota-foot .nota-add-btn{flex:1; margin:0; height:30px; padding:0 10px; border-radius:8px;}
+  .nota-meta{display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--text-faint); white-space:nowrap;}
+  .nota-meta input{width:52px; height:30px; box-sizing:border-box;}
+
+  /* grids sit on the same glass as every other panel */
+  .week-grid{
+    border-radius:22px;
+    background:radial-gradient(120% 70% at 0% 0%, var(--lg-sheen) 0%, transparent 55%), var(--lg-fill);
+    backdrop-filter:var(--lg-blur); -webkit-backdrop-filter:var(--lg-blur);
+    box-shadow:var(--lg-drop), var(--lg-inner);
+  }
+  html[data-theme="light"] .week-grid{
+    background:linear-gradient(180deg, rgba(255,255,255,.42) 0%, rgba(255,255,255,0) 42%),
+      radial-gradient(120% 70% at 0% 0%, var(--lg-sheen) 0%, transparent 55%), var(--lg-fill);
+  }
+  .week-grid .head{background:transparent; padding:12px 8px;}
+  .week-grid > :nth-last-child(-n+6){border-bottom:none;}
+  #weekGrid > :nth-last-child(-n+7){border-bottom:none;}
 
   /* sidebar: user + clock on top, course at the bottom */
   .rail__head{border-bottom:1px solid var(--line-soft);}
@@ -1774,6 +1862,7 @@
             <h2>Painel</h2>
           </div>
           <div class="meta-row" id="painelSub"></div>
+          <p class="day-overview" id="dayOverview"></p>
         </div>
         <div class="postits" id="lembretesList" aria-label="Lembretes"></div>
       </div>
@@ -1797,18 +1886,18 @@
       </div>
 
       <div class="section-label" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Agenda da semana</span>
+        <span id="agendaCount" style="font-size:12px;font-weight:500;color:var(--text-faint);"></span>
+      </div>
+      <div id="agendaSemanalPanel" class="panel panel--pad" style="--accent:var(--purple);overflow-x:auto;"></div>
+
+      <div class="section-label" style="display:flex;align-items:center;justify-content:space-between;">
         <span>Tarefas urgentes</span>
         <a href="#" id="dashVerTodas" style="font-size:12.5px; font-weight:500; color:var(--blue); text-decoration:none;">Ver todas</a>
       </div>
       <div class="panel panel--pad" style="--accent:var(--green)">
         <div id="dashTarefasList"></div>
       </div>
-
-      <div class="section-label" style="display:flex;align-items:center;justify-content:space-between;">
-        <span>Agenda da semana</span>
-        <span id="agendaCount" style="font-size:12px;font-weight:500;color:var(--text-faint);"></span>
-      </div>
-      <div id="agendaSemanalPanel" class="panel panel--pad" style="--accent:var(--purple);overflow-x:auto;"></div>
 
       <div class="section-label">Disciplinas em risco</div>
       <div id="discRiscoPanel" class="panel panel--pad" style="--accent:var(--red)"></div>
@@ -2896,9 +2985,7 @@ function renderPainel(){
 
   document.getElementById('painelSub').innerHTML = `
     <span class="meta-chip">Sincronizado às <b>${nowHM}</b></span>
-    <span class="meta-chip"><b>${esc(STATE.config.aluno || 'Aluno não identificado')}</b></span>
-    ${proximaProva ? `<span class="meta-chip" style="color:var(--blue);">${esc(examLabel(proximaProva))} ${diasLabel(daysUntil(proximaProva.data))}</span>` : ''}
-  `;
+    <span class="meta-chip"><b>${esc(STATE.config.aluno || 'Aluno não identificado')}</b></span>  `;
 
   // Calcular disciplinas com nota já reprovada (sem recuperação possível)
   const notaMin = STATE.config.notaMinima || 60;
@@ -2916,13 +3003,25 @@ function renderPainel(){
     return precisa > 100;
   }).length;
 
+  // Próxima prova que ainda não começou (uma prova de hoje às 08:00 sai do card depois das 08:00)
+  const todayIsoStat = localISO(new Date());
+  const proxProva = upcomingProvas().find(p => p.data > todayIsoStat || !p.hora || p.hora > nowHM);
+  const proxProvaHoje = !!proxProva && proxProva.data === todayIsoStat;
+  const provaCard = proxProva ? (() => {
+    const sig = (String(proxProva.disciplina).match(/\(([^)]+)\)\s*$/) || [])[1] || proxProva.disciplina;
+    const quando = diasLabel(daysUntil(proxProva.data)) + (proxProva.hora ? ` às ${proxProva.hora}` : '');
+    return `${esc(proxProva.tipo)} de ${esc(sig)}<span class="stat__sub">${esc(quando)}</span>`;
+  })() : 'Nenhuma marcada';
+
+  renderDayOverview();
   const streak = calcStudyStreak();
   const weekProg = calcWeeklyTaskProgress();
   document.getElementById('resumoStats').innerHTML = `
     ${statCard('Aulas hoje', aulasHoje.length, 'blue')}
     ${statCard('Próxima aula', proxAula, 'gray', true)}
-    ${statCard('Tarefas atrasadas', tarefasAtrasadas, tarefasAtrasadas>0?'red':'green')}
+    ${statCard('Próxima prova', provaCard, proxProvaHoje?'red':'blue', true)}
     ${statCard('Prazos em 7 dias', tarefas7d, tarefas7d>0?'amber':'green')}
+    ${tarefasAtrasadas > 0 ? statCard('Tarefas atrasadas', tarefasAtrasadas, 'red') : ''}
     ${disciplinasRisco > 0 ? statCard('Risco de falta', disciplinasRisco+' disc.', 'red', true) : ''}
     ${discReprovando > 0 ? statCard('Reprovando em notas', discReprovando+' disc.', 'red', true) : ''}
     ${streak > 0 ? statCard('Sequência de estudos', streak+'d', 'amber', true) : ''}
@@ -2994,7 +3093,7 @@ function renderPainel(){
       <div class="dash-task-check" data-dash-done="${t.id}" role="button" tabindex="0" aria-label="Concluir ${esc(t.nome)}"></div>
       <div class="dash-task-info">
         <div class="t">${esc(t.nome)}</div>
-        <div class="s">${esc(t.categoria)}${t.prazo?', prazo '+fmtDate(t.prazo)+(overdue?' (atrasado)':''):''}${t.disciplina?', '+esc(t.disciplina):''}</div>
+        <div class="s">${esc(t.categoria)}${t.prazo?', '+fmtDate(t.prazo)+(overdue?' (atrasado)':''):''}${t.disciplina?', '+esc(t.disciplina):''}</div>
       </div>
       <span class="badge badge-${stCls}">${t.status}</span>
     </div>`;
@@ -3060,6 +3159,56 @@ function renderProgressoCurso(){
         <span style="font-size:11.5px;color:var(--text-faint);">Preencha a CH no Histórico para ver a integralização em horas.</span>
       </div>`}
     </div>`;
+}
+
+// ---------------- Painel: overview do dia ----------------
+// Uma saudação e no máximo três frases sobre provas, trabalhos e prazos (aulas ficam de fora).
+function renderDayOverview(){
+  const el = document.getElementById('dayOverview');
+  if(!el) return;
+  const now = new Date();
+  const h = now.getHours();
+  const nowHM = String(h).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  const saud = h < 5 ? 'Boa noite' : h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+  const nome = String(STATE.config.aluno || '').trim().split(/\s+/)[0];
+  const hora = hm => { if(!hm) return ''; const [H,M] = hm.split(':'); return ` às ${Number(H)}h${M && M !== '00' ? M : ''}`; };
+  const disc = p => String(p.disciplina || '').replace(/\s*\([^)]*\)\s*$/, '');
+  const prova = p => `${esc(p.tipo)} de ${esc(disc(p))}${hora(p.hora)}`;
+  const lista = arr => arr.length < 2 ? arr.join('') : arr.slice(0,-1).join(', ') + ' e ' + arr[arr.length-1];
+  const abertas = STATE.tarefas.filter(t => t.status !== 'Concluído' && t.prazo);
+  const rels = DATA.relatorios
+    .filter(r => !STATE.relatoriosOcultos.includes(r.nome))
+    .map(r => { const ov = STATE.relatoriosOverrides[r.nome] || {}; return Object.assign({}, r, {nome: ov.nome||r.nome, fim: ov.fim||r.fim}); })
+    .filter(r => r.fim && relatorioStatus(r).label !== 'Concluído');
+
+  const frases = [];
+  const provasHoje = upcomingProvas().filter(p => daysUntil(p.data) === 0 && (!p.hora || p.hora > nowHM));
+  const provasAmanha = upcomingProvas().filter(p => daysUntil(p.data) === 1);
+  if(provasHoje.length === 1) frases.push(`Hoje tem <b>${prova(provasHoje[0])}</b>. Você se preparou pra isso, vai com calma.`);
+  else if(provasHoje.length > 1) frases.push(`Hoje tem ${provasHoje.length} provas: <b>${lista(provasHoje.map(prova))}</b>. Uma de cada vez, você consegue.`);
+  if(provasAmanha.length) frases.push(`Amanhã tem <b>${lista(provasAmanha.map(prova))}</b>, vale uma revisada hoje.`);
+
+  const atrasadas = abertas.filter(t => daysUntil(t.prazo) < 0);
+  const hoje = abertas.filter(t => daysUntil(t.prazo) === 0);
+  const amanha = abertas.filter(t => daysUntil(t.prazo) === 1);
+  if(atrasadas.length === 1) frases.push(`<b>${esc(atrasadas[0].nome)}</b> ficou pra trás. Que tal resolver hoje e tirar isso da cabeça?`);
+  else if(atrasadas.length > 1) frases.push(`Tem <b>${atrasadas.length} tarefas atrasadas</b> te esperando. Escolhe uma e começa por ela.`);
+  if(hoje.length) frases.push(`${hoje.length === 1 ? `<b>${esc(hoje[0].nome)}</b> vence` : `<b>${hoje.length} tarefas</b> vencem`} hoje, não esquece.`);
+  else if(amanha.length) frases.push(`${amanha.length === 1 ? `<b>${esc(amanha[0].nome)}</b> vence` : `<b>${amanha.length} tarefas</b> vencem`} amanhã.`);
+
+  const relPerto = rels.filter(r => { const d = daysUntil(r.fim); return d >= 0 && d <= 2; });
+  if(relPerto.length){
+    const r = relPerto[0]; const d = daysUntil(r.fim);
+    frases.push(`O <b>${esc(r.nome)}</b> do laboratório entrega ${d === 0 ? 'hoje' : d === 1 ? 'amanhã' : 'depois de amanhã'}.`);
+  }
+
+  if(!frases.length){
+    const prox = upcomingProvas().find(p => daysUntil(p.data) > 1);
+    frases.push(prox && daysUntil(prox.data) <= 7
+      ? `Nada urgente por hoje. A próxima prova é <b>${prova(prox)}</b> ${diasLabel(daysUntil(prox.data))}, dá tempo de se organizar com calma.`
+      : 'Nenhuma prova ou prazo à vista hoje. Aproveite o dia.');
+  }
+  el.innerHTML = `<span class="day-overview__hi">${saud}${nome ? ', ' + esc(nome) : ''}.</span> ${frases.slice(0,3).join(' ')}`;
 }
 
 function statCard(label, value, accent, small){
@@ -3662,13 +3811,14 @@ function renderNotasSemestre(){
               data-nota-peso data-sigla="${esc(sigla)}" data-idx="${i}">
             <button class="nota-del" data-nota-del data-sigla="${esc(sigla)}" data-idx="${i}" title="Remover linha">×</button>
           </div>`).join('')}
-        <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
-          <button class="nota-add-btn" data-nota-add data-sigla="${esc(sigla)}" style="flex:1;">+ adicionar nota</button>
-          <span style="font-size:11px;color:var(--text-faint);white-space:nowrap;">meta:</span>
-          <input class="nota-peso-input" type="number" min="${notaMin}" max="100" step="1"
-            value="${metaVal != null ? metaVal : ''}" placeholder="${notaMin}"
-            data-nota-meta data-sigla="${esc(sigla)}"
-            title="Meta pessoal de nota (acima do mínimo ${notaMin})" style="width:52px;">
+        <div class="nota-foot">
+          <button class="nota-add-btn" data-nota-add data-sigla="${esc(sigla)}">+ Adicionar nota</button>
+          <label class="nota-meta">Meta
+            <input class="nota-peso-input" type="number" min="${notaMin}" max="100" step="1"
+              value="${metaVal != null ? metaVal : ''}" placeholder="${notaMin}"
+              data-nota-meta data-sigla="${esc(sigla)}"
+              title="Meta pessoal de nota (acima do mínimo ${notaMin})">
+          </label>
         </div>
       </div>
       ${preenchidas.length > 0 ? `
@@ -3997,26 +4147,22 @@ function renderFaltas(){
     const chEst = d.ch || limite * 4;
     const presencaPct = chEst > 0 ? Math.max(0, Math.round((chEst - faltas) / chEst * 100)) : null;
     const restam = Math.max(0, limite - faltas);
-    const restamTxt = pct >= 100 ? 'Limite atingido!' :
-      restam === 1 ? '<b style="color:var(--red)">Mais 1 falta = reprovado</b>' :
-      restam <= 3 ? `<b style="color:var(--amber)">Ainda pode faltar ${restam}×</b>` :
-      `Ainda pode faltar <b>${restam}×</b>`;
+    // Só fala quando importa: perto do limite ou estourado
+    const aviso = pct >= 100 ? 'Limite atingido' :
+      restam === 1 ? 'Mais 1 falta reprova' :
+      restam <= 3 ? `Restam ${restam} faltas` : '';
     return `<div class="panel falta-card" style="--accent:var(--${badgeCls})">
-      <div class="disc">${d.nome}</div>
-      <div class="disc-ch mono">${d.sigla}, Limite: <span class="limite-text">${limite} faltas${temCustom?' ✎':''}</span> <button class="btn-limite-edit" data-limite-edit="${d.sigla}" data-limite-atual="${limite}" title="Editar limite de faltas" style="background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:12px;padding:0 2px;opacity:.6;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='.6'">${ico('edit')}</button>${presencaPct!==null?`<span style="margin-left:8px;color:var(--text-faint);">· ${presencaPct}% presença</span>`:''}</div>
-      <div class="counter-row">
-        <button class="counter-btn sub" data-f-dec="${d.sigla}" title="Remover falta">−</button>
-        <div class="counter-val">${faltas}</div>
-        <button class="counter-btn" data-f-inc="${d.sigla}" title="Adicionar falta">+</button>
-      </div>
-      <div style="display:flex; align-items:center; justify-content:space-between; font-size:11px; color:var(--text-faint); font-family:var(--mono); margin-bottom:4px;">
-        <span>${restamTxt}</span>
-        <span class="badge badge-${badgeCls}" style="font-size:10px;">${badgeLabel}</span>
+      <div class="disc" title="${esc(d.sigla)}">${esc(d.nome)}</div>
+      <div class="falta-main">
+        <div class="counter-row">
+          <button class="counter-btn sub" data-f-dec="${d.sigla}" title="Remover falta" aria-label="Remover falta">−</button>
+          <div class="counter-val">${faltas}<button class="falta-lim-btn" data-limite-edit="${d.sigla}" data-limite-atual="${limite}" title="Limite de ${limite} faltas${temCustom?' (ajustado por você)':''}. Clique para editar">/${limite}</button></div>
+          <button class="counter-btn" data-f-inc="${d.sigla}" title="Adicionar falta" aria-label="Adicionar falta">+</button>
+        </div>
+        ${presencaPct!==null?`<div class="falta-pres"><b>${presencaPct}%</b><span>de presença</span></div>`:''}
       </div>
       <div class="falta-bar"><div class="falta-bar-fill" style="width:${pct}%; background:${barColor};"></div></div>
-      ${faltas > 0 && pct < 100 ? `<div class="falta-forecast" style="color:var(--${pct>=75?'red':pct>=50?'amber':'text-faint'})">
-        ${restam <= 2 ? 'Margem crítica' : restam <= 5 ? 'Atenção' : '✓ Margem segura'}: ${restam} falta${restam!==1?'s':''} restantes (~${restam} semana${restam!==1?'s':''} a 1/semana)
-      </div>` : ''}
+      ${aviso ? `<div class="falta-aviso" style="color:var(--${pct>=100 || restam===1 ? 'red' : 'amber'})">${aviso}</div>` : ''}
     </div>`;
   }).join('');
 
@@ -4056,12 +4202,10 @@ function renderFaltas(){
     btn.addEventListener('click', () => {
       const sigla = btn.dataset.limiteEdit;
       const atual = Number(btn.dataset.limiteAtual);
-      const span = btn.previousElementSibling;
       const inp = document.createElement('input');
       inp.type = 'number'; inp.value = atual; inp.min = 1; inp.max = 999;
-      inp.style.cssText = 'width:46px;font-family:var(--mono);font-size:11px;background:var(--bg-alt);border:1px solid var(--blue);border-radius:3px;padding:1px 4px;color:var(--text);';
-      span.replaceWith(inp);
-      btn.style.display = 'none';
+      inp.className = 'falta-lim-input'; inp.setAttribute('aria-label', 'Limite de faltas');
+      btn.replaceWith(inp);
       inp.focus(); inp.select();
       const save = async () => {
         const v = Math.max(1, parseInt(inp.value, 10) || 1);
@@ -4166,7 +4310,7 @@ function renderAgendaSemanal(){
       ...e.aulasDia.map(a => ({t:a.inicio||'', html: evHtml('ev-aula', a.inicio && a.fim ? `${a.inicio}–${a.fim}` : '', a.disciplina, a.local||'')})),
       ...e.provasDia.map(p => ({t:p.hora||'', html: evHtml('ev-prova', p.hora||'', examLabel(p), p.local||'')})),
       ...e.relsDia.map(r => ({t:'98', html: evHtml('ev-lab', '', r.nome, 'Entrega do relatório')})),
-      ...e.tarefasDia.map(t => ({t:'99', html: evHtml('ev-tarefa', '', t.nome, ['Prazo', t.disciplina].filter(Boolean).join(', '))})),
+      ...e.tarefasDia.map(t => ({t:'99', html: evHtml('ev-tarefa', '', t.nome, [t.categoria, t.disciplina].filter(Boolean).join(', '))})),
     ].sort((a,b) => a.t.localeCompare(b.t));
     return items.map(i => i.html).join('') || '<div class="agenda-empty">—</div>';
   };
@@ -4868,7 +5012,7 @@ function renderTarefas(){
       <span class="badge badge-${prCls}">${t.prioridade}</span>
       <div class="name">
         <div class="t">${esc(t.nome)}</div>
-        <div class="meta">${esc(t.categoria)}${t.disciplina?(', '+esc(t.disciplina)):''}${t.prazo?(', prazo '+fmtDate(t.prazo)+(overdue?' (atrasado)':'')):''}</div>
+        <div class="meta">${esc(t.categoria)}${t.disciplina?(', '+esc(t.disciplina)):''}${t.prazo?(', '+fmtDate(t.prazo)+(overdue?' (atrasado)':'')):''}</div>
       </div>
       <span class="badge badge-${stCls} status-btn" data-toggle="${t.id}" tabindex="0" role="button" aria-label="Mudar status de ${esc(t.nome)}, atual ${t.status}">${t.status}</span>
       <button class="btn btn-ghost" data-edit-tarefa="${t.id}" title="Editar" aria-label="Editar ${esc(t.nome)}">${ico('edit')}</button>
