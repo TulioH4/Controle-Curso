@@ -1,0 +1,16 @@
+# Personal academic data: never commit or publish
+dados_curso.js
+embedded_data.json
+Gestao_Curso.xlsx
+backup-centro-de-controle*.json
+index.backup-*.html
+
+# Local notes (out of date)
+README.md
+
+# Build output (GitHub Actions builds it)
+dist/
+
+# Local tooling
+.claude/
+__pycache__/
