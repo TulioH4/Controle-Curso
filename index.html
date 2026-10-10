@@ -2774,6 +2774,7 @@ async function storeGet(key, fallback){
   }
 }
 async function storeSet(key, value){
+  if(typeof REMINDER_KEYS !== 'undefined' && REMINDER_KEYS.includes(key)) saveReminderSnapshot();
   const pk = profiledKey(key);
   try{
     await window.storage.set(pk, JSON.stringify(value), false);
@@ -2919,7 +2920,9 @@ async function init(opts = {}){
   if(_motiv && !opts.silent) setTimeout(() => showToast(_motiv, 'info', 5000), 1200);
 
   // Automatic deadline notifications: at most once per day per profile
+  saveReminderSnapshot();
   setTimeout(() => {
+    if('serviceWorker' in navigator && navigator.serviceWorker.controller){ askReminderCheck(); return; }
     const key = 'notif_last_' + (ACTIVE_PROFILE_ID || 'default');
     const today = localISO(new Date());
     if(lsGet(key, null) === today) return;
@@ -6026,7 +6029,51 @@ function scheduleDeadlineNotifications(){
   });
 }
 
+// ---------------- lembretes locais (sem servidor) ----------------
+// O app guarda um resumo dos prazos no Cache Storage e o service worker decide o que avisar,
+// uma vez cada: ao abrir, a cada poucos minutos com o app aberto e, no Android com o app
+// instalado, quando o celular rodar a sincronização periódica.
+const REMINDER_KEYS = ['tarefas', 'provas', 'base_data', 'lab_concluido', 'relatorios_overrides', 'relatorios_ocultos'];
+let _snapTimer = null;
+function saveReminderSnapshot(){
+  clearTimeout(_snapTimer);
+  _snapTimer = setTimeout(async () => {
+    if(!('caches' in window) || !STATE.tarefas || !STATE.provas) return;
+    const rels = (DATA.relatorios || [])
+      .filter(r => !(STATE.relatoriosOcultos || []).includes(r.nome))
+      .map(r => { const ov = (STATE.relatoriosOverrides || {})[r.nome] || {}; return {nome: ov.nome || r.nome, fim: ov.fim || r.fim, inicio: r.inicio}; })
+      .filter(r => r.fim && relatorioStatus(r).label !== 'Concluído')
+      .map(r => ({nome: r.nome, fim: r.fim}));
+    const snap = {
+      provas: STATE.provas.map(p => ({tipo: p.tipo, disciplina: p.disciplina, data: p.data, hora: p.hora || null, local: p.local || null})),
+      tarefas: STATE.tarefas.filter(t => t.status !== 'Concluído' && t.prazo).map(t => ({nome: t.nome, prazo: t.prazo})),
+      rels,
+    };
+    try{
+      const c = await caches.open('lembretes-data');
+      await c.put('./__lembretes.json', new Response(JSON.stringify(snap), {headers:{'Content-Type':'application/json'}}));
+    }catch(e){}
+  }, 800);
+}
+async function askReminderCheck(){
+  if(!('serviceWorker' in navigator) || !('Notification' in window) || Notification.permission !== 'granted') return;
+  try{
+    const reg = await navigator.serviceWorker.ready;
+    if(reg.active) reg.active.postMessage('check-reminders');
+  }catch(e){}
+}
+async function registerPeriodicReminders(){
+  try{
+    const reg = await navigator.serviceWorker.ready;
+    if(reg.periodicSync) await reg.periodicSync.register('lembretes', {minInterval: 6 * 60 * 60 * 1000});
+  }catch(e){ /* só existe no Chrome do Android com o app instalado */ }
+}
+// confere de novo a cada 5 minutos com o app aberto (pega o aviso de 2h antes da prova)
+setInterval(() => { if(document.visibilityState === 'visible'){ saveReminderSnapshot(); setTimeout(askReminderCheck, 1500); } }, 5 * 60 * 1000);
+
 // ---------------- notificações push (com o app fechado) ----------------
+// Desligado até o Supabase ser configurado (supabase/push.sql e a função "lembretes").
+const PUSH_SERVER_READY = false;
 const VAPID_PUBLIC_KEY = 'BMJzStLBz7lkjxz9UmEP7OwHjqwjnxVVkrLIGZYPq2OhbEaQI1R0VcRj_dD46nOnbLEwu027mJr3ItfBo__pHMk';
 const pushSupported = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && /^https?:$/.test(location.protocol);
 const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
@@ -6054,6 +6101,7 @@ async function disablePush(){
   _pushSub = null;
 }
 async function renderNotifPanel(){
+  if(!PUSH_SERVER_READY) return renderLocalNotifPanel();
   const p = document.getElementById('notifPanel');
   if(!p) return;
   const quando = `<ul class="notif-list">
@@ -6103,6 +6151,50 @@ async function renderNotifPanel(){
     try{ await enablePush(); showToast('Notificações ativadas', 'success'); }
     catch(err){ showToast(err.message, 'error', 6000); }
     renderNotifPanel();
+  };
+}
+function renderLocalNotifPanel(){
+  const p = document.getElementById('notifPanel');
+  if(!p) return;
+  const quando = `<ul class="notif-list">
+      <li><b>No dia</b><span>provas, tarefas que vencem, entregas do laboratório e o que estiver atrasado</span></li>
+      <li><b>Na véspera</b><span>a partir das 17h, o que vem amanhã</span></li>
+      <li><b>2h antes</b><span>de cada prova, com horário e sala</span></li>
+    </ul>
+    <p class="notif-note">Os avisos aparecem quando você abre o app e enquanto ele estiver aberto. No Android, com o app instalado, o celular também confere sozinho de tempos em tempos. Cada aviso aparece uma vez só, e dias sem nada não geram notificação.</p>`;
+  const row = (dot, t, s, btns) => `<div class="sync-row"><span class="sync-dot ${dot}"></span><div class="sync-info"><div class="t">${t}</div><div class="s">${s}</div></div>${btns || ''}</div>`;
+  if(!('Notification' in window)){
+    p.innerHTML = row('is-local', 'Este navegador não mostra notificações', isIOS() ? 'No iPhone, instale o app na tela de início (Compartilhar, depois Adicionar à Tela de Início) e ative por lá.' : 'Tente pelo Chrome ou pelo app instalado.') + quando;
+    return;
+  }
+  if(Notification.permission === 'denied'){
+    p.innerHTML = row('is-error', 'Notificações bloqueadas', 'Libere as notificações deste site nas configurações do navegador e volte aqui.') + quando;
+    return;
+  }
+  if(Notification.permission === 'granted'){
+    p.innerHTML = row('', 'Ativas neste aparelho', 'Os lembretes de provas, tarefas e entregas aparecem aqui.', `<button class="btn btn-sm" id="notifTest">Mostrar exemplo</button>`) + quando;
+    document.getElementById('notifTest').onclick = async () => {
+      const opts = {body: 'É assim que os lembretes de provas e tarefas vão aparecer.', tag: 'exemplo', icon: 'icons/icon-192.png'};
+      try{
+        const reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration() : null;
+        if(reg) await reg.showNotification('Notificações funcionando', opts); else new Notification('Notificações funcionando', opts);
+      }catch(err){ showToast('Não foi possível mostrar a notificação neste navegador.', 'error', 5000); }
+    };
+    registerPeriodicReminders();
+    return;
+  }
+  p.innerHTML = row('is-local', 'Desativadas neste aparelho', 'Ative para receber lembretes de provas, tarefas e entregas.', `<button class="btn btn-sm btn-primary" id="notifOn">Ativar notificações</button>`) + quando;
+  document.getElementById('notifOn').onclick = async () => {
+    const perm = await Notification.requestPermission();
+    if(perm === 'granted'){
+      showToast('Notificações ativadas', 'success');
+      registerPeriodicReminders();
+      saveReminderSnapshot();
+      setTimeout(askReminderCheck, 1500);
+    } else {
+      showToast('Você não permitiu as notificações. Dá para liberar nas configurações do navegador.', 'error', 6000);
+    }
+    renderLocalNotifPanel();
   };
 }
 function goToNotifications(){
