@@ -1760,16 +1760,20 @@
     [data-del-disc], .status-btn, [data-cancel-edit-tarefa], [data-save-tarefa] {
       display:none !important;
     }
-    body { background:#fff !important; color:#111 !important; }
+    /* prints only the open tab, always in the light palette (the theme is switched on beforeprint) */
+    #lembretesList, #dashVerTodas, #syncLine, #toastContainer, .rail-icon-btn, .btn { display:none !important; }
+    html, body { background:#fff !important; color:#111 !important; }
     body::before { display:none !important; }
-    .panel, .stat { backdrop-filter:none !important; box-shadow:none !important; }
-    .screen { padding: 20px !important; }
-    .tab { display:block !important; page-break-before: always; }
-    .tab:first-of-type { page-break-before: avoid; }
-    #tab-painel { page-break-before: avoid; }
-    .panel { border:1px solid #ccc !important; background:#fafafa !important; }
-    .rail__brand h1, .rail__brand p { display: none; }
-    @page { margin: 15mm; }
+    #app, .main, .screen { display:block !important; padding:0 !important; margin:0 !important; max-width:none !important; }
+    .panel, .stat, .week-grid {
+      backdrop-filter:none !important; -webkit-backdrop-filter:none !important; box-shadow:none !important;
+      background:#fff !important; border:1px solid #d6d6dc !important; break-inside:avoid;
+    }
+    .panel::before, .stat::before, .rail::before { display:none !important; }
+    .section-label { break-after:avoid; }
+    .day-overview { color:#333 !important; }
+    .painel-top { margin-bottom:12px !important; }
+    @page { size:A4; margin:12mm; }
   }
 </style>
 </head>
@@ -4785,6 +4789,17 @@ document.getElementById('themeToggle').addEventListener('click', async () => {
 
 // Print / PDF
 document.getElementById('btnPrint').addEventListener('click', () => window.print());
+// Paper is white: print with the light palette, then restore the user's theme
+let _themeBeforePrint = null;
+window.addEventListener('beforeprint', () => {
+  _themeBeforePrint = document.documentElement.getAttribute('data-theme');
+  document.documentElement.setAttribute('data-theme', 'light');
+});
+window.addEventListener('afterprint', () => {
+  if(_themeBeforePrint === null) document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', _themeBeforePrint);
+  _themeBeforePrint = null;
+});
 
 // Keyboard shortcuts modal
 (function initShortcuts(){
