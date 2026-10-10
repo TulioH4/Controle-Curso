@@ -4310,7 +4310,7 @@ function renderAgendaSemanal(){
       ...e.aulasDia.map(a => ({t:a.inicio||'', html: evHtml('ev-aula', a.inicio && a.fim ? `${a.inicio}–${a.fim}` : '', a.disciplina, a.local||'')})),
       ...e.provasDia.map(p => ({t:p.hora||'', html: evHtml('ev-prova', p.hora||'', examLabel(p), p.local||'')})),
       ...e.relsDia.map(r => ({t:'98', html: evHtml('ev-lab', '', r.nome, 'Entrega do relatório')})),
-      ...e.tarefasDia.map(t => ({t:'99', html: evHtml('ev-tarefa', '', t.nome, ['Prazo', t.disciplina].filter(Boolean).join(', '))})),
+      ...e.tarefasDia.map(t => ({t:'99', html: evHtml('ev-tarefa', '', t.nome, [t.categoria, t.disciplina].filter(Boolean).join(', '))})),
     ].sort((a,b) => a.t.localeCompare(b.t));
     return items.map(i => i.html).join('') || '<div class="agenda-empty">—</div>';
   };
