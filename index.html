@@ -1831,7 +1831,6 @@
       </button>
       <div class="rail__toolbar">
         <button class="rail-icon-btn" id="btnInstall" title="Instalar app" aria-label="Instalar app" data-ico="download" hidden></button>
-        <button class="rail-icon-btn" id="btnPrint" title="Imprimir / PDF" aria-label="Imprimir" data-ico="print"></button>
         <button class="rail-icon-btn" id="btnNotifications" title="Notificações de prazo" aria-label="Notificações"></button>
         <button class="rail-icon-btn" id="btnShortcuts" title="Atalhos de teclado (?)" aria-label="Atalhos de teclado" data-ico="keyboard"></button>
         <button class="rail-icon-btn" id="themeToggle" title="Alternar tema" aria-label="Alternar tema">
@@ -4788,7 +4787,6 @@ document.getElementById('themeToggle').addEventListener('click', async () => {
 });
 
 // Print / PDF
-document.getElementById('btnPrint').addEventListener('click', () => window.print());
 // Paper is white: print with the light palette, then restore the user's theme
 let _themeBeforePrint = null;
 window.addEventListener('beforeprint', () => {
