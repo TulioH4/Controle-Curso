@@ -1610,6 +1610,8 @@
   .week-grid .slot{margin:0; border-radius:0; box-shadow:inset 3px 0 0 var(--blue);}
   .week-grid .head{text-transform:none; letter-spacing:0; font-size:12.5px; font-weight:600; color:var(--text-dim);}
   #turmasGrid > :nth-child(6n), #weekGrid > :nth-child(7n){border-right:none;}
+  .stat__sub{display:block; margin-top:3px; font-size:12.5px; font-weight:500; color:var(--text-faint);}
+
   /* notas: add button and goal on one aligned row, same height */
   .nota-foot{display:flex; align-items:center; gap:10px; margin-top:8px;}
   .nota-foot .nota-add-btn{flex:1; margin:0; height:30px; padding:0 10px; border-radius:8px;}
@@ -2997,13 +2999,24 @@ function renderPainel(){
     return precisa > 100;
   }).length;
 
+  // Próxima prova que ainda não começou (uma prova de hoje às 08:00 sai do card depois das 08:00)
+  const todayIsoStat = localISO(new Date());
+  const proxProva = upcomingProvas().find(p => p.data > todayIsoStat || !p.hora || p.hora > nowHM);
+  const proxProvaHoje = !!proxProva && proxProva.data === todayIsoStat;
+  const provaCard = proxProva ? (() => {
+    const sig = (String(proxProva.disciplina).match(/\(([^)]+)\)\s*$/) || [])[1] || proxProva.disciplina;
+    const quando = diasLabel(daysUntil(proxProva.data)) + (proxProva.hora ? ` às ${proxProva.hora}` : '');
+    return `${esc(proxProva.tipo)} de ${esc(sig)}<span class="stat__sub">${esc(quando)}</span>`;
+  })() : 'Nenhuma marcada';
+
   const streak = calcStudyStreak();
   const weekProg = calcWeeklyTaskProgress();
   document.getElementById('resumoStats').innerHTML = `
     ${statCard('Aulas hoje', aulasHoje.length, 'blue')}
     ${statCard('Próxima aula', proxAula, 'gray', true)}
-    ${statCard('Tarefas atrasadas', tarefasAtrasadas, tarefasAtrasadas>0?'red':'green')}
+    ${statCard('Próxima prova', provaCard, proxProvaHoje?'red':'blue', true)}
     ${statCard('Prazos em 7 dias', tarefas7d, tarefas7d>0?'amber':'green')}
+    ${tarefasAtrasadas > 0 ? statCard('Tarefas atrasadas', tarefasAtrasadas, 'red') : ''}
     ${disciplinasRisco > 0 ? statCard('Risco de falta', disciplinasRisco+' disc.', 'red', true) : ''}
     ${discReprovando > 0 ? statCard('Reprovando em notas', discReprovando+' disc.', 'red', true) : ''}
     ${streak > 0 ? statCard('Sequência de estudos', streak+'d', 'amber', true) : ''}
