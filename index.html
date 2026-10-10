@@ -1606,6 +1606,43 @@
     padding:12px 14px; margin-bottom:20px; border-radius:12px; background:var(--lg-fill-hover);
     font-size:13px; color:var(--text-dim);
   }
+  /* wizard: grade by tapping (catalog) */
+  .wiz-choice{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:8px; margin-bottom:22px;}
+  .wiz-choice-btn{
+    display:flex; flex-direction:column; align-items:flex-start; gap:3px; padding:12px 14px; text-align:left;
+    border-radius:12px; border:1px solid var(--line); background:var(--panel-2); color:var(--text);
+    font:inherit; font-size:13px; cursor:pointer; transition:border-color .15s, box-shadow .15s;
+  }
+  .wiz-choice-btn span{font-size:12px; color:var(--text-dim);}
+  .wiz-choice-btn.active{border-color:var(--blue); box-shadow:inset 0 0 0 1px var(--blue);}
+  .wiz-sem-pick{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:22px;}
+  .wiz-sem-pick button{
+    min-width:46px; height:42px; padding:0 10px; border-radius:10px; border:1px solid var(--line);
+    background:var(--panel-2); color:var(--text); font:inherit; font-size:13px; cursor:pointer;
+  }
+  .wiz-sem-pick button.active{background:var(--blue); border-color:var(--blue); color:#fff;}
+  .wiz-sem-block{margin-bottom:16px;}
+  .wiz-sem-head{display:flex; justify-content:space-between; gap:8px; font-size:12px; color:var(--text-dim); margin:0 2px 6px;}
+  .wiz-disc-list{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:6px;}
+  .wiz-disc{
+    display:flex; align-items:center; gap:10px; min-height:44px; padding:8px 12px; text-align:left;
+    border-radius:10px; border:1px solid var(--line); background:var(--panel-2); color:var(--text);
+    font:inherit; font-size:12.5px; cursor:pointer; transition:border-color .15s, opacity .15s;
+  }
+  .wiz-disc-sig{font-family:var(--mono); font-size:11px; color:var(--text-dim); min-width:36px; flex-shrink:0;}
+  .wiz-disc-nome{flex:1; min-width:0;}
+  .wiz-disc-st{font-size:11px; color:var(--text-faint); white-space:nowrap; flex-shrink:0;}
+  .wiz-disc.st-falta .wiz-disc-nome{color:var(--text-dim);}
+  .wiz-disc.st-feita{border-color:color-mix(in srgb, var(--green) 50%, transparent);}
+  .wiz-disc.st-feita .wiz-disc-st{color:var(--green);}
+  .wiz-disc.st-cursando{border-color:color-mix(in srgb, var(--blue) 60%, transparent);}
+  .wiz-disc.st-cursando .wiz-disc-st{color:var(--blue);}
+  .wiz-nota-row{display:flex; align-items:center; gap:10px; padding:6px 2px; border-bottom:1px solid var(--line-soft); font-size:12.5px;}
+  .wiz-nota-row input{
+    width:76px; flex-shrink:0; background:var(--panel-2); border:1px solid var(--line); border-radius:var(--r);
+    color:var(--text); padding:7px 9px; font-size:13px; text-align:right;
+  }
+  .wiz-nota-row input:focus{outline:none; border-color:var(--blue);}
 
   /* installed app: respect notches and the gesture bar */
   .rail-icon-btn[hidden]{display:none;}
@@ -2277,7 +2314,7 @@
     </div>
     <div class="wizard-body" id="wizardBody"></div>
     <div class="wizard-foot">
-      <button class="btn" id="wizardBack">← Anterior</button>
+      <button class="btn" id="wizardBack">Anterior</button>
       <button class="btn btn-primary" id="wizardNext">Próximo</button>
     </div>
   </div>
@@ -5625,6 +5662,25 @@ async function selectProfile(profileId){
 // WIZARD DE SETUP (5 passos)
 // ============================================================
 
+// Matrizes curriculares públicas (só sigla e nome, sem notas). Com elas o
+// assistente monta a grade com toques, sem planilha nem copiar e colar.
+const CURRICULOS = [
+  {id:'inatel-producao', curso:'Engenharia de Produção', instituicao:'INATEL', semestres:[
+    [["AT01","Atividade Complementar I"],["C02","Algoritmos e Estrutura de Dados I"],["E01","Circuitos Elétricos em Corrente Contínua"],["H01","Administração"],["M01","Matemática Aplicada à Engenharia"],["M02","Álgebra e Geometria Analítica"],["P01","Introdução à Engenharia"],["Q01","Química e Ciências dos Materiais"]],
+    [["AT02","Atividade Complementar II"],["C03","Algoritmos e Estrutura de Dados II"],["E10","Desenho"],["F01","Física Newtoniana Clássica"],["G04","Fundamentos de Gestão de Projetos"],["H02","Economia"],["M03","Cálculo Aplicado à Engenharia I"],["P02","Empreendedorismo e Inovação"]],
+    [["AT03","Atividade Complementar III"],["E04","Eletrônica Analógica para Projetos de Fontes de Alimentação"],["F02","Física Ondulatória, Óptica e Termodinâmica"],["F05","Mecânica dos Sólidos e Resistências dos Materiais"],["M04","Cálculo Aplicado à Engenharia II"],["P03","Engenharia Econômica"],["P04","Gestão da Segurança da Informação"],["P05","Comunicação Empresarial"]],
+    [["AT04","Atividade Complementar IV"],["E07","Eletrônica Digital Básica"],["F03","Física Aplicada na Eletricidade e Eletromagnetismo"],["M05","Cálculo Aplicado à Séries e Equações Diferenciais"],["P06","Engenharia da Qualidade"],["P07","Métodos de Gestão de Projetos"],["P08","Engenharia de Processos"]],
+    [["AT05","Atividade Complementar V"],["C06","Programação Orientada a Objetos com Java"],["M11","Probabilidade e Processos Estocásticos"],["P09","Sistemas de Produção"],["P10","Administração Financeira"],["P11","Desenvolvimento Organizacional"],["P12","Mercado Financeiro e de Capitais"],["P13","Contabilidade de Custos Empresariais"]],
+    [["AT06","Atividade Complementar VI"],["CP01","Comportamento Profissional I"],["C11","Ciência de Dados com Python"],["FT01","Feira Tecnológica do Inatel I"],["H03","Humanidades, Ciências Sociais e Cidadania"],["M06","Cálculo Numérico e Estatística"],["P30","Disciplina Eletiva I"],["TR01","Trilha I"],["T02","Redes de Dados I"]],
+    [["AT07","Atividade Complementar VII"],["C23","Inteligência Artificial"],["M09","Otimização"],["P14","Planejamento e Controle da Produção"],["P15","Administração de Marketing"],["P24","Normatização Ambiental"],["P25","Engenharia da Qualidade II"],["P26","Finanças Estratégicas"],["P31","Disciplina Eletiva II"]],
+    [["AT08","Atividade Complementar VIII"],["A16","Instalações Elétricas"],["P16","Logística Empresarial"],["P17","Simulação Industrial"],["P18","Indústria 4.0"],["P19","Sistemas de Informação"],["P20","Design Estratégico"]],
+    [["AT09","Atividade Complementar IX"],["EST1","Estágio Supervisionado"],["H04","Ciências do Ambiente"],["P21","Engenharia de Vendas Complexas"],["P22","Engenharia de Produtos Digitais"]],
+    [["AT10","Atividade Complementar X"],["A18","Manutenção Industrial, Normalização e Certificações"],["P23","Gestão do Conhecimento e Inovação"],["TCC","Trabalho de Conclusão de Curso I"]]
+  ]},
+];
+const WIZ_STATUS = {falta:'A fazer', feita:'Concluída', cursando:'Cursando'};
+const WIZ_NEXT_STATUS = {falta:'feita', feita:'cursando', cursando:'falta'};
+
 let WIZARD_DATA = {};
 let WIZARD_STEP = 1;
 const WIZARD_TOTAL = 5;
@@ -5637,7 +5693,8 @@ function showWizard(profileId){
   WIZARD_DATA = {
     nome:'', curso:'', instituicao:'INATEL', semestre:'', notaMinima:60,
     grade:[], disciplinasAtuais:[], aulas:[], importMode:'file',
-    importHeaders:[], importRows:[], importMapping:{}
+    importHeaders:[], importRows:[], importMapping:{},
+    catalogo:null, status:{}, notas:{}, semAtual:null
   };
   const overlay = document.getElementById('wizardOverlay');
   overlay.style.display = 'flex';
@@ -5813,6 +5870,7 @@ function wizardRender(){
   // Renderiza passo
   const body = document.getElementById('wizardBody');
   [,wizardStep1,wizardStep2,wizardStep3,wizardStep4,wizardStep5][WIZARD_STEP](body);
+  body.scrollTop = 0;
 }
 
 function wizardStep1(body){
@@ -5835,12 +5893,99 @@ function wizardStep1(body){
     <div class="wiz-field"><label>Semestre atual</label><input id="wSem" value="${esc(WIZARD_DATA.semestre)}" placeholder="Ex: 2º semestre de 2026"></div>`;
 }
 
+function wizNorm(s){ return String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim(); }
+function wizCatalogo(){ return CURRICULOS.find(c => c.id === WIZARD_DATA.catalogo) || null; }
+
 function wizardStep2(body){
   document.getElementById('wizardTitle').textContent = 'Passo 2 de 5: grade curricular';
-  const mode = WIZARD_DATA.importMode || 'file';
+  // Pré-seleciona a grade quando o curso digitado no passo 1 bate com um catálogo
+  if(WIZARD_DATA.catalogo === null){
+    const match = CURRICULOS.find(c => wizNorm(WIZARD_DATA.curso) && wizNorm(c.curso).includes(wizNorm(WIZARD_DATA.curso)));
+    if(match) WIZARD_DATA.catalogo = match.id;
+  }
   body.innerHTML = `
-    <p class="wizard-step-title">Importe as disciplinas do seu curso</p>
-    <p class="wizard-step-desc">Você pode importar um arquivo Excel/CSV, colar o conteúdo copiado do Excel, ou digitar manualmente. As colunas mínimas necessárias são: <b>Sigla</b> e <b>Disciplina</b>.</p>
+    <p class="wizard-step-title">Qual é o seu curso?</p>
+    <div class="wiz-choice">
+      ${CURRICULOS.map(c => `<button type="button" class="wiz-choice-btn${WIZARD_DATA.catalogo===c.id?' active':''}" data-cat="${c.id}"><b>${esc(c.curso)}</b><span>${esc(c.instituicao)}</span></button>`).join('')}
+      <button type="button" class="wiz-choice-btn${WIZARD_DATA.catalogo==='outro'?' active':''}" data-cat="outro"><b>Outro curso</b><span>Importar ou digitar a grade</span></button>
+    </div>
+    <div id="wizGradeArea"></div>`;
+  body.querySelectorAll('[data-cat]').forEach(btn => btn.addEventListener('click', () => {
+    if(WIZARD_DATA.catalogo === btn.dataset.cat) return;
+    WIZARD_DATA.catalogo = btn.dataset.cat;
+    WIZARD_DATA.grade = []; WIZARD_DATA.disciplinasAtuais = [];
+    WIZARD_DATA.status = {}; WIZARD_DATA.notas = {}; WIZARD_DATA.semAtual = null;
+    body.querySelectorAll('[data-cat]').forEach(b => b.classList.toggle('active', b === btn));
+    renderGradeArea();
+  }));
+  renderGradeArea();
+}
+
+function renderGradeArea(){
+  const area = document.getElementById('wizGradeArea');
+  if(!area) return;
+  if(WIZARD_DATA.catalogo === 'outro') return renderOutroCurso(area);
+  const cat = wizCatalogo();
+  if(!cat){ area.innerHTML = ''; return; }
+  const st = s => WIZARD_DATA.status[s] || 'falta';
+  area.innerHTML = `
+    <p class="wizard-step-title">Em que semestre você está?</p>
+    <p class="wizard-step-desc">Os semestres anteriores ficam marcados como concluídos e o atual como cursando.</p>
+    <div class="wiz-sem-pick">
+      ${cat.semestres.map((_,i) => `<button type="button" class="${WIZARD_DATA.semAtual===i+1?'active':''}" data-sem="${i+1}">${i+1}º</button>`).join('')}
+    </div>
+    ${WIZARD_DATA.semAtual ? `
+      <p class="wizard-step-desc">Ficou alguma pendência ou adiantou alguma disciplina? Toque nela para trocar entre concluída, cursando e a fazer.</p>
+      ${cat.semestres.map((sem,i) => `
+        <div class="wiz-sem-block">
+          <div class="wiz-sem-head"><span>${i+1}º semestre</span><span data-sem-count="${i}">${sem.filter(([s]) => st(s)==='feita').length}/${sem.length} concluídas</span></div>
+          <div class="wiz-disc-list">
+            ${sem.map(([s,nome]) => `<button type="button" class="wiz-disc st-${st(s)}" data-sigla="${esc(s)}" data-semi="${i}">
+              <span class="wiz-disc-sig">${esc(s)}</span><span class="wiz-disc-nome">${esc(nome)}</span><span class="wiz-disc-st">${WIZ_STATUS[st(s)]}</span>
+            </button>`).join('')}
+          </div>
+        </div>`).join('')}` : ''}`;
+  area.querySelectorAll('[data-sem]').forEach(btn => btn.addEventListener('click', () => {
+    const n = Number(btn.dataset.sem);
+    WIZARD_DATA.semAtual = n;
+    cat.semestres.forEach((sem,i) => sem.forEach(([s]) => {
+      WIZARD_DATA.status[s] = i+1 < n ? 'feita' : i+1 === n ? 'cursando' : 'falta';
+    }));
+    renderGradeArea();
+  }));
+  area.querySelectorAll('[data-sigla]').forEach(btn => btn.addEventListener('click', () => {
+    const s = btn.dataset.sigla;
+    const next = WIZ_NEXT_STATUS[st(s)];
+    WIZARD_DATA.status[s] = next;
+    btn.className = `wiz-disc st-${next}`;
+    btn.querySelector('.wiz-disc-st').textContent = WIZ_STATUS[next];
+    const i = Number(btn.dataset.semi);
+    area.querySelector(`[data-sem-count="${i}"]`).textContent =
+      `${cat.semestres[i].filter(([x]) => st(x)==='feita').length}/${cat.semestres[i].length} concluídas`;
+  }));
+}
+
+// Converte o catálogo marcado no formato do histórico (na ordem curricular,
+// que é o que o Mapa de Sucesso usa para separar os semestres).
+function wizBuildCatalogGrade(){
+  const cat = wizCatalogo();
+  if(!cat) return;
+  const atuais = [];
+  WIZARD_DATA.grade = cat.semestres.flat().map(([sigla, disciplina]) => {
+    const st = WIZARD_DATA.status[sigla] || 'falta';
+    if(st === 'cursando') atuais.push(sigla);
+    const nota = st === 'feita' ? (WIZARD_DATA.notas[sigla] ?? null) : null;
+    const item = {sigla, disciplina, ch:null, nota, semestre:null};
+    if(st === 'feita') item.aprovado = true;
+    return item;
+  });
+  WIZARD_DATA.disciplinasAtuais = atuais;
+}
+
+function renderOutroCurso(area){
+  const mode = WIZARD_DATA.importMode || 'file';
+  area.innerHTML = `
+    <p class="wizard-step-desc">Importe um arquivo Excel/CSV, cole o conteúdo copiado do Excel ou digite as disciplinas. As colunas mínimas necessárias são: <b>Sigla</b> e <b>Disciplina</b>.</p>
     <div class="wiz-import-tabs">
       <button class="wiz-import-tab${mode==='file'?' active':''}" data-mode="file">Excel / CSV</button>
       <button class="wiz-import-tab${mode==='paste'?' active':''}" data-mode="paste">Colar texto</button>
@@ -5848,10 +5993,10 @@ function wizardStep2(body){
     </div>
     <div id="wizImportArea"></div>`;
 
-  body.querySelectorAll('.wiz-import-tab').forEach(tab => {
+  area.querySelectorAll('.wiz-import-tab').forEach(tab => {
     tab.addEventListener('click', () => {
       WIZARD_DATA.importMode = tab.dataset.mode;
-      body.querySelectorAll('.wiz-import-tab').forEach(t => t.classList.toggle('active', t===tab));
+      area.querySelectorAll('.wiz-import-tab').forEach(t => t.classList.toggle('active', t===tab));
       renderImportArea(document.getElementById('wizImportArea'), tab.dataset.mode);
     });
   });
@@ -6065,6 +6210,7 @@ function renderGradePreview(container){
 }
 
 function wizardStep3(body){
+  if(wizCatalogo()) return wizardStep3Notas(body);
   document.getElementById('wizardTitle').textContent = 'Passo 3 de 5: semestre atual';
   const grade = WIZARD_DATA.grade;
   // Apenas disciplinas sem nota — já cursadas não fazem sentido marcar como "cursando agora"
@@ -6082,6 +6228,27 @@ function wizardStep3(body){
             </label>`).join('')}
          </div>`
     }`;
+}
+
+// Com a grade do catálogo, o passo 3 vira notas opcionais das disciplinas concluídas
+function wizardStep3Notas(body){
+  document.getElementById('wizardTitle').textContent = 'Passo 3 de 5: notas';
+  const cat = wizCatalogo();
+  const blocos = cat.semestres.map((sem,i) => ({n:i+1, itens: sem.filter(([s]) =>
+    WIZARD_DATA.status[s] === 'feita' && !/^AT\d+/.test(s))})).filter(b => b.itens.length);
+  body.innerHTML = `
+    <p class="wizard-step-title">Quer adicionar suas notas?</p>
+    <p class="wizard-step-desc">É opcional. As notas servem para calcular o IRA e os gráficos de desempenho. O que ficar em branco conta como aprovado e pode ser preenchido depois na aba Histórico.</p>
+    ${blocos.length === 0
+      ? `<div style="padding:20px; text-align:center; color:var(--text-faint);">Nenhuma disciplina concluída ainda. Pode seguir para o próximo passo.</div>`
+      : blocos.map(b => `
+        <div class="wiz-sem-block">
+          <div class="wiz-sem-head"><span>${b.n}º semestre</span></div>
+          ${b.itens.map(([s,nome]) => `<label class="wiz-nota-row">
+            <span class="wiz-disc-sig">${esc(s)}</span><span class="wiz-disc-nome">${esc(nome)}</span>
+            <input type="text" inputmode="decimal" autocomplete="off" maxlength="5" placeholder="Nota" data-nota="${esc(s)}" value="${WIZARD_DATA.notas[s] ?? ''}">
+          </label>`).join('')}
+        </div>`).join('')}`;
 }
 
 function wizardStep4(body){
@@ -6166,6 +6333,20 @@ function wizardCollectStep(){
     WIZARD_DATA.semestre = (document.getElementById('wSem')?.value||'').trim();
     WIZARD_DATA.notaMinima = Number(document.getElementById('wNotaMin')?.value||60);
     if(!WIZARD_DATA.nome){ alert('Por favor, insira seu nome.'); return false; }
+  }
+  if(WIZARD_STEP === 2 && wizCatalogo()){
+    if(!WIZARD_DATA.semAtual){ alert('Escolha em que semestre você está.'); return false; }
+    wizBuildCatalogGrade();
+    return true;
+  }
+  if(WIZARD_STEP === 3 && wizCatalogo()){
+    document.querySelectorAll('#wizardBody [data-nota]').forEach(inp => {
+      const v = inp.value.trim().replace(',', '.');
+      if(v === '' || isNaN(Number(v))) delete WIZARD_DATA.notas[inp.dataset.nota];
+      else WIZARD_DATA.notas[inp.dataset.nota] = Math.max(0, Math.min(100, Number(v)));
+    });
+    wizBuildCatalogGrade();
+    return true;
   }
   if(WIZARD_STEP === 2){
     // Validação: permitir continuar sem grade (grade vazia = começa do zero)
