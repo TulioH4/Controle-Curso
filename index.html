@@ -8149,8 +8149,25 @@ if(window.Sync) Sync.onChange(renderSyncUI); else renderSyncUI({status:'local', 
 // ============================================================
 if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(err => console.warn('Service worker não registrado:', err));
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      // o app instalado costuma só voltar do segundo plano, sem recarregar:
+      // procura versão nova sempre que ele volta a aparecer
+      document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') reg.update().catch(() => {}); });
+    }).catch(err => console.warn('Service worker não registrado:', err));
   });
+  // versão nova assumiu: recarrega, mas não no meio de algo que a pessoa está digitando
+  const hadController = !!navigator.serviceWorker.controller;
+  let _swReloading = false;
+  const reloadForUpdate = () => {
+    if(_swReloading) return;
+    const a = document.activeElement;
+    const busy = (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) || document.querySelector('.modal-overlay.open')
+      || (document.getElementById('quickAddOverlay') || {}).style?.display === 'flex';
+    if(busy){ document.addEventListener('visibilitychange', reloadForUpdate, {once:true}); return; }
+    _swReloading = true;
+    location.reload();
+  };
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if(hadController) reloadForUpdate(); });
 }
 
 (function initInstall(){

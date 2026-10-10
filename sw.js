@@ -146,7 +146,9 @@ self.addEventListener('fetch', event => {
 
   if (req.mode === 'navigate') {
     event.respondWith(
-      fetch(req)
+      // no-cache: always revalidate with the server, so a new version shows up right after a deploy
+      // (a navigate-mode Request cannot take options, so fetch by URL)
+      fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' })
         .then(res => { const copy = res.clone(); caches.open(CACHE).then(c => c.put('./index.html', copy)); return res; })
         .catch(() => caches.match('./index.html'))
     );
