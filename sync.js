@@ -209,6 +209,53 @@
     setStatus('local', { lastSync: null, error: null });
   }
 
+  // ---- push notifications ------------------------------------------------------
+  const PUSH_ERRORS = [
+    [/relation .*push_subscriptions.* does not exist|could not find the table/i, 'O Supabase ainda não foi preparado para notificações (falta rodar supabase/push.sql).'],
+    [/failed to fetch|network/i, 'Sem conexão com o servidor. Verifique a internet.'],
+  ];
+  const pushFriendly = e => {
+    const msg = (e && e.message) || String(e);
+    const hit = PUSH_ERRORS.find(([re]) => re.test(msg));
+    return new Error(hit ? hit[1] : msg);
+  };
+  async function currentPushSub(){
+    if (!('serviceWorker' in navigator)) return null;
+    const reg = await navigator.serviceWorker.getRegistration();
+    return reg && reg.pushManager ? reg.pushManager.getSubscription() : null;
+  }
+  async function savePush(sub, tz){
+    if (!client || !state.user) throw new Error('Entre na sua conta para ativar as notificações.');
+    const j = sub.toJSON();
+    const { error } = await client.from('push_subscriptions').upsert(
+      { endpoint: j.endpoint, user_id: state.user.id, p256dh: j.keys.p256dh, auth: j.keys.auth, tz },
+      { onConflict: 'endpoint' });
+    if (error) throw pushFriendly(error);
+  }
+  async function deletePush(endpoint){
+    if (!client || !state.user) return;
+    await client.from('push_subscriptions').delete().eq('endpoint', endpoint);
+  }
+  async function testPush(){
+    if (!client || !state.user) throw new Error('Entre na sua conta para testar.');
+    const { data, error } = await client.functions.invoke('lembretes', { body: { test: true } });
+    if (error) {
+      const status = error.context && error.context.status;
+      if (status === 404) throw new Error('A função de lembretes ainda não foi publicada no Supabase.');
+      throw pushFriendly(error);
+    }
+    return data;
+  }
+  // leaving the account also stops this device from getting that account's reminders
+  const _signOut = signOut;
+  async function signOutAndUnsubscribe(){
+    try {
+      const sub = await currentPushSub();
+      if (sub) { await deletePush(sub.endpoint); await sub.unsubscribe(); }
+    } catch (e) {}
+    return _signOut();
+  }
+
   window.Sync = {
     enabled,
     get state(){ return Object.assign({}, state); },
@@ -216,6 +263,7 @@
     onChange(fn){ listeners.add(fn); fn(Object.assign({}, state)); return () => listeners.delete(fn); },
     hasSyncedBefore: () => Object.keys(meta).length > 0,
     hasPending: hasDirty,
-    restoreSession, signIn, signUp, signOut, pull, push, startBackground,
+    restoreSession, signIn, signUp, signOut: signOutAndUnsubscribe, pull, push, startBackground,
+    currentPushSub, savePush, deletePush, testPush,
   };
 })();

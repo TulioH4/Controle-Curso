@@ -5,6 +5,9 @@ Gestao_Curso.xlsx
 backup-centro-de-controle*.json
 index.backup-*.html
 
+# Push notification private key (goes only into Supabase secrets)
+*.local.env
+
 # Local notes (out of date)
 README.local.md
 

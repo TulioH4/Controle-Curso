@@ -29,6 +29,34 @@ self.addEventListener('activate', event => {
   );
 });
 
+// Push reminders sent by the "lembretes" Edge Function
+self.addEventListener('push', event => {
+  let d = {};
+  try { d = event.data ? event.data.json() : {}; } catch (e) { d = { body: event.data ? event.data.text() : '' }; }
+  event.waitUntil(self.registration.showNotification(d.title || 'Centro de Controle', {
+    body: d.body || '',
+    tag: d.tag || undefined,
+    icon: './icons/icon-192.png',
+    data: { url: d.url || './' },
+  }));
+});
+
+// Tapping a notification opens the app (or focuses it) on the right screen
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const url = new URL((event.notification.data && event.notification.data.url) || './', self.registration.scope).href;
+  event.waitUntil((async () => {
+    const wins = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    const win = wins.find(w => w.url.startsWith(self.registration.scope));
+    if (win) {
+      await win.focus();
+      if ('navigate' in win) { try { await win.navigate(url); } catch (e) {} }
+      return;
+    }
+    await self.clients.openWindow(url);
+  })());
+});
+
 self.addEventListener('fetch', event => {
   const req = event.request;
   if (req.method !== 'GET') return;

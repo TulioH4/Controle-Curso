@@ -1615,6 +1615,10 @@
   .day-overview{margin:18px 0 0; max-width:68ch; font-size:16px; line-height:1.55; color:var(--text-dim); text-wrap:pretty;}
   .day-overview b{color:var(--text); font-weight:600;}
   .day-overview__hi{color:var(--text); font-weight:600;}
+  .notif-list{list-style:none; margin:14px 0 0; padding:0; display:flex; flex-direction:column; gap:8px;}
+  .notif-list li{display:flex; gap:12px; font-size:13px; line-height:1.45; color:var(--text-dim);}
+  .notif-list b{flex:0 0 64px; color:var(--text); font-weight:600;}
+  .notif-note{margin:10px 0 0; font-size:12px; color:var(--text-faint);}
   .stat__sub{display:block; margin-top:3px; font-size:12.5px; font-weight:500; color:var(--text-faint);}
 
   /* ---------- Estudos (recurso em teste) ---------- */
@@ -2525,6 +2529,8 @@
       </div>
       <div class="section-label">Conta e sincronização</div>
       <div class="panel panel--pad" id="syncPanel"></div>
+      <div class="section-label">Notificações</div>
+      <div class="panel panel--pad" id="notifPanel"></div>
       <div id="profilesSection">
       <div class="section-label">Perfis de usuário</div>
       <div class="panel panel--pad" style="--accent:var(--amber)">
@@ -2917,7 +2923,8 @@ async function init(opts = {}){
     const key = 'notif_last_' + (ACTIVE_PROFILE_ID || 'default');
     const today = localISO(new Date());
     if(lsGet(key, null) === today) return;
-    if('Notification' in window && Notification.permission === 'granted'){
+    // com o push ativo, os lembretes vêm do servidor; isto cobre quem não ativou
+    if('Notification' in window && Notification.permission === 'granted' && !_pushSub){
       scheduleDeadlineNotifications();
       lsSet(key, today);
     }
@@ -3091,7 +3098,7 @@ function openMoreSheet(){
   const act = {
     timer: () => { closeMoreSheet(); document.getElementById('pomodoroBtn').click(); },
     tema: () => { document.getElementById('themeToggle').click(); openMoreSheet(); },
-    notif: () => { closeMoreSheet(); document.getElementById('btnNotifications').click(); },
+    notif: () => { closeMoreSheet(); goToNotifications(); },
     install: () => { closeMoreSheet(); install.click(); },
   };
   sheet.querySelectorAll('[data-more-act]').forEach(b => b.onclick = act[b.dataset.moreAct]);
@@ -5995,57 +6002,120 @@ function scheduleDeadlineNotifications(){
   const today = localISO(new Date());
   const tomorrow = localISO(new Date(Date.now() + 86400000));
 
+  // Android só mostra notificação pelo service worker; new Notification() fica para o computador
+  const show = async (title, opts) => {
+    try{
+      const reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration() : null;
+      if(reg) return reg.showNotification(title, Object.assign({icon:'icons/icon-192.png'}, opts));
+      new Notification(title, opts);
+    }catch(err){}
+  };
   STATE.provas.filter(p => p.data === today || p.data === tomorrow).forEach(p => {
     const when = p.data === today ? 'hoje' : 'amanhã';
-    try {
-      new Notification(`${examLabel(p)} ${when}`, {
-        body: [p.hora ? 'às ' + p.hora : '', p.local || ''].filter(Boolean).join(', ') || 'Horário não informado',
-        tag: 'prova-' + p.data + '-' + p.disciplina
-      });
-    } catch(err){}
+    show(`${examLabel(p)} ${when}`, {
+      body: [p.hora ? 'às ' + p.hora : '', p.local || ''].filter(Boolean).join(', ') || 'Horário não informado',
+      tag: 'prova-' + p.data + '-' + p.disciplina
+    });
   });
-
   STATE.tarefas.filter(t => t.status !== 'Concluído' && (t.prazo === today || t.prazo === tomorrow)).forEach(t => {
     const when = t.prazo === today ? 'hoje' : 'amanhã';
-    try {
-      new Notification(`Prazo ${when}: ${t.nome}`, {
-        body: (t.categoria || '') + (t.disciplina ? ', ' + t.disciplina : ''),
-        tag: 'tarefa-' + t.prazo + '-' + t.id
-      });
-    } catch(err){}
+    show(`Vence ${when}: ${t.nome}`, {
+      body: (t.categoria || '') + (t.disciplina ? ', ' + t.disciplina : ''),
+      tag: 'tarefa-' + t.prazo + '-' + t.id
+    });
   });
+}
+
+// ---------------- notificações push (com o app fechado) ----------------
+const VAPID_PUBLIC_KEY = 'BMJzStLBz7lkjxz9UmEP7OwHjqwjnxVVkrLIGZYPq2OhbEaQI1R0VcRj_dD46nOnbLEwu027mJr3ItfBo__pHMk';
+const pushSupported = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && /^https?:$/.test(location.protocol);
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+function b64urlToBytes(s){
+  const pad = '='.repeat((4 - s.length % 4) % 4);
+  const raw = atob((s + pad).replace(/-/g, '+').replace(/_/g, '/'));
+  return Uint8Array.from(raw, c => c.charCodeAt(0));
+}
+let _pushSub = null;
+async function enablePush(){
+  if(Notification.permission !== 'granted'){
+    const perm = await Notification.requestPermission();
+    if(perm !== 'granted') throw new Error('Você não permitiu as notificações. Dá para liberar nas configurações do navegador.');
+  }
+  const reg = await navigator.serviceWorker.ready;
+  let sub = await reg.pushManager.getSubscription();
+  if(!sub) sub = await reg.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:b64urlToBytes(VAPID_PUBLIC_KEY)});
+  await Sync.savePush(sub, Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Sao_Paulo');
+  _pushSub = sub;
+}
+async function disablePush(){
+  const sub = _pushSub || await Sync.currentPushSub();
+  if(sub){ await Sync.deletePush(sub.endpoint); await sub.unsubscribe(); }
+  _pushSub = null;
+}
+async function renderNotifPanel(){
+  const p = document.getElementById('notifPanel');
+  if(!p) return;
+  const quando = `<ul class="notif-list">
+      <li><b>7h</b><span>o resumo do dia: provas, tarefas que vencem, entregas do laboratório e o que estiver atrasado</span></li>
+      <li><b>20h</b><span>o que vem amanhã, para dar tempo de se preparar</span></li>
+      <li><b>2h antes</b><span>de cada prova, com horário e sala</span></li>
+    </ul><p class="notif-note">Dias sem nada para lembrar não geram notificação.</p>`;
+  const row = (dot, t, s, btns) => `<div class="sync-row"><span class="sync-dot ${dot}"></span><div class="sync-info"><div class="t">${t}</div><div class="s">${s}</div></div>${btns || ''}</div>`;
+  if(!pushSupported()){
+    p.innerHTML = row('is-local', 'Este navegador não recebe notificações', isIOS()
+      ? 'No iPhone, instale o app na tela de início (Compartilhar, depois Adicionar à Tela de Início) e ative por lá.'
+      : 'Abra o app pelo site ou pelo app instalado para ativar.') + quando;
+    return;
+  }
+  if(isIOS() && !isStandalone()){
+    p.innerHTML = row('is-local', 'Instale o app para receber notificações', 'No iPhone, as notificações só funcionam com o app instalado: toque em Compartilhar, depois em Adicionar à Tela de Início, e abra por lá.') + quando;
+    return;
+  }
+  if(!(window.Sync && Sync.user)){
+    p.innerHTML = row('is-local', 'Entre na sua conta para receber lembretes', 'Os lembretes chegam mesmo com o app fechado, a partir dos dados da sua conta.') + quando;
+    return;
+  }
+  if(Notification.permission === 'denied'){
+    p.innerHTML = row('is-error', 'Notificações bloqueadas', 'Libere as notificações deste site nas configurações do navegador e volte aqui.') + quando;
+    return;
+  }
+  try{ _pushSub = await Sync.currentPushSub(); }catch(e){ _pushSub = null; }
+  if(_pushSub && Notification.permission === 'granted'){
+    p.innerHTML = row('', 'Ativas neste aparelho', 'Você recebe lembretes mesmo com o app fechado.',
+      `<button class="btn btn-sm" id="notifTest">Enviar teste</button><button class="btn btn-sm btn-ghost" id="notifOff">Desativar</button>`) + quando;
+    document.getElementById('notifTest').onclick = async e => {
+      const b = e.currentTarget; b.disabled = true;
+      try{ const r = await Sync.testPush(); showToast(r && r.sent ? 'Teste enviado. Deve chegar em alguns segundos.' : 'Nenhum aparelho recebeu o teste. Desative e ative de novo.', r && r.sent ? 'success' : 'error', 5000); }
+      catch(err){ showToast(err.message, 'error', 6000); }
+      finally{ b.disabled = false; }
+    };
+    document.getElementById('notifOff').onclick = async () => {
+      try{ await disablePush(); showToast('Notificações desativadas neste aparelho', 'info'); }catch(err){ showToast(err.message, 'error', 5000); }
+      renderNotifPanel();
+    };
+    return;
+  }
+  p.innerHTML = row('is-local', 'Desativadas neste aparelho', 'Ative para receber lembretes de provas, tarefas e entregas.',
+    `<button class="btn btn-sm btn-primary" id="notifOn">Ativar notificações</button>`) + quando;
+  document.getElementById('notifOn').onclick = async e => {
+    const b = e.currentTarget; b.disabled = true; b.textContent = 'Ativando…';
+    try{ await enablePush(); showToast('Notificações ativadas', 'success'); }
+    catch(err){ showToast(err.message, 'error', 6000); }
+    renderNotifPanel();
+  };
+}
+function goToNotifications(){
+  switchTab('config');
+  setTimeout(() => document.getElementById('notifPanel').scrollIntoView({behavior:'smooth', block:'center'}), 250);
 }
 
 (function initNotifications(){
   const btn = document.getElementById('btnNotifications');
-  if(!('Notification' in window)){ btn.style.display='none'; return; }
-
-  function updateBtnLabel(){
-    const p = Notification.permission;
-    btn.innerHTML = ico('bell');
-    btn.title = p === 'granted' ? 'Notificações ativas' : (p === 'denied' ? 'Notificações bloqueadas' : 'Ativar notificações de prazo');
-    btn.classList.toggle('is-on', p === 'granted');
-    btn.style.opacity = p === 'denied' ? '.5' : '1';
-    btn.disabled = p === 'denied';
-  }
-  updateBtnLabel();
-
-  btn.addEventListener('click', () => {
-    if(Notification.permission === 'granted'){
-      scheduleDeadlineNotifications();
-      showToast('Lembretes disparados!', 'success');
-      return;
-    }
-    Notification.requestPermission().then(perm => {
-      updateBtnLabel();
-      if(perm === 'granted'){
-        showToast('Notificações ativadas! Será lembrado de prazos do dia e do dia seguinte.', 'success', 4000);
-        scheduleDeadlineNotifications();
-      } else {
-        showToast('Permissão de notificação negada. Permita nas configurações do browser.', 'error', 4000);
-      }
-    });
-  });
+  btn.innerHTML = ico('bell');
+  btn.title = 'Notificações';
+  btn.addEventListener('click', goToNotifications);
+  if(window.Sync) Sync.onChange(() => renderNotifPanel()); else renderNotifPanel();
 })();
 
 // ---------------- render all ----------------
