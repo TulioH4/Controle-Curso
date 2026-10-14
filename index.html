@@ -14,7 +14,6 @@
 <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
 <script src="sync.js"></script>
 <script src="dados_curso.js"></script>
@@ -279,7 +278,7 @@
   }
 
   /* Tarefas */
-  .task-form{display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1fr auto; gap:10px; align-items:end; margin-bottom:18px;}
+  .task-form{display:grid; grid-template-columns:minmax(0,2fr) repeat(4, minmax(0,1fr)) auto; gap:10px; align-items:end; margin-bottom:18px;}
   .task-row{display:flex; align-items:center; gap:10px; padding:11px 4px; border-bottom:1px solid var(--line-soft);}
   .task-row:last-child{border-bottom:none;}
   .task-row .name{flex:1; min-width:0;}
@@ -440,7 +439,7 @@
   .exam-row .info .t{font-weight:600; font-size:13px;}
   .exam-row .info .s{font-size:11.5px; color:var(--text-faint); margin-top:1px;}
 
-  .exam-form{display:grid; grid-template-columns:1.2fr 1fr 1fr 1fr 1.2fr auto; gap:10px; align-items:end; margin-bottom:18px;}
+  .exam-form{display:grid; grid-template-columns:minmax(0,1.2fr) repeat(3, minmax(0,1fr)) minmax(0,1.2fr) auto; gap:10px; align-items:end; margin-bottom:18px;}
 
   /* Mobile */
   @media (max-width:880px){
@@ -467,8 +466,8 @@
     .screen__header{flex-direction:column; align-items:flex-start;}
     .stat-grid{grid-template-columns:repeat(2,1fr);}
     .charts-grid{grid-template-columns:1fr;}
-    .task-form{grid-template-columns:1fr 1fr;}
-    .exam-form{grid-template-columns:1fr 1fr;}
+    .task-form{grid-template-columns:repeat(2, minmax(0,1fr));}
+    .exam-form{grid-template-columns:repeat(2, minmax(0,1fr));}
     .grid-3{grid-template-columns:1fr;}
     .provas-grid{grid-template-columns:1fr;}
     .navday .num{font-size:10px;}
@@ -579,7 +578,7 @@
   .modal-head h3{margin:0; font-size:15px; font-weight:600;}
   .modal-body{flex:1; overflow-y:auto; padding:18px 20px;}
   .modal-foot{padding:14px 20px; border-top:1px solid rgba(255,255,255,.07); display:flex; gap:10px; justify-content:flex-end;}
-  .modal-row{display:grid; grid-template-columns:80px 70px 70px 1fr 100px auto; gap:8px; align-items:center; margin-bottom:8px;}
+  .modal-row{display:grid; grid-template-columns:96px 96px 96px 1fr 100px auto; gap:8px; align-items:center; margin-bottom:8px;}
   .modal-input{
     background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.10); border-radius:3px; color:var(--text);
     padding:6px 8px; font-size:12.5px; font-family:var(--mono); width:100%;
@@ -587,7 +586,7 @@
   }
   .modal-input:focus{outline:none; border-color:rgba(96,165,250,.5); box-shadow:0 0 8px -3px var(--blue);}
   .modal-head-row{
-    display:grid; grid-template-columns:80px 70px 70px 1fr 100px 32px; gap:8px;
+    display:grid; grid-template-columns:96px 96px 96px 1fr 100px 32px; gap:8px;
     padding-bottom:8px; border-bottom:1px solid var(--line-soft); margin-bottom:8px;
     font-family:var(--mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--text-faint);
   }
@@ -610,11 +609,11 @@
   .hist-add-form{display:grid; grid-template-columns:80px 1fr 70px 70px auto; gap:10px; align-items:end;}
 
   @media(max-width:880px){
-    .horas-form{grid-template-columns:1fr 1fr;}
+    .horas-form{grid-template-columns:repeat(2, minmax(0,1fr));}
     .horas-resumo{grid-template-columns:repeat(2,1fr);}
     .faltas-grid{grid-template-columns:repeat(2, minmax(0, 1fr));}
     .modal-row{grid-template-columns:1fr 1fr 1fr;}
-    .hist-add-form{grid-template-columns:1fr 1fr;}
+    .hist-add-form{grid-template-columns:repeat(2, minmax(0,1fr));}
     #btnNotifications{display:none;}
   }
   @media(max-width:560px){
@@ -1556,6 +1555,8 @@
   }
   .postit:hover .postit__del, .postit__del:focus-visible{opacity:1;}
   .postit__del:hover{background:var(--red-dim); color:var(--red);}
+  /* touch screens have no hover: keep the delete buttons visible */
+  @media (hover:none){ .postit__del, .pc-del-btn{opacity:.7;} }
   .postit--add{
     display:flex; align-items:center; justify-content:center; gap:6px;
     background:transparent; box-shadow:none; backdrop-filter:none; -webkit-backdrop-filter:none;
@@ -1858,6 +1859,21 @@
      top bar that fills in on scroll, tab bar with "Mais",
      floating add button, bottom sheets, list agenda
      ===================================================== */
+  /* empty state shown in place of a chart (the canvas stays, so the chart can come back) */
+  .chart-empty{height:100%; min-height:150px; display:flex; align-items:center; justify-content:center; text-align:center; padding:16px;}
+  .chart-empty[hidden]{display:none;}
+  /* tarefas: round check to finish a task in one tap */
+  .task-check{
+    width:22px; height:22px; flex-shrink:0; border-radius:50%; border:1.5px solid var(--text-faint); background:transparent;
+    display:flex; align-items:center; justify-content:center; padding:0; cursor:pointer; color:transparent;
+    transition:border-color .15s, background .15s, color .15s;
+  }
+  .task-check .i{width:14px; height:14px; stroke-width:2.4;}
+  .task-check:hover{border-color:var(--green); color:var(--green);}
+  .task-check.is-done{background:var(--green); border-color:var(--green); color:#fff;}
+  .qa-close, .ed-short, .hday{display:none;}
+  .navday:not(.out){cursor:pointer;}
+
   .mtabbar, .mfab, .msheet, .msheet-backdrop, .agenda-list{display:none;}
   @media (max-width:880px){
     html, body{overscroll-behavior-y:none;}
@@ -1983,11 +1999,12 @@
 
     /* painel */
     #painelSub{display:none;}
-    .painel-top{gap:0; margin-bottom:6px !important;}
+    /* stretch: otherwise the notes strip grows to fit every note and the last ones fall off screen */
+    .painel-top{gap:0; margin-bottom:6px !important; align-items:stretch;}
     .day-overview{margin-top:4px; font-size:15.5px;}
     .postits{
       flex-wrap:nowrap; justify-content:flex-start; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none;
-      max-width:none; margin:16px -16px 0; padding:8px 16px 14px; gap:10px;
+      max-width:none; min-width:0; margin:16px -16px 0; padding:8px 16px 14px; gap:10px;
     }
     .postits::-webkit-scrollbar{display:none;}
     .postit{flex:0 0 150px; scroll-snap-align:start;}
@@ -2019,12 +2036,14 @@
     .task-filters .stat__label{display:none;}
     .task-filters .search{width:150px !important;}
     .task-filters select, .task-filters .search{font-size:14px !important; padding:7px 10px !important; border-radius:999px !important;}
-    .task-row{display:grid !important; grid-template-columns:auto auto minmax(0,1fr) auto auto; column-gap:6px; row-gap:8px; align-items:center; padding:12px 2px !important;}
-    .task-row > .name{grid-column:1 / 4; grid-row:1; min-width:0;}
-    .task-row > [data-edit-tarefa]{grid-column:4; grid-row:1;}
-    .task-row > [data-del]{grid-column:5; grid-row:1;}
-    .task-row > .badge:first-child{grid-column:1; grid-row:2;}
-    .task-row > .status-btn{grid-column:2; grid-row:2;}
+    .task-row{display:grid !important; grid-template-columns:auto auto auto minmax(0,1fr) auto auto; column-gap:6px; row-gap:8px; align-items:center; padding:12px 2px !important;}
+    .task-row > .task-check{grid-column:1; grid-row:1; margin-right:4px;}
+    .task-row > .name{grid-column:2 / 5; grid-row:1; min-width:0;}
+    .task-row > [data-edit-tarefa]{grid-column:5; grid-row:1;}
+    .task-row > [data-del]{grid-column:6; grid-row:1;}
+    .task-row > .task-prio{grid-column:2; grid-row:2;}
+    .task-row > .status-btn{grid-column:3; grid-row:2;}
+    .task-check{width:26px; height:26px;}
     .task-row .name .t{font-size:14.5px;}
     .task-edit-panel > div[style*="grid-template-columns"]{grid-template-columns:1fr 1fr !important;}
 
@@ -2094,8 +2113,62 @@
     #turmasGrid > :nth-child(3n){border-right:none !important;}
     #turmasGrid > :nth-child(n+10){border-bottom:none !important;}
 
-    /* wide tables (histórico, horas) scroll sideways inside their panel instead of being cut off */
-    .panel:has(> table:not(.rel-table)), .panel:has(> div > table){overflow-x:auto; -webkit-overflow-scrolling:touch;}
+    /* other wide tables scroll sideways inside their panel instead of being cut off */
+    .panel:has(> table:not(.rel-table):not(.hist-table):not(.horas-table)), .panel:has(> div > table){overflow-x:auto; -webkit-overflow-scrolling:touch;}
+
+    /* histórico and horas complementares: each row becomes a card */
+    .hist-table thead, .horas-table thead{display:none;}
+    .hist-table, .hist-table tbody, .horas-table, .horas-table tbody{display:block; width:100%;}
+    .hist-table tr, .horas-table tr{display:grid; gap:6px 10px; align-items:center; padding:13px 0; border-bottom:1px solid var(--line-soft);}
+    .hist-table tr:last-child, .horas-table tr:last-child{border-bottom:none;}
+    .hist-table td, .horas-table td{display:block; min-width:0; padding:0 !important; border:none !important; background:none !important;}
+    .hist-table td[colspan], .horas-table td[colspan]{grid-column:1 / -1;}
+    .hist-table td[data-label]::before, .horas-table td[data-label]::before{content:attr(data-label); display:block; margin-bottom:3px; font-size:11px; color:var(--text-faint);}
+    .hist-table .cell-input, .horas-table .cell-input{width:100% !important;}
+    .hist-table tr{grid-template-columns:repeat(3, minmax(0,76px)) minmax(0,1fr) auto; grid-template-areas:"sig sig sig . sit" "disc disc disc disc disc" "nota ch sem . del";}
+    .hist-table td:nth-child(1){grid-area:sig; font-size:12px; color:var(--text-dim);}
+    .hist-table td:nth-child(2){grid-area:disc; font-size:14.5px; font-weight:600;}
+    .hist-table td:nth-child(3){grid-area:nota;}
+    .hist-table td:nth-child(4){grid-area:ch;}
+    .hist-table td:nth-child(5){grid-area:sem;}
+    .hist-table td:nth-child(6){grid-area:sit; justify-self:end; white-space:nowrap;}
+    .hist-table td:nth-child(7){grid-area:del; justify-self:end; align-self:end;}
+    .horas-table tr{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) auto; grid-template-areas:"sig sig st" "nome nome nome" "tot val del";}
+    .horas-table td:nth-child(1){grid-area:sig; font-size:12.5px;}
+    .horas-table td:nth-child(2){grid-area:nome; font-size:14.5px; font-weight:600;}
+    .horas-table td:nth-child(3){grid-area:tot;}
+    .horas-table td:nth-child(4){grid-area:val;}
+    .horas-table td:nth-child(5){grid-area:st; justify-self:end; white-space:nowrap;}
+    .horas-table td:nth-child(6){grid-area:del; justify-self:end; align-self:end;}
+    .horas-table td:nth-child(4) .cell-input{width:80px !important;}
+
+    /* horário: one day at a time instead of a grid wider than the screen */
+    #weekGrid{display:none !important;}
+    .hday{display:block;}
+    .hday__pick{display:flex; gap:3px; padding:4px; margin-bottom:12px; border-radius:16px; background:var(--lg-fill); box-shadow:var(--lg-inner);}
+    .hday__pick button{
+      flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 0 7px;
+      border:none; border-radius:12px; background:none; cursor:pointer; font:inherit; font-size:13px; font-weight:500; color:var(--text-dim);
+    }
+    .hday__pick button.is-today{color:var(--blue);}
+    .hday__pick button.active{background:var(--lg-fill-active); color:var(--text); font-weight:600; box-shadow:var(--lg-inner), 0 1px 4px rgba(0,0,0,.12);}
+    .hday__pick button.active.is-today{color:var(--blue);}
+    .hday__dot{width:4px; height:4px; border-radius:50%; background:currentColor; opacity:.5;}
+    .hday__dot.is-empty{opacity:0;}
+    .hday .row-item .time{width:92px;}
+
+    /* quick add: a close button instead of the Esc hint */
+    #quickAddPanel kbd{display:none;}
+    .qa-close{display:flex; align-items:center; justify-content:center; width:32px; height:32px; padding:0; border:none; border-radius:50%; background:var(--lg-fill-active); color:var(--text-dim); font-size:14px; cursor:pointer;}
+
+    /* calendário: the cells are narrow, so exams show only the subject code */
+    .ed-full{display:none;}
+    .ed-short{display:inline;}
+
+    /* the side rail does not exist on phones */
+    #railSettings{display:none;}
+    .section-label__note{display:none;}
+    .horas-form input, .hist-add-form input{min-width:0; width:100%;}
   }
 
   /* ---------- PRINT ---------- */
@@ -2281,8 +2354,11 @@
       </div>
       <div class="section-label">Grade de aulas</div>
       <div class="week-grid" id="weekGrid"></div>
-      <div class="section-label">Disciplinas assíncronas (sem horário fixo)</div>
-      <div class="chip-row" id="asyncChips"></div>
+      <div class="hday" id="horarioDia"></div>
+      <div id="asyncWrap">
+        <div class="section-label">Disciplinas assíncronas (sem horário fixo)</div>
+        <div class="chip-row" id="asyncChips"></div>
+      </div>
     </section>
 
     <!-- LABORATÓRIO -->
@@ -2350,7 +2426,7 @@
         </select>
       </div>
       <div class="panel panel--pad" style="--accent:var(--purple)">
-        <table>
+        <table class="hist-table">
           <thead id="histThead"><tr>
             <th data-sort-col="sigla" style="cursor:pointer;user-select:none;" title="Ordenar por sigla">Sigla <span class="sort-ic" data-sort-ic="sigla"></span></th>
             <th data-sort-col="disciplina" style="cursor:pointer;user-select:none;" title="Ordenar por nome">Disciplina <span class="sort-ic" data-sort-ic="disciplina"></span></th>
@@ -2420,7 +2496,7 @@
 
       <div class="section-label" style="justify-content:space-between;">
         Resumo de horas
-        <span style="font-size:10.5px; color:var(--text-faint); font-family:var(--mono); font-weight:400; text-transform:none; letter-spacing:0;">
+        <span class="section-label__note" style="font-size:10.5px; color:var(--text-faint); font-family:var(--mono); font-weight:400; text-transform:none; letter-spacing:0;">
           Valores do sistema acadêmico — edite diretamente nos campos
         </span>
       </div>
@@ -2441,7 +2517,7 @@
           <div class="field"><label>Horas validadas</label><input id="hcValidadas" type="number" placeholder="0" min="0"></div>
           <button class="btn btn-primary" id="btnAddHora">+ Adicionar</button>
         </div>
-        <table>
+        <table class="horas-table">
           <thead>
             <tr>
               <th>Sigla</th><th>Atividade</th><th>Total (h)</th><th>Validadas (h)</th><th>Status</th><th></th>
@@ -2524,7 +2600,7 @@
             <input id="pDisciplinaCustom" placeholder="Nome da disciplina" style="display:none; margin-top:4px; width:100%; background:var(--bg-alt); border:1px solid var(--line); border-radius:var(--r); color:var(--text); padding:9px 10px; font-size:13px;">
           </div>
           <div class="field"><label>Tipo</label>
-            <select id="pTipo"><option>P1</option><option>P2</option><option>P3</option><option>Final</option><option>Substitutiva</option></select>
+            <select id="pTipo"><option>P1</option><option>P2</option><option>P3</option><option>Final</option><option>Substitutiva</option><option>Trabalho</option><option>Seminário</option></select>
           </div>
           <div class="field"><label>Data</label><input id="pData" type="date"></div>
           <div class="field"><label>Hora</label><input id="pHora" type="time"></div>
@@ -2609,6 +2685,7 @@
         </div>
       </div>
       </div>
+      <div id="railSettings">
       <div class="section-label">Painel de navegação</div>
       <div class="panel panel--pad" style="--accent:var(--blue)">
         <div class="field">
@@ -2619,6 +2696,7 @@
           <label>Modo de exibição</label>
           <div id="railModeGrid" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;"></div>
         </div>
+      </div>
       </div>
 
       <div class="section-label">Metas de nota por disciplina</div>
@@ -2740,6 +2818,7 @@
       <button class="btn btn-sm qa-tab-btn" id="qaTabProva" data-qa-tab="prova">+ Prova</button>
       <span style="flex:1;"></span>
       <kbd style="font-size:11px;color:var(--text-faint);border:1px solid var(--line);border-radius:4px;padding:2px 6px;">Esc</kbd>
+      <button type="button" class="qa-close" id="qaClose" aria-label="Fechar">✕</button>
     </div>
     <div id="qaPainelTarefa">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
@@ -2753,8 +2832,11 @@
     </div>
     <div id="qaPainelProva" style="display:none;">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-        <div class="field" style="grid-column:1/-1;"><label>Disciplina</label><input id="qaProvaDisciplina" placeholder="ex: Física I"></div>
-        <div class="field"><label>Tipo</label><select id="qaProvaTipo"><option>P1</option><option>P2</option><option>P3</option><option>Final</option><option>Substitutiva</option></select></div>
+        <div class="field" style="grid-column:1/-1;"><label for="qaProvaDisciplina">Disciplina</label>
+          <select id="qaProvaDisciplina"></select>
+          <input id="qaProvaDiscCustom" placeholder="Nome da disciplina" aria-label="Nome da disciplina" style="display:none;margin-top:6px;">
+        </div>
+        <div class="field"><label>Tipo</label><select id="qaProvaTipo"><option>P1</option><option>P2</option><option>P3</option><option>Final</option><option>Substitutiva</option><option>Trabalho</option><option>Seminário</option></select></div>
         <div class="field"><label>Data</label><input id="qaProvaData" type="date"></div>
         <div class="field"><label>Hora</label><input id="qaProvaHora" type="time"></div>
         <div class="field"><label>Local</label><input id="qaProvaLocal" placeholder="ex: Lab A203"></div>
@@ -2833,6 +2915,7 @@ function profiledKey(key){ return ACTIVE_PROFILE_ID ? ACTIVE_PROFILE_ID+'_'+key 
 async function storeGet(key, fallback){
   const pk = profiledKey(key);
   try{
+    if(!window.storage) throw 0; // only exists when hosted as a Claude artifact
     const r = await window.storage.get(pk, false);
     return r ? JSON.parse(r.value) : fallback;
   }catch(e){
@@ -2846,6 +2929,7 @@ async function storeSet(key, value){
   if(typeof REMINDER_KEYS !== 'undefined' && REMINDER_KEYS.includes(key)) saveReminderSnapshot();
   const pk = profiledKey(key);
   try{
+    if(!window.storage) throw 0;
     await window.storage.set(pk, JSON.stringify(value), false);
     if(!STORAGE_OK){ STORAGE_OK = true; hideStorageWarning(); }
     return;
@@ -2986,7 +3070,12 @@ async function init(opts = {}){
                  _pct >= 70 ? 'Mais de 70% do curso concluído!' :
                  _pct >= 50 ? 'Metade do caminho percorrido!' :
                  _pct >= 25 ? 'Progredindo bem!' : '';
-  if(_motiv && !opts.silent) setTimeout(() => showToast(_motiv, 'info', 5000), 1200);
+  // uma vez por dia em cada aparelho, não a cada abertura (a chave notif_last_* não sincroniza)
+  const _motivKey = 'notif_last_motiv_' + (ACTIVE_PROFILE_ID || 'default');
+  if(_motiv && !opts.silent && lsGet(_motivKey, null) !== localISO(new Date())){
+    lsSet(_motivKey, localISO(new Date()));
+    setTimeout(() => showToast(_motiv, 'info', 5000), 1200);
+  }
 
   // Automatic deadline notifications: at most once per day per profile
   saveReminderSnapshot();
@@ -3015,6 +3104,8 @@ async function init(opts = {}){
   document.getElementById('loading').style.opacity = '0';
   setTimeout(() => { document.getElementById('loading').style.display='none'; }, 300);
   document.getElementById('app').style.display = 'flex';
+  linkFieldLabels(document);
+  pomRestore();
   if(!opts.silent) applyLaunchParams();
   } finally {
     _initInProgress = false;
@@ -3064,9 +3155,41 @@ function ico(name, cls){
   return `<svg class="i${cls?' '+cls:''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]||''}</svg>`;
 }
 document.querySelectorAll('[data-ico]').forEach(el => el.insertAdjacentHTML('afterbegin', ico(el.dataset.ico)));
-if(window.Chart) Chart.defaults.font.family = getComputedStyle(document.documentElement).getPropertyValue('--sans').trim() || 'system-ui, sans-serif';
-// no celular a animação de entrada dos gráficos custa mais do que vale
-if(window.Chart && matchMedia('(max-width:880px)').matches) Chart.defaults.animation = false;
+
+// Chart.js só é usado na aba Notas: carrega na primeira vez que ela abre, não na abertura do app
+const CHART_JS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js';
+let _chartJsLoading = null;
+function loadChartJs(){
+  if(window.Chart) return Promise.resolve(window.Chart);
+  if(!_chartJsLoading) _chartJsLoading = new Promise((ok, no) => {
+    const s = document.createElement('script');
+    s.src = CHART_JS_URL;
+    s.onload = () => {
+      Chart.defaults.font.family = getComputedStyle(document.documentElement).getPropertyValue('--sans').trim() || 'system-ui, sans-serif';
+      // no celular a animação de entrada dos gráficos custa mais do que vale
+      if(matchMedia('(max-width:880px)').matches) Chart.defaults.animation = false;
+      ok(window.Chart);
+    };
+    s.onerror = () => { _chartJsLoading = null; s.remove(); no(new Error('Chart.js indisponível')); };
+    document.head.appendChild(s);
+  });
+  return _chartJsLoading;
+}
+// Mostra um aviso no lugar do gráfico sem apagar o canvas, para o gráfico poder voltar depois
+function chartEmpty(canvas, msg){
+  if(!canvas) return;
+  const wrap = canvas.parentElement;
+  let note = wrap.querySelector('.chart-empty');
+  if(msg){
+    canvas.style.display = 'none';
+    if(!note){ note = document.createElement('div'); note.className = 'empty chart-empty'; wrap.appendChild(note); }
+    note.textContent = msg;
+    note.hidden = false;
+  } else {
+    canvas.style.display = '';
+    if(note) note.hidden = true;
+  }
+}
 
 const TABS = [
   {id:'painel',    label:'Painel',         icon:'home'},
@@ -3219,7 +3342,7 @@ function closeMoreSheet(){
     'config','historico_overrides','historico_custom','historico_removidos',
     'tarefas','lab_concluido','relatorios_ocultos','relatorios_overrides',
     'provas','faltas','faltas_limites','horas_comp','horas_global',
-    'aulas_custom','turmas_custom','notas_parciais','tema','lembretes','pom_sessions','disc_notes','estudos_materiais'
+    'aulas_custom','turmas_custom','notas_parciais','metas_notas','tema','lembretes','pom_sessions','disc_notes','estudos_materiais','labs'
   ]);
   let _syncTimeout = null;
   window.addEventListener('storage', async (e) => {
@@ -3254,6 +3377,7 @@ function closeMoreSheet(){
         if(bareKey === 'pom_sessions')          STATE.pomSessions = fresh;
         if(bareKey === 'disc_notes')            STATE.discNotes = fresh;
         if(bareKey === 'estudos_materiais')     STATE.estudos = fresh;
+        if(bareKey === 'labs'){ STATE.labs = fresh || {}; renderNav(); }
         if(bareKey === 'tema'){ STATE.tema = fresh; document.documentElement.setAttribute('data-theme', fresh); return; }
         // Rebuild merged historico if overrides/custom/removidos changed
         if(['historico_overrides','historico_custom','historico_removidos'].includes(bareKey)){
@@ -3290,7 +3414,7 @@ function situacao(item){
     return STATE.config.disciplinasAtuais.includes(item.sigla) ? 'Cursando' : 'Pendente';
   }
   if(typeof nota === 'string' && nota.trim().toUpperCase() === 'APR') return 'Aprovado';
-  const n = Number(nota);
+  const n = Number(typeof nota === 'string' ? nota.replace(',', '.') : nota);
   if(!isNaN(n)){
     if(n >= STATE.config.notaMinima) return 'Aprovado';
     // Aprovado por recuperação: nota abaixo do mínimo mas marcado manualmente ou via import
@@ -3361,10 +3485,32 @@ function examLabel(p){ return `${p.tipo} de ${p.disciplina}`; }
 function sortedProvas(){
   return [...STATE.provas].sort((a,b) => (a.data+(a.hora||'')).localeCompare(b.data+(b.hora||'')));
 }
-function upcomingProvas(n){
-  const todayIso = localISO(new Date());
-  return sortedProvas().filter(p => p.data >= todayIso).slice(0, n || Infinity);
+function nowHHMM(){ const d = new Date(); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+// Prova que ainda não começou: a de hoje passa para "realizadas" quando chega o horário dela
+function provaPendente(p){
+  const hoje = localISO(new Date());
+  return p.data > hoje || (p.data === hoje && (!p.hora || p.hora > nowHHMM()));
 }
+function upcomingProvas(n){
+  return sortedProvas().filter(provaPendente).slice(0, n || Infinity);
+}
+// A prova é desta disciplina? "Nome (P10)" e "Nome (P10-A)" comparam pela sigla; sem sigla, pelo nome
+function provaDaDisciplina(p, sigla, nome){
+  const code = (/\(([^)]+)\)\s*$/.exec(p.disciplina || '') || [])[1];
+  if(code) return code.split('-')[0].trim().toUpperCase() === String(sigla || '').toUpperCase();
+  const d = normalizeStr(p.disciplina), n = normalizeStr(nome);
+  return !!d && (d === normalizeStr(sigla) || (!!n && (d === n || d.includes(n))));
+}
+// A tarefa é desta disciplina? Campo com a sigla ("P10", "P10 - lista") ou com o nome
+function tarefaDaDisciplina(t, sigla, nome){
+  const d = normalizeStr(t.disciplina).trim(), s = normalizeStr(sigla);
+  if(!d || !s) return false;
+  return d === s || d === normalizeStr(nome) || (d.startsWith(s) && !/[a-z0-9]/.test(d.charAt(s.length)));
+}
+// Nota parcial já lançada (vazio, null ou texto não contam)
+const notaOk = e => !!e && e.valor !== null && e.valor !== undefined && e.valor !== '' && !isNaN(Number(e.valor));
+// Números com vírgula, como se escreve em português
+const fmtNum = (n, d = 1) => Number(n).toFixed(d).replace('.', ',');
 
 
 // ---------------- Disciplinas em Risco (painel) ----------------
@@ -3383,15 +3529,15 @@ function renderDiscRisco(){
     const faltasPct = faltasCount / limite;
 
     const entradas = STATE.notasParciais[sigla] || [];
-    const preenchidas = entradas.filter(e => e.valor!==null && !isNaN(Number(e.valor)));
-    const vazias = entradas.filter(e => e.valor===null || e.valor==='');
+    const preenchidas = entradas.filter(notaOk);
+    const vazias = entradas.filter(e => !notaOk(e));
     const pesoTotal = entradas.reduce((s,e)=>s+(Number(e.peso)||1),0);
     const somaW = preenchidas.reduce((s,e)=>s+Number(e.valor)*(Number(e.peso)||1),0);
     const pesoVazias = vazias.reduce((s,e)=>s+(Number(e.peso)||1),0);
     let notaRisk = 0, notaLabel = '';
     if(preenchidas.length && pesoVazias === 0){
       const mf = pesoTotal>0 ? somaW/pesoTotal : 0;
-      if(mf < notaMin){ notaRisk = 1; notaLabel = `Nota final: ${mf.toFixed(1)}`; }
+      if(mf < notaMin){ notaRisk = 1; notaLabel = `Nota final: ${fmtNum(mf)}`; }
     } else if(preenchidas.length && pesoVazias > 0){
       const precisa = (notaMin*pesoTotal - somaW)/pesoVazias;
       if(precisa > 100){ notaRisk = 1; notaLabel = 'Matematicamente reprovado'; }
@@ -3416,7 +3562,7 @@ function renderDiscRisco(){
       <span class="risco-sigla" style="color:${barColor}">${esc(r.sigla)}</span>
       <span class="risco-nome" title="${esc(r.nome)}">${esc(r.nome)}</span>
       <span style="font-size:11px;color:var(--${faltasCls});font-family:var(--mono);width:42px;text-align:right;flex-shrink:0;">${r.faltasCount}/${r.limite}</span>
-      ${r.notaLabel ? `<span style="font-size:10.5px;color:var(--text-faint);white-space:nowrap;flex-shrink:0;">${r.notaLabel}</span>` : ''}
+      ${r.notaLabel ? `<span style="font-size:10.5px;color:var(--text-faint);white-space:nowrap;flex-shrink:0;">${esc(r.notaLabel)}</span>` : ''}
       <div class="risco-bar-wrap"><div class="risco-bar-fill" style="width:${barPct}%;background:${barColor};"></div></div>
     </div>`;
   }).join('');
@@ -3478,8 +3624,8 @@ function renderPainel(){
   const discReprovando = (STATE.config.disciplinasAtuais||[]).filter(sigla => {
     const entradas = STATE.notasParciais ? (STATE.notasParciais[sigla]||[]) : [];
     if(!entradas.length) return false;
-    const preenchidas = entradas.filter(e => e.valor!==null && e.valor!=='' && !isNaN(Number(e.valor)));
-    const vazias = entradas.filter(e => e.valor===null || e.valor==='');
+    const preenchidas = entradas.filter(notaOk);
+    const vazias = entradas.filter(e => !notaOk(e));
     if(!preenchidas.length) return false;
     const pesoTotal = entradas.reduce((s,e) => s+(Number(e.peso)||1), 0);
     const somaW = preenchidas.reduce((s,e) => s+Number(e.valor)*(Number(e.peso)||1), 0);
@@ -3490,9 +3636,8 @@ function renderPainel(){
   }).length;
 
   // Próxima prova que ainda não começou (uma prova de hoje às 08:00 sai do card depois das 08:00)
-  const todayIsoStat = localISO(new Date());
-  const proxProva = upcomingProvas().find(p => p.data > todayIsoStat || !p.hora || p.hora > nowHM);
-  const proxProvaHoje = !!proxProva && proxProva.data === todayIsoStat;
+  const proxProva = upcomingProvas(1)[0];
+  const proxProvaHoje = !!proxProva && proxProva.data === localISO(new Date());
   const provaCard = proxProva ? (() => {
     const sig = (String(proxProva.disciplina).match(/\(([^)]+)\)\s*$/) || [])[1] || proxProva.disciplina;
     const quando = diasLabel(daysUntil(proxProva.data)) + (proxProva.hora ? ` às ${proxProva.hora}` : '');
@@ -3544,9 +3689,10 @@ function renderPainel(){
     .filter(x => x.st.label !== 'Concluído');
   document.getElementById('prazosList').innerHTML = relsAbertos.length ? relsAbertos.map(({rEfetivo, st}) => {
     const dr = daysUntil(rEfetivo.fim);
+    const quando = dr < 0 ? 'prazo encerrado' : dr === 0 ? 'entrega hoje' : dr === 1 ? 'entrega amanhã' : `faltam ${dr} dias`;
     return `<div class="row-item">
       <div class="time mono">${fmtDate(rEfetivo.fim)}</div>
-      <div class="info"><div class="t">${esc(rEfetivo.nome)}</div><div class="s">${dr>=0? dr+' dias restantes' : 'prazo encerrado'}</div></div>
+      <div class="info"><div class="t">${esc(rEfetivo.nome)}</div><div class="s">${quando}</div></div>
       <span class="badge badge-${st.cls}">${st.label}</span>
     </div>`;
   }).join('') : `<div class="empty" style="font-size:12px;padding:8px 0;">Nenhum relatório em aberto</div>`;
@@ -3697,12 +3843,14 @@ function renderDayOverview(){
   el.innerHTML = `<span class="day-overview__hi">${saud}${nome ? ', ' + esc(nome) : ''}.</span> ${frases.slice(0,3).join(' ')}`;
 }
 
+// último número mostrado em cada card: o painel se redesenha a cada minuto e não deve recontar do zero
+const _countShown = {};
 function statCard(label, value, accent, small){
   const isNum = typeof value === 'number' && !isNaN(value);
   return `<div class="panel stat" style="--accent:var(--${accent})">
     <div class="stat__label">${label}</div>
-    <div class="stat__value${small?' small':''}"${isNum?` data-count="${value}"`:''}>
-      ${isNum ? 0 : value}
+    <div class="stat__value${small?' small':''}"${isNum?` data-count="${value}" data-count-key="${esc(label)}"`:''}>
+      ${isNum ? (_countShown[label] ?? 0) : value}
     </div>
   </div>`;
 }
@@ -3722,21 +3870,54 @@ function renderHorario(){
 
   let html = `<div class="head"></div>` + WEEK_DAYS.map(d=>`<div class="head">${d}</div>`).join('');
   times.forEach(t => {
-    html += `<div class="cell timecell">${t}</div>`;
+    html += `<div class="cell timecell">${esc(t)}</div>`;
     WEEK_DAYS.forEach(day => {
       const match = real.find(a => a.dia===day && a.inicio===t);
       if(match){
         const isNow = day===todayName() && nowHM >= match.inicio && nowHM < match.fim;
-        html += `<div class="cell slot${isNow?' now':''}"><div class="t">${match.disciplina}</div><div class="l">${match.local}</div></div>`;
+        html += `<div class="cell slot${isNow?' now':''}"><div class="t">${esc(match.disciplina)}</div><div class="l">${esc(match.local)}</div></div>`;
       } else {
         html += `<div class="cell"></div>`;
       }
     });
   });
   document.getElementById('weekGrid').innerHTML = html;
+  renderHorarioDia(real, nowHM);
 
   const asyncSubjects = getAulas().filter(a => !a.inicio || a.inicio === '—');
+  document.getElementById('asyncWrap').style.display = asyncSubjects.length ? '' : 'none';
   document.getElementById('asyncChips').innerHTML = asyncSubjects.map(a => `<span class="chip">${esc(a.disciplina)}, sem horário fixo</span>`).join('');
+}
+
+// No celular a grade da semana não cabe: mostra um dia por vez, começando por hoje
+let _horarioDia = null;
+function renderHorarioDia(real, nowHM){
+  const el = document.getElementById('horarioDia');
+  if(!el) return;
+  const hoje = todayName();
+  if(!_horarioDia) _horarioDia = WEEK_DAYS.includes(hoje) ? hoje : 'Segunda';
+  const doDia = d => real.filter(a => a.dia === d).sort((a, b) => a.inicio.localeCompare(b.inicio));
+  const nomeDisc = s => (STATE.historico.find(i => i.sigla === s) || {}).disciplina || '';
+  const aulas = doDia(_horarioDia);
+  el.innerHTML = `
+    <div class="hday__pick" role="tablist" aria-label="Dia da semana">${WEEK_DAYS.map(d => `
+      <button type="button" role="tab" class="${d === _horarioDia ? 'active' : ''}${d === hoje ? ' is-today' : ''}" data-hdia="${d}" aria-selected="${d === _horarioDia}">
+        ${d.slice(0, 3)}<span class="hday__dot${doDia(d).length ? '' : ' is-empty'}"></span>
+      </button>`).join('')}
+    </div>
+    <div class="panel panel--pad" style="--accent:var(--blue)">
+      <div class="row-list">${aulas.length ? aulas.map(a => {
+        const agora = _horarioDia === hoje && nowHM >= a.inicio && nowHM < a.fim;
+        const passou = _horarioDia === hoje && a.fim && a.fim <= nowHM;
+        const nome = nomeDisc(a.disciplina);
+        return `<div class="row-item${agora ? ' now' : passou ? ' past' : ''}">
+          <div class="time mono">${esc(a.inicio)}${a.fim ? '–' + esc(a.fim) : ''}</div>
+          <div class="info"><div class="t">${esc(a.disciplina)}</div><div class="s">${esc([nome, a.local].filter(Boolean).join(', '))}</div></div>
+          ${agora ? '<span class="badge badge-amber">agora</span>' : ''}
+        </div>`;
+      }).join('') : `<div class="empty">Sem aulas ${_horarioDia === 'Sábado' ? 'no sábado' : 'na ' + _horarioDia.toLowerCase()}</div>`}</div>
+    </div>`;
+  el.querySelectorAll('[data-hdia]').forEach(b => b.onclick = () => { _horarioDia = b.dataset.hdia; renderHorarioDia(real, nowHM); });
 }
 
 // ---------------- render: Laboratório ----------------
@@ -3744,7 +3925,7 @@ function renderLab(){
   let html = WEEK_DAYS.map(d=>`<div class="head">${d}</div>`).join('');
   WEEK_DAYS.forEach(d => {
     const turmas = getTurmas()[d] || [];
-    html += `<div class="cell" style="text-align:center;">${turmas.map(t=>`<div class="mono" style="font-size:12px;color:var(--text);margin:3px 0;">${t}</div>`).join('') || '<span class="dim">—</span>'}</div>`;
+    html += `<div class="cell" style="text-align:center;">${turmas.map(t=>`<div class="mono" style="font-size:12px;color:var(--text);margin:3px 0;">${esc(t)}</div>`).join('') || '<span class="dim">—</span>'}</div>`;
   });
   document.getElementById('turmasGrid').innerHTML = html;
 
@@ -3915,8 +4096,8 @@ function renderHistorico(filter){
   document.getElementById('histSub').innerHTML = `
     <span class="meta-chip"><b>${stats.total}</b> disciplinas</span>
     <span class="meta-chip" style="color:var(--green);border-color:var(--green-dim);"><b>${stats.counts.Aprovado}</b> aprovadas</span>
-    <span class="meta-chip">média <b>${stats.media.toFixed(1)}</b></span>
-    ${iraInfo.ira !== null ? `<span class="meta-chip" style="color:var(--blue);border-color:var(--blue-dim);" title="${iraInfo.ponderado?'IRA ponderado pela carga horária':'Média simples — preencha CH para IRA real'}">IRA <b>${iraInfo.ira.toFixed(2)}</b>${iraInfo.ponderado?' ✓':' ≈'}</span>` : ''}
+    <span class="meta-chip">média <b>${fmtNum(stats.media)}</b></span>
+    ${iraInfo.ira !== null ? `<span class="meta-chip" style="color:var(--blue);border-color:var(--blue-dim);" title="${iraInfo.ponderado?'IRA ponderado pela carga horária':'Média simples — preencha CH para IRA real'}">IRA <b>${fmtNum(iraInfo.ira, 2)}</b>${iraInfo.ponderado?' ✓':' ≈'}</span>` : ''}
   `;
 
   document.getElementById('histBody').innerHTML = rows.map(item => {
@@ -3926,23 +4107,24 @@ function renderHistorico(filter){
     const isCurrently = STATE.config.disciplinasAtuais.includes(item.sigla);
     const notaN = Number(item.nota);
     const notaBaixaHistorico = !isCurrently && !isNaN(notaN) && notaN < STATE.config.notaMinima;
+    const sig = esc(item.sigla);
     let situacaoBadge;
     if(notaBaixaHistorico && s === 'Reprovado'){
-      situacaoBadge = `<span class="led led-${meta.cls}"></span> <span class="badge badge-${meta.cls}" data-toggle-apr="${item.sigla}" title="Clique para marcar como Aprovado por recuperação" style="cursor:pointer;">${meta.label}</span>`;
+      situacaoBadge = `<span class="led led-${meta.cls}"></span> <span class="badge badge-${meta.cls}" data-toggle-apr="${sig}" title="Clique para marcar como Aprovado por recuperação" style="cursor:pointer;">${meta.label}</span>`;
     } else if(notaBaixaHistorico && s === 'Aprovado' && item.aprovado === true){
-      situacaoBadge = `<span class="led led-${meta.cls}"></span> <span class="badge badge-${meta.cls}" data-toggle-rep="${item.sigla}" title="Aprovado por recuperação — clique para reverter" style="cursor:pointer;border-style:dashed;">${meta.label}</span>`;
+      situacaoBadge = `<span class="led led-${meta.cls}"></span> <span class="badge badge-${meta.cls}" data-toggle-rep="${sig}" title="Aprovado por recuperação — clique para reverter" style="cursor:pointer;border-style:dashed;">${meta.label}</span>`;
     } else {
       situacaoBadge = `<span class="led led-${meta.cls}"></span> <span class="badge badge-${meta.cls}">${meta.label}</span>`;
     }
     const chVal = item.ch != null ? item.ch : '';
-    return `<tr data-sigla="${item.sigla}" style="cursor:pointer;" title="Clique para ver detalhes de ${item.sigla}">
-      <td class="mono" style="font-weight:600;">${item.sigla}${isCustom?'<span title="Disciplina adicionada manualmente" style="color:var(--blue);margin-left:4px;font-size:10px;">★</span>':''}</td>
+    return `<tr data-sigla="${sig}" style="cursor:pointer;" title="Clique para ver detalhes de ${sig}">
+      <td class="mono" style="font-weight:600;">${sig}${isCustom?'<span title="Disciplina adicionada manualmente" style="color:var(--blue);margin-left:4px;font-size:10px;">★</span>':''}</td>
       <td>${esc(item.disciplina)}</td>
-      <td><input class="cell-input" data-field="nota" data-sigla="${item.sigla}" value="${notaVal}"></td>
-      <td><input class="cell-input mono" data-field="ch" data-sigla="${item.sigla}" value="${chVal}" placeholder="—" style="width:52px;" title="Carga horária (define limite de faltas)"></td>
-      <td><input class="cell-input mono dim" data-field="semestre" data-sigla="${item.sigla}" value="${item.semestre||''}" placeholder="—" style="width:72px;" title="Semestre letivo"></td>
+      <td data-label="Nota"><input class="cell-input" data-field="nota" data-sigla="${sig}" value="${esc(notaVal)}" aria-label="Nota de ${sig}"></td>
+      <td data-label="CH"><input class="cell-input mono" data-field="ch" data-sigla="${sig}" value="${esc(chVal)}" placeholder="—" style="width:52px;" title="Carga horária (define limite de faltas)" aria-label="Carga horária de ${sig}"></td>
+      <td data-label="Semestre"><input class="cell-input mono dim" data-field="semestre" data-sigla="${sig}" value="${esc(item.semestre||'')}" placeholder="—" style="width:72px;" title="Semestre letivo" aria-label="Semestre de ${sig}"></td>
       <td>${situacaoBadge}</td>
-      <td><button class="btn btn-ghost btn-sm" data-del-disc="${item.sigla}" title="Remover disciplina" style="padding:4px 7px;">✕</button></td>
+      <td><button class="btn btn-ghost btn-sm" data-del-disc="${sig}" title="Remover disciplina" aria-label="Remover ${sig}" style="padding:4px 7px;">✕</button></td>
     </tr>`;
   }).join('') || `<tr><td colspan="7"><div class="empty">Nenhuma disciplina encontrada</div></td></tr>`;
 
@@ -3955,7 +4137,9 @@ function renderHistorico(filter){
       if(field === 'ch'){
         val = val === '' ? null : (Math.max(1, parseInt(val, 10)) || null);
       } else {
-        val = val==='' ? null : (isNaN(Number(val)) ? val : Number(val));
+        // "85,5" com vírgula também é número
+        const n = Number(val.replace(',', '.'));
+        val = val==='' ? null : (isNaN(n) ? val : n);
       }
       item[field] = val;
       STATE.historicoOverrides[sigla] = STATE.historicoOverrides[sigla] || {};
@@ -4044,20 +4228,16 @@ function showDiscDetail(sigla){
   const faltasCls = faltasCount >= limite ? 'red' : (faltasCount >= limite*0.75 ? 'amber' : 'green');
 
   const entradas = isAtual && STATE.notasParciais[sigla] ? STATE.notasParciais[sigla] : [];
-  const preenchidas = entradas.filter(e => e.valor !== null && !isNaN(Number(e.valor)));
+  const preenchidas = entradas.filter(notaOk);
   const pesoPreench = preenchidas.reduce((a,e) => a+(Number(e.peso)||1), 0);
   const mediaAtual = preenchidas.length && pesoPreench > 0
     ? preenchidas.reduce((a,e) => a+Number(e.valor)*(Number(e.peso)||1), 0) / pesoPreench
     : null;
 
-  const todayIso = localISO(new Date());
-  const provasDisc = STATE.provas.filter(p => p.data >= todayIso &&
-    (normalizeStr(p.disciplina).includes(normalizeStr(sigla)) || normalizeStr(p.disciplina).includes(normalizeStr(item.disciplina)))
-  ).slice(0, 4);
+  const provasDisc = upcomingProvas().filter(p => provaDaDisciplina(p, sigla, item.disciplina)).slice(0, 4);
 
-  const tarefasDisc = STATE.tarefas.filter(t => t.status !== 'Concluído' && t.disciplina &&
-    normalizeStr(t.disciplina).includes(normalizeStr(sigla))
-  ).sort((a,b) => (a.prazo||'9999').localeCompare(b.prazo||'9999')).slice(0, 6);
+  const tarefasDisc = STATE.tarefas.filter(t => t.status !== 'Concluído' && tarefaDaDisciplina(t, sigla, item.disciplina))
+    .sort((a,b) => (a.prazo||'9999').localeCompare(b.prazo||'9999')).slice(0, 6);
 
   // Sessões de estudo desta disciplina (últimos 30 dias)
   const cutoff30 = new Date(); cutoff30.setDate(cutoff30.getDate()-30);
@@ -4072,7 +4252,7 @@ function showDiscDetail(sigla){
       <div class="dm-stat"><label>Situação</label><span style="color:var(--${meta.cls})">${meta.label}</span></div>
       <div class="dm-stat"><label>Nota</label><span>${item.nota != null ? item.nota : '—'}</span></div>
       <div class="dm-stat"><label>Faltas</label><span style="color:var(--${faltasCls})">${faltasCount}/${limite}</span></div>
-      ${mediaAtual !== null ? `<div class="dm-stat"><label>Média atual</label><span style="color:var(--${mediaAtual>=notaMin?'green':'red'})">${mediaAtual.toFixed(1)}</span></div>` : ''}
+      ${mediaAtual !== null ? `<div class="dm-stat"><label>Média atual</label><span style="color:var(--${mediaAtual>=notaMin?'green':'red'})">${fmtNum(mediaAtual)}</span></div>` : ''}
       ${totalMinSess > 0 ? `<div class="dm-stat"><label>Horas estudadas (30d)</label><span style="color:var(--blue)">${Math.floor(totalMinSess/60)}h${totalMinSess%60>0?String(totalMinSess%60)+'m':''}</span></div>` : ''}
     </div>
     ${faltasCount > 0 ? `<div style="height:5px;border-radius:3px;background:var(--line);overflow:hidden;margin-bottom:14px;" title="${faltasPct}% do limite de faltas"><div style="height:100%;width:${faltasPct}%;background:var(--${faltasCls});transition:width .4s;"></div></div>` : ''}
@@ -4081,7 +4261,7 @@ function showDiscDetail(sigla){
       <div class="section-label" style="margin:0 0 8px;">Notas parciais</div>
       ${entradas.map(e => {
         const v = (e.valor !== null && e.valor !== '' && !isNaN(e.valor)) ? Number(e.valor) : null;
-        return `<div class="sim-row"><span class="sim-sigla">${esc(e.label||'?')}</span><span style="font-size:11.5px;color:var(--text-faint);">peso ${Number(e.peso)||1}</span><span style="flex:1;"></span><span class="sim-atual" style="color:${v!==null?(v>=notaMin?'var(--green)':'var(--red)'):'var(--text-faint)'};">${v !== null ? v.toFixed(1) : '—'}</span></div>`;
+        return `<div class="sim-row"><span class="sim-sigla">${esc(e.label||'?')}</span><span style="font-size:11.5px;color:var(--text-faint);">peso ${Number(e.peso)||1}</span><span style="flex:1;"></span><span class="sim-atual" style="color:${v!==null?(v>=notaMin?'var(--green)':'var(--red)'):'var(--text-faint)'};">${v !== null ? fmtNum(v) : '—'}</span></div>`;
       }).join('')}
     </div>` : ''}
     ${provasDisc.length ? `
@@ -4118,14 +4298,16 @@ function renderCharts(){
   renderSessoesEstudo();
   renderCalculadoraFinal();
   renderProdutividade();
-  renderIRAEvolution();
+  const CHART_IDS = ['chartSituacao','chartNotas','chartTendencia','chartIRAEvol'];
   if(typeof Chart === 'undefined'){
-    ['chartSituacao','chartNotas','chartTendencia'].forEach(id => {
-      const c = document.getElementById(id);
-      if(c) c.parentElement.innerHTML = '<div class="empty">Não foi possível carregar a biblioteca de gráficos (sem conexão com o CDN). Os dados continuam corretos nas outras abas.</div>';
+    loadChartJs().then(() => {
+      if(document.getElementById('tab-desempenho').classList.contains('active')) renderCharts();
+    }).catch(() => {
+      CHART_IDS.forEach(id => chartEmpty(document.getElementById(id), 'Sem conexão para carregar os gráficos agora. As notas acima continuam certas.'));
     });
     return;
   }
+  renderIRAEvolution();
   const stats = cursoStatsCompute();
   const notaMin = STATE.config ? (STATE.config.notaMinima || 60) : 60;
   const cs = getComputedStyle(document.documentElement);
@@ -4136,6 +4318,7 @@ function renderCharts(){
 
   const ctx1 = document.getElementById('chartSituacao');
   if(chartSituacaoRef) chartSituacaoRef.destroy();
+  chartEmpty(ctx1, null);
   chartSituacaoRef = new Chart(ctx1, {
     type:'doughnut',
     data:{ labels:['Aprovado','Cursando','Reprovado','Pendente'],
@@ -4149,6 +4332,7 @@ function renderCharts(){
   const numeric = STATE.historico.filter(i => typeof i.nota === 'number');
   const ctx2 = document.getElementById('chartNotas');
   if(chartNotasRef) chartNotasRef.destroy();
+  chartEmpty(ctx2, null);
   chartNotasRef = new Chart(ctx2, {
     type:'bar',
     data:{ labels:numeric.map(i=>i.sigla),
@@ -4181,6 +4365,7 @@ function renderCharts(){
   if(chartTendenciaRef){ chartTendenciaRef.destroy(); chartTendenciaRef=null; }
   if(semKeys.length >= 2 && ctx3){
     if(wrap3) wrap3.style.display = '';
+    chartEmpty(ctx3, null);
     chartTendenciaRef = new Chart(ctx3, {
       type:'line',
       data:{ labels: semKeys,
@@ -4203,7 +4388,7 @@ function renderCharts(){
     });
   } else if(ctx3){
     if(wrap3) wrap3.style.display = '';
-    ctx3.parentElement.innerHTML = '<div class="empty" style="height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;">Preencha o semestre das disciplinas no Histórico para ver a evolução.</div>';
+    chartEmpty(ctx3, 'Preencha o semestre das disciplinas no Histórico para ver a evolução.');
   }
 }
 
@@ -4252,8 +4437,8 @@ function renderNotasSemestre(){
         accentColor = ok ? 'var(--green)' : 'var(--red)';
         progressColor = accentColor;
         precisaTxt = ok
-          ? `Média final: ${mediaFinal.toFixed(1)} — aprovado!`
-          : `Média ${mediaFinal.toFixed(1)} — abaixo do mínimo (${notaMin})`;
+          ? `Média final: ${fmtNum(mediaFinal)}, aprovado!`
+          : `Média ${fmtNum(mediaFinal)}, abaixo do mínimo (${notaMin})`;
       } else {
         const precisa = pesoVazias > 0 ? (notaMin * pesoTotal - somaW) / pesoVazias : null;
         if(precisa === null || precisa <= 0){
@@ -4265,7 +4450,7 @@ function renderNotasSemestre(){
           accentColor = 'var(--red)'; progressColor = 'var(--red)';
           precisaTxt = 'Não é mais possível atingir a média mínima.';
         } else {
-          const provasStr = vazias.length === 1 ? 'próxima prova' : `próximas ${vazias.length} provas`;
+          const provasStr = vazias.length === 1 ? 'na próxima avaliação' : `de média nas próximas ${vazias.length} avaliações`;
           if(precisa > notaMin * 1.15){
             statusLabel = 'Em risco'; statusCls = 'red';
             accentColor = 'var(--red)'; progressColor = 'var(--red)';
@@ -4276,7 +4461,7 @@ function renderNotasSemestre(){
             statusLabel = 'Em dia'; statusCls = 'green';
             accentColor = 'var(--green)'; progressColor = 'var(--green)';
           }
-          precisaTxt = `Precisa de <b>${precisa.toFixed(1)}</b> na(s) ${provasStr} para passar`;
+          precisaTxt = `Precisa de <b>${fmtNum(precisa)}</b> ${provasStr} para passar`;
         }
       }
     }
@@ -4288,7 +4473,7 @@ function renderNotasSemestre(){
       : '';
     const metaStatusTxt = metaVal != null && mediaVal != null
       ? (mediaVal >= metaVal ? `<span style="color:var(--blue);font-size:11px;">✓ Meta ${metaVal} atingida!</span>`
-        : `<span style="color:var(--blue);font-size:11px;">Meta ${metaVal}: faltam ${(metaVal - mediaVal).toFixed(1)} pontos</span>`)
+        : `<span style="color:var(--blue);font-size:11px;">Meta ${metaVal}: faltam ${fmtNum(metaVal - mediaVal)} pontos</span>`)
       : '';
 
     return `<div class="panel notas-card" style="--accent:${accentColor}">
@@ -4330,7 +4515,7 @@ function renderNotasSemestre(){
         </div>
         <div class="notas-media-row">
           <span class="notas-media-label">${todosPesoIgual ? 'Média atual' : 'Média ponderada'}</span>
-          <span class="notas-media-val" style="color:${progressColor};">${mediaVal.toFixed(1)}</span>
+          <span class="notas-media-val" style="color:${progressColor};">${fmtNum(mediaVal)}</span>
           ${metaStatusTxt}
         </div>
         <div class="notas-precisa">${precisaTxt}</div>
@@ -4422,7 +4607,7 @@ function renderSimuladorIRA(){
     const nome = item ? item.disciplina : sigla;
     const ch = item && typeof item.ch === 'number' && item.ch > 0 ? item.ch : null;
     const entradas = STATE.notasParciais[sigla] || [];
-    const preenchidas = entradas.filter(e => e.valor !== null && !isNaN(Number(e.valor)));
+    const preenchidas = entradas.filter(notaOk);
     const pesoPreench = preenchidas.reduce((a,e) => a+(Number(e.peso)||1), 0);
     const mediaAtual = preenchidas.length && pesoPreench > 0
       ? preenchidas.reduce((a,e) => a+Number(e.valor)*(Number(e.peso)||1), 0) / pesoPreench
@@ -4439,7 +4624,7 @@ function renderSimuladorIRA(){
         <div class="sim-row">
           <span class="sim-sigla">${esc(d.sigla)}</span>
           <span class="sim-nome" title="${esc(d.nome)}">${esc(d.nome)}</span>
-          <span class="sim-atual" style="color:var(--text-faint);" title="Média parcial atual">${d.mediaAtual !== null ? d.mediaAtual.toFixed(1) : '—'}</span>
+          <span class="sim-atual" style="color:var(--text-faint);" title="Média parcial atual">${d.mediaAtual !== null ? fmtNum(d.mediaAtual) : '—'}</span>
           <input class="sim-inp" type="number" min="0" max="100" step="0.1"
             value="${d.mediaAtual !== null ? d.mediaAtual.toFixed(1) : ''}"
             placeholder="nota" data-sim-sigla="${esc(d.sigla)}" data-sim-ch="${d.ch||''}">
@@ -4448,11 +4633,11 @@ function renderSimuladorIRA(){
     <div class="sim-result">
       <div>
         <div style="font-size:10px;color:var(--text-faint);font-family:var(--mono);margin-bottom:2px;text-transform:uppercase;letter-spacing:.06em;">IRA Projetado</div>
-        <div class="sim-ira-display" id="simIRADisplay">${iraAtual !== null ? iraAtual.toFixed(2) : '—'}</div>
+        <div class="sim-ira-display" id="simIRADisplay">${iraAtual !== null ? fmtNum(iraAtual, 2) : '—'}</div>
       </div>
       <div>
         <div style="font-size:10px;color:var(--text-faint);font-family:var(--mono);margin-bottom:2px;text-transform:uppercase;letter-spacing:.06em;">Atual</div>
-        <div style="font-size:20px;font-weight:600;font-family:var(--mono);color:var(--text-dim)">${iraAtual !== null ? iraAtual.toFixed(2) : '—'}</div>
+        <div style="font-size:20px;font-weight:600;font-family:var(--mono);color:var(--text-dim)">${iraAtual !== null ? fmtNum(iraAtual, 2) : '—'}</div>
       </div>
       <div>
         <div style="font-size:10px;color:var(--text-faint);font-family:var(--mono);margin-bottom:2px;text-transform:uppercase;letter-spacing:.06em;">Meta IRA</div>
@@ -4484,11 +4669,11 @@ function renderSimuladorIRA(){
     const disp = document.getElementById('simIRADisplay');
     const deltaEl = document.getElementById('simDelta');
     if(iraProj !== null && disp){
-      disp.textContent = iraProj.toFixed(2);
+      disp.textContent = fmtNum(iraProj, 2);
       disp.style.color = iraProj >= 70 ? 'var(--green)' : iraProj >= 60 ? 'var(--blue)' : 'var(--red)';
       if(iraAtual !== null && deltaEl){
         const d = iraProj - iraAtual;
-        deltaEl.textContent = (d >= 0 ? '▲ +' : '▼ ') + d.toFixed(2);
+        deltaEl.textContent = (d >= 0 ? '▲ +' : '▼ ') + fmtNum(d, 2);
         deltaEl.style.color = d >= 0 ? 'var(--green)' : 'var(--red)';
       }
       const metaEl = document.getElementById('simMeta');
@@ -4497,7 +4682,7 @@ function renderSimuladorIRA(){
         const meta = parseFloat(metaEl.value);
         if(!isNaN(meta)){
           const diff = iraProj - meta;
-          metaStatusEl.textContent = diff >= 0 ? `✓ Meta atingida (+${diff.toFixed(2)})` : `Faltam ${Math.abs(diff).toFixed(2)} pts`;
+          metaStatusEl.textContent = diff >= 0 ? `✓ Meta atingida (+${fmtNum(diff, 2)})` : `Faltam ${fmtNum(Math.abs(diff), 2)} pts`;
           metaStatusEl.style.color = diff >= 0 ? 'var(--green)' : 'var(--red)';
         }
       } else if(metaStatusEl){ metaStatusEl.textContent = ''; }
@@ -4582,7 +4767,7 @@ function renderMapaSucesso(){
     const chips = bloco.disciplinas.map(d => {
       const s = situacao(d); const meta = situacaoMeta(s);
       const check = s==='Aprovado' ? '✓ ' : '';
-      return `<span class="badge badge-${meta.cls}" title="${esc(d.disciplina)} — ${meta.label} (clique para detalhes)" data-disc-chip="${d.sigla}" style="cursor:pointer;">${check}${d.sigla}</span>`;
+      return `<span class="badge badge-${meta.cls}" title="${esc(d.disciplina)} — ${meta.label} (clique para detalhes)" data-disc-chip="${esc(d.sigla)}" style="cursor:pointer;">${check}${esc(d.sigla)}</span>`;
     }).join('');
     return `
       <div class="timeline-node">
@@ -4655,9 +4840,9 @@ function renderFaltas(){
       <div class="disc" title="${esc(d.sigla)}">${esc(d.nome)}</div>
       <div class="falta-main">
         <div class="counter-row">
-          <button class="counter-btn sub" data-f-dec="${d.sigla}" title="Remover falta" aria-label="Remover falta">−</button>
-          <div class="counter-val">${faltas}<button class="falta-lim-btn" data-limite-edit="${d.sigla}" data-limite-atual="${limite}" title="Limite de ${limite} faltas${temCustom?' (ajustado por você)':''}. Clique para editar">/${limite}</button></div>
-          <button class="counter-btn" data-f-inc="${d.sigla}" title="Adicionar falta" aria-label="Adicionar falta">+</button>
+          <button class="counter-btn sub" data-f-dec="${esc(d.sigla)}" title="Remover falta" aria-label="Remover falta de ${esc(d.nome)}">−</button>
+          <div class="counter-val">${faltas}<button class="falta-lim-btn" data-limite-edit="${esc(d.sigla)}" data-limite-atual="${limite}" title="Limite de ${limite} faltas${temCustom?' (ajustado por você)':''}. Clique para editar">/${limite}</button></div>
+          <button class="counter-btn" data-f-inc="${esc(d.sigla)}" title="Adicionar falta" aria-label="Adicionar falta em ${esc(d.nome)}">+</button>
         </div>
         ${presencaPct!==null?`<div class="falta-pres"><b>${presencaPct}%</b><span>de presença</span></div>`:''}
       </div>
@@ -4667,7 +4852,7 @@ function renderFaltas(){
   }).join('');
 
   function bumpCounter(sigla){
-    const card = document.querySelector(`[data-f-inc="${sigla}"], [data-f-dec="${sigla}"]`)?.closest('.falta-card');
+    const card = document.querySelector(`[data-f-inc="${CSS.escape(sigla)}"], [data-f-dec="${CSS.escape(sigla)}"]`)?.closest('.falta-card');
     if(!card) return;
     const val = card.querySelector('.counter-val');
     if(!val) return;
@@ -4744,7 +4929,7 @@ function renderFaltasRanking(){
   panel.innerHTML = ranked.map(d => {
     const cls = d.pct >= 100 ? 'red' : d.pct >= 75 ? 'amber' : d.pct >= 50 ? 'blue' : 'green';
     return `<div class="risco-row">
-      <span class="risco-sigla" style="color:var(--${cls})">${d.sigla}</span>
+      <span class="risco-sigla" style="color:var(--${cls})">${esc(d.sigla)}</span>
       <span class="risco-nome">${esc(d.nome)}</span>
       <div class="risco-bar-wrap"><div class="risco-bar-fill" style="width:${maxPct>0?Math.round(d.pct/maxPct*100):0}%;background:var(--${cls});"></div></div>
       <span style="font-family:var(--mono);font-size:11px;color:var(--${cls});flex-shrink:0;width:38px;text-align:right;">${d.faltas}/${d.limite}</span>
@@ -4785,7 +4970,8 @@ function renderAgendaSemanal(){
       .filter(a => a.dia === DIAS[d.getDay()] || a.dia === DIAS_FULL[d.getDay()])
       .filter(a => !provasDia.some(p => {
         const code = provaCode(p);
-        if(code) return code === a.disciplina;
+        // "P10" e "P10-A" são a mesma disciplina (a turma vem depois do hífen)
+        if(code) return code === a.disciplina || code.split('-')[0] === String(a.disciplina || '').split('-')[0];
         return p.hora && a.fim && p.hora >= a.inicio && p.hora < a.fim;
       }));
     const tarefasDia = STATE.tarefas.filter(t => t.prazo === isoD && t.status !== 'Concluído');
@@ -4846,9 +5032,7 @@ function renderAgendaSemanal(){
 function renderProvaTimeline(){
   const panel = document.getElementById('provaTimelinePanel');
   if(!panel) return;
-  const todayIso = localISO(new Date());
-  const upcoming = STATE.provas.filter(p => p.data >= todayIso)
-    .sort((a,b) => a.data.localeCompare(b.data)).slice(0,10);
+  const upcoming = upcomingProvas(10);
   if(!upcoming.length){
     panel.innerHTML = `<div class="empty">Nenhuma prova futura cadastrada.</div>`;
     return;
@@ -4892,16 +5076,17 @@ function renderPlanoEstudos(){
     const faltaPct = faltas / limite;
     const notaMin = STATE.config.notaMinima || 60;
     const entradas = STATE.notasParciais[sigla] || [];
-    const preench = entradas.filter(e => e.valor !== null && !isNaN(Number(e.valor)));
+    const preench = entradas.filter(notaOk);
     const pesoP = preench.reduce((a,e) => a+(Number(e.peso)||1), 0);
     const media = preench.length && pesoP > 0 ? preench.reduce((a,e) => a+Number(e.valor)*(Number(e.peso)||1),0)/pesoP : null;
     const notaScore = media !== null ? Math.max(0, notaMin - media) / notaMin : 0.3;
     // Nearest prova bonus
-    const provasDays = STATE.provas.filter(p => p.data >= todayIso && normalizeStr(p.disciplina).includes(normalizeStr(sigla)))
+    const provasDays = upcomingProvas().filter(p => provaDaDisciplina(p, sigla, item && item.disciplina))
       .map(p => daysUntil(p.data));
     const provaBonus = provasDays.length ? Math.max(0, 14 - Math.min(...provasDays)) / 14 : 0;
     // Last studied
-    const lastStudy = STATE.pomSessions.filter(s => s.sigla === sigla).sort((a,b) => b.ts-a.ts)[0];
+    // ts é uma data ISO (texto): subtrair dava NaN e a ordenação saía errada
+    const lastStudy = STATE.pomSessions.filter(s => s.sigla === sigla).sort((a,b) => new Date(b.ts) - new Date(a.ts))[0];
     const staleness = lastStudy ? Math.min(7, (Date.now() - new Date(lastStudy.ts)) / 86400000) / 7 : 1;
     return notaScore * 0.35 + provaBonus * 0.4 + staleness * 0.15 + faltaPct * 0.1;
   };
@@ -4915,7 +5100,7 @@ function renderPlanoEstudos(){
   });
   panel.innerHTML = plan.map((p, i) => {
     const iso = localISO(p.d);
-    const hasProva = STATE.provas.some(pr => pr.data === iso && normalizeStr(pr.disciplina).includes(normalizeStr(p.sigla)));
+    const hasProva = STATE.provas.some(pr => pr.data === iso && provaDaDisciplina(pr, p.sigla, p.nome));
     const dayLabel = i === 0 ? 'Hoje' : i === 1 ? 'Amanhã' : `${DAYS_PT[p.d.getDay()]}, ${p.d.getDate()}/${p.d.getMonth()+1}`;
     return `<div class="plan-day">
       <div class="plan-day-label${i===0?' is-today':''}">${dayLabel}</div>
@@ -4938,8 +5123,8 @@ function renderCalculadoraFinal(){
     const item = STATE.historico.find(i => i.sigla === sigla);
     const nome = item ? item.disciplina : sigla;
     const entradas = STATE.notasParciais[sigla] || [];
-    const preench = entradas.filter(e => e.valor !== null && !isNaN(Number(e.valor)));
-    const vazias = entradas.filter(e => e.valor === null || isNaN(Number(e.valor)));
+    const preench = entradas.filter(notaOk);
+    const vazias = entradas.filter(e => !notaOk(e));
     const pesoPreench = preench.reduce((a,e) => a+(Number(e.peso)||1), 0);
     const pesoTotal = entradas.reduce((a,e) => a+(Number(e.peso)||1), 0);
     const pesoVazias = vazias.reduce((a,e) => a+(Number(e.peso)||1), 0);
@@ -4965,9 +5150,9 @@ function renderCalculadoraFinal(){
       Nota necessária nas avaliações restantes para atingir ${notaMin} pontos (nota mínima de aprovação).
     </div>
     ${rows.map(r => `<div class="calc-row">
-      <span class="calc-sigla">${r.sigla}</span>
+      <span class="calc-sigla">${esc(r.sigla)}</span>
       <span class="sim-nome" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-dim);" title="${esc(r.nome)}">${esc(r.nome)}</span>
-      <span class="calc-needed" style="color:var(--${r.cls});">${r.needed !== null ? r.needed.toFixed(1) : '—'}</span>
+      <span class="calc-needed" style="color:var(--${r.cls});">${r.needed !== null ? fmtNum(r.needed) : '—'}</span>
       <span class="calc-verdict" style="color:var(--${r.cls});">${r.verdict}</span>
     </div>`).join('')}
   `;
@@ -4998,10 +5183,11 @@ function renderIRAEvolution(){
     for(let i = 0; i < Math.max(ka.length, kb.length); i++){ const d = (ka[i]||0) - (kb[i]||0); if(d) return d; }
     return 0;
   });
-  if(sems.length < 2){ const wrap = document.getElementById('chartIRAEvolWrap'); if(wrap) wrap.innerHTML = `<div class="empty" style="padding:20px;">Histórico insuficiente para traçar evolução (mínimo 2 semestres concluídos).</div>`; return; }
+  if(chartIRAEvolRef){ chartIRAEvolRef.destroy(); chartIRAEvolRef = null; }
+  if(sems.length < 2){ chartEmpty(canvas, 'A evolução aparece quando houver notas de pelo menos 2 semestres no Histórico.'); return; }
+  chartEmpty(canvas, null);
   const labels = sems.map(s => /^\d+$/.test(s) ? `${s}º` : s);
   const vals = sems.map(s => bySem[s].peso > 0 ? bySem[s].soma/bySem[s].peso : null);
-  if(chartIRAEvolRef) chartIRAEvolRef.destroy();
   const isDark = document.documentElement.dataset.theme === 'dark' || (!document.documentElement.dataset.theme && window.matchMedia('(prefers-color-scheme:dark)').matches);
   const textColor = isDark ? '#9ca3af' : '#6b7280';
   chartIRAEvolRef = new Chart(canvas, {
@@ -5021,7 +5207,7 @@ function renderIRAEvolution(){
     },
     options:{
       responsive:true, maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:v=>`IRA: ${v.raw.toFixed(2)}`}}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:v=>`IRA: ${fmtNum(v.raw, 2)}`}}},
       scales:{
         x:{grid:{color:'rgba(128,128,128,.1)'},ticks:{color:textColor}},
         y:{min:0,max:100,grid:{color:'rgba(128,128,128,.1)'},ticks:{color:textColor,callback:v=>v.toFixed(0)}}
@@ -5057,11 +5243,11 @@ function renderProdutividade(){
       <div><div style="font-size:10px;font-family:var(--mono);color:var(--text-faint);letter-spacing:.06em;margin-bottom:3px;">DIAS ESTUDADOS</div><div style="font-size:24px;font-weight:700;font-family:var(--mono);">${studyDays}</div></div>
       <div><div style="font-size:10px;font-family:var(--mono);color:var(--text-faint);letter-spacing:.06em;margin-bottom:3px;">MÉDIA/SESSÃO</div><div style="font-size:24px;font-weight:700;font-family:var(--mono);">${Math.round(totalMin/sessions.length)}min</div></div>
     </div>
-    <div class="section-label" style="margin:0 0 10px;">POR DISCIPLINA (ALL TIME)</div>
+    <div class="section-label" style="margin:0 0 10px;">Por disciplina, desde o início</div>
     ${sorted.map(d => {
       const h = Math.floor(d.min/60), m = d.min%60;
       return `<div class="prod-stat-row">
-        <div class="prod-disc" title="${esc(d.nome)}">${d.sigla} <span style="color:var(--text-faint);font-family:var(--sans);">${esc(d.nome)}</span></div>
+        <div class="prod-disc" title="${esc(d.nome)}">${esc(d.sigla)} <span style="color:var(--text-faint);font-family:var(--sans);">${esc(d.nome)}</span></div>
         <div class="prod-sessions">${d.count}× pomodoro</div>
         <div class="prod-time">${h>0?h+'h':''}${m>0?m+'m':''}</div>
         <div style="width:80px;height:4px;border-radius:2px;background:var(--line);overflow:hidden;flex-shrink:0;">
@@ -5099,7 +5285,7 @@ function renderKanban(){
           <div class="kc-meta">
             <span class="badge badge-${prCls}" style="font-size:9px;">${t.prioridade}</span>
             ${t.disciplina ? `, ${esc(t.disciplina)}` : ''}
-            ${t.prazo ? `, ${fmtDate(t.prazo)}${overdue?'':''}` : ''}
+            ${t.prazo ? `, ${fmtDate(t.prazo)}${overdue?' (atrasado)':''}` : ''}
           </div>
         </div>`;
       }).join('') : `<div class="kanban-empty">Nenhuma tarefa aqui</div>`}
@@ -5128,10 +5314,10 @@ function renderMetaNotas(){
     const item = STATE.historico.find(i => i.sigla === sigla);
     const nome = item ? item.disciplina : sigla;
     return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line-soft);">
-      <span style="font-family:var(--mono);font-weight:700;width:52px;flex-shrink:0;">${sigla}</span>
+      <span style="font-family:var(--mono);font-weight:700;width:52px;flex-shrink:0;">${esc(sigla)}</span>
       <span style="flex:1;font-size:12.5px;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(nome)}</span>
       <input type="number" min="0" max="100" step="1" placeholder="Meta" value="${metas[sigla]??''}"
-        data-meta-sigla="${sigla}"
+        data-meta-sigla="${esc(sigla)}" aria-label="Meta de ${esc(sigla)}"
         style="width:70px;background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r);color:var(--text);padding:4px 8px;font-family:var(--mono);font-size:13px;text-align:center;">
     </div>`;
   }).join('');
@@ -5156,14 +5342,14 @@ function horasStatus(hc){
   if(hc.validadas>0) return {label:'Em Curso', cls:'amber'};
   return {label:'Pendente', cls:'gray'};
 }
-function horasEditCard(fieldKey, label, accent){
+function horasEditCard(fieldKey, label, accent, unidade = 'horas'){
   const val = STATE.horasGlobal[fieldKey] ?? 0;
   return `<div class="panel stat" style="--accent:var(--${accent})">
     <div class="stat__label">${label}</div>
     <input
       class="horas-global-input"
       data-hg="${fieldKey}"
-      type="number" min="0"
+      type="number" min="0" inputmode="numeric" aria-label="${label}"
       value="${val}"
       style="
         font-family:var(--mono); font-size:24px; font-weight:600; margin-top:8px;
@@ -5171,7 +5357,7 @@ function horasEditCard(fieldKey, label, accent){
         width:100%; padding:0 0 2px; outline:none; line-height:1;
       "
     >
-    <div style="font-size:10px; color:var(--text-faint); margin-top:5px;">horas, clique para editar</div>
+    <div style="font-size:10px; color:var(--text-faint); margin-top:5px;">${unidade}, toque para editar</div>
   </div>`;
 }
 function renderHorasComp(){
@@ -5181,7 +5367,7 @@ function renderHorasComp(){
       ${horasEditCard('confirmadas', 'Nº de horas confirmadas', 'green')}
       ${horasEditCard('consumidas',  'Nº de horas consumidas',  'blue')}
       ${horasEditCard('previstas',   'Nº de horas previstas',   'amber')}
-      ${horasEditCard('creditos',    'Nº de créditos',          'gray')}
+      ${horasEditCard('creditos',    'Nº de créditos',          'gray', 'créditos')}
     `;
     resumo.querySelectorAll('.horas-global-input').forEach(inp => {
       inp.addEventListener('focus', () => { inp.style.borderBottomColor = 'var(--blue)'; });
@@ -5202,12 +5388,12 @@ function renderHorasComp(){
     const st = horasStatus(hc);
     const pct = hc.total ? Math.min(100, Math.round(hc.validadas/hc.total*100)) : 0;
     return `<tr>
-      <td class="mono" style="font-weight:600;">${hc.sigla}</td>
-      <td>${hc.nome}</td>
-      <td class="mono">${hc.total}h</td>
-      <td><input class="cell-input" data-hc-val="${hc.id}" type="number" min="0" value="${hc.validadas}" style="width:70px;"> <span style="font-size:11px;color:var(--text-faint);">(${pct}%)</span></td>
+      <td class="mono" style="font-weight:600;">${esc(hc.sigla)}</td>
+      <td>${esc(hc.nome)}</td>
+      <td class="mono" data-label="Total">${Number(hc.total) || 0}h</td>
+      <td data-label="Validadas"><input class="cell-input" data-hc-val="${esc(hc.id)}" type="number" min="0" inputmode="numeric" value="${Number(hc.validadas) || 0}" style="width:70px;" aria-label="Horas validadas de ${esc(hc.nome)}"> <span style="font-size:11px;color:var(--text-faint);">(${pct}%)</span></td>
       <td><span class="led led-${st.cls}"></span> <span class="badge badge-${st.cls}">${st.label}</span></td>
-      <td><button class="btn btn-ghost btn-sm" data-del-hc="${hc.id}" title="Remover">✕</button></td>
+      <td><button class="btn btn-ghost btn-sm" data-del-hc="${esc(hc.id)}" title="Remover" aria-label="Remover ${esc(hc.nome)}">✕</button></td>
     </tr>`;
   }).join('') : `<tr><td colspan="6"><div class="empty">Nenhuma atividade cadastrada</div></td></tr>`;
 
@@ -5272,7 +5458,8 @@ document.getElementById('btnAddDisc').addEventListener('click', async () => {
   const sigla = document.getElementById('hSigla').value.trim().toUpperCase();
   const nome = document.getElementById('hNome').value.trim();
   const notaRaw = document.getElementById('hNota').value.trim();
-  const nota = notaRaw==='' ? null : (isNaN(Number(notaRaw)) ? notaRaw : Number(notaRaw));
+  const notaNum = Number(notaRaw.replace(',', '.'));
+  const nota = notaRaw==='' ? null : (isNaN(notaNum) ? notaRaw.toUpperCase() : notaNum);
   if(!sigla||!nome) return;
   if(STATE.historico.some(i=>i.sigla===sigla)){ showToast('Sigla já existe no histórico.', 'error'); return; }
   const disc = {sigla, disciplina:nome, ch:null, nota, semestre:null, _custom:true};
@@ -5360,21 +5547,32 @@ function openModalHorario(){
   const dias = WEEK_DAYS;
   const container = document.getElementById('modalHorarioRows');
 
+  // horário digitado como "7:30" vira "07:30", para as comparações de texto funcionarem
+  const hm = v => { const m = /^(\d{1,2}):?(\d{2})$/.exec(String(v || '').trim()); return m ? m[1].padStart(2, '0') + ':' + m[2] : String(v || '').trim(); };
+  // lê o que está digitado na tela, para não perder edições ao remover ou adicionar linhas
+  const readRows = () => Array.from(container.querySelectorAll('.modal-row')).map((row, i) => Object.assign({}, editList[i], {
+    dia: row.querySelector('[data-mr="dia"]').value,
+    inicio: hm(row.querySelector('[data-mr="inicio"]').value) || (editList[i] || {}).inicio || '',
+    fim: hm(row.querySelector('[data-mr="fim"]').value) || (editList[i] || {}).fim || '',
+    disciplina: row.querySelector('[data-mr="disciplina"]').value.trim(),
+    local: row.querySelector('[data-mr="local"]').value.trim(),
+  }));
   function buildRows(list){
     container.innerHTML = list.map((a,i) => `
       <div class="modal-row" data-row-idx="${i}">
-        <select class="modal-input" data-mr="dia">
+        <select class="modal-input" data-mr="dia" aria-label="Dia">
           ${dias.map(d=>`<option${d===a.dia?' selected':''}>${d}</option>`).join('')}
         </select>
-        <input class="modal-input" data-mr="inicio" value="${a.inicio||''}" placeholder="19:30">
-        <input class="modal-input" data-mr="fim" value="${a.fim||''}" placeholder="21:10">
-        <input class="modal-input" data-mr="disciplina" value="${a.disciplina||''}" placeholder="Nome da disciplina">
-        <input class="modal-input" data-mr="local" value="${a.local||''}" placeholder="I-7">
-        <button class="btn btn-ghost" style="padding:4px 7px;" data-del-row="${i}">✕</button>
+        <input class="modal-input" type="time" data-mr="inicio" value="${esc(hm(a.inicio))}" aria-label="Início">
+        <input class="modal-input" type="time" data-mr="fim" value="${esc(hm(a.fim))}" aria-label="Fim">
+        <input class="modal-input" data-mr="disciplina" value="${esc(a.disciplina)}" placeholder="Disciplina" aria-label="Disciplina">
+        <input class="modal-input" data-mr="local" value="${esc(a.local)}" placeholder="Sala" aria-label="Local">
+        <button class="btn btn-ghost" style="padding:4px 7px;" data-del-row="${i}" aria-label="Remover aula">✕</button>
       </div>`).join('');
     container.querySelectorAll('[data-del-row]').forEach(b => {
       b.addEventListener('click', () => {
-        list.splice(Number(b.dataset.delRow), 1); buildRows(list);
+        editList = readRows();
+        editList.splice(Number(b.dataset.delRow), 1); buildRows(editList);
       });
     });
   }
@@ -5383,21 +5581,16 @@ function openModalHorario(){
   buildRows(editList);
 
   document.getElementById('btnAddAula').onclick = () => {
+    editList = readRows();
     editList.push({dia:'Segunda', inicio:'19:30', fim:'21:10', disciplina:'', local:'', tipo:'Teórica'});
     buildRows(editList);
   };
 
   document.getElementById('saveModalHorario').onclick = async () => {
-    const rows = container.querySelectorAll('.modal-row');
-    editList = Array.from(rows).map(row => ({
-      dia: row.querySelector('[data-mr="dia"]').value,
-      inicio: row.querySelector('[data-mr="inicio"]').value.trim(),
-      fim: row.querySelector('[data-mr="fim"]').value.trim(),
-      disciplina: row.querySelector('[data-mr="disciplina"]').value.trim(),
-      local: row.querySelector('[data-mr="local"]').value.trim(),
-      tipo: 'Teórica',
-    })).filter(a => a.disciplina);
-    STATE.aulasCustom = editList;
+    editList = readRows().filter(a => a.disciplina).map(a => Object.assign({tipo:'Teórica'}, a));
+    // as disciplinas sem horário fixo não aparecem no editor, mas continuam no horário
+    const semHorario = getAulas().filter(a => !a.inicio || a.inicio === '—');
+    STATE.aulasCustom = [...editList, ...semHorario];
     await storeSet('aulas_custom', STATE.aulasCustom);
     closeModalHorario();
     renderHorario(); renderPainel();
@@ -5426,7 +5619,7 @@ function openModalTurmas(){
   grid.innerHTML = WEEK_DAYS.map(d => `
     <div class="field">
       <label>${d}</label>
-      <textarea class="modal-input" data-turma-dia="${d}" rows="4" style="resize:vertical; font-size:12px;">${(turmas[d]||[]).join('\n')}</textarea>
+      <textarea class="modal-input" data-turma-dia="${d}" rows="4" style="resize:vertical; font-size:12px;" aria-label="Turmas de ${d}">${esc((turmas[d]||[]).join('\n'))}</textarea>
     </div>`).join('');
   document.getElementById('modalTurmas').classList.add('open');
 }
@@ -5519,13 +5712,13 @@ function renderTarefas(){
 
   const renderRow = t => {
     if(t.id === _editingTarefaId){
-      const catOpts = (CATS.includes(t.categoria) ? CATS : [t.categoria, ...CATS]).map(c=>`<option${t.categoria===c?' selected':''}>${c}</option>`).join('');
+      const catOpts = (CATS.includes(t.categoria) ? CATS : [t.categoria, ...CATS]).map(c=>`<option${t.categoria===c?' selected':''}>${esc(c)}</option>`).join('');
       const prioOpts = PRIOS.map(p=>`<option${t.prioridade===p?' selected':''}>${p}</option>`).join('');
       return `<div class="task-edit-panel" id="tEdit_${t.id}">
-        <input id="tEditNome_${t.id}" class="input" value="${t.nome.replace(/"/g,'&quot;')}" style="font-weight:600;margin-bottom:8px;width:100%;">
+        <input id="tEditNome_${t.id}" class="input" value="${esc(t.nome)}" aria-label="Nome da tarefa" style="font-weight:600;margin-bottom:8px;width:100%;">
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:10px;">
           <div class="field"><label>Categoria</label><select id="tEditCat_${t.id}">${catOpts}</select></div>
-          <div class="field"><label>Disciplina</label><input id="tEditDisc_${t.id}" value="${(t.disciplina||'').replace(/"/g,'&quot;')}"></div>
+          <div class="field"><label>Disciplina</label><input id="tEditDisc_${t.id}" value="${esc(t.disciplina||'')}" list="discSuggestList"></div>
           <div class="field"><label>Prazo</label><input id="tEditPrazo_${t.id}" type="date" value="${t.prazo||''}"></div>
           <div class="field"><label>Prioridade</label><select id="tEditPrio_${t.id}">${prioOpts}</select></div>
         </div>
@@ -5538,8 +5731,10 @@ function renderTarefas(){
     const overdue = t.status!=='Concluído' && t.prazo && daysUntil(t.prazo) < 0;
     const stCls = t.status==='Concluído' ? 'green' : (overdue ? 'red' : (t.status==='Em andamento' ? 'amber' : 'gray'));
     const prCls = t.prioridade==='Alta' ? 'red' : (t.prioridade==='Média' ? 'amber' : 'green');
+    const feita = t.status === 'Concluído';
     return `<div class="task-row">
-      <span class="badge badge-${prCls}">${t.prioridade}</span>
+      <button type="button" class="task-check${feita ? ' is-done' : ''}" data-check-tarefa="${esc(t.id)}" aria-pressed="${feita}" aria-label="${feita ? 'Reabrir' : 'Concluir'} ${esc(t.nome)}" title="${feita ? 'Reabrir' : 'Concluir'}">${ico('save')}</button>
+      <span class="badge badge-${prCls} task-prio">${esc(t.prioridade)}</span>
       <div class="name">
         <div class="t">${esc(t.nome)}</div>
         <div class="meta">${esc(t.categoria)}${t.disciplina?(', '+esc(t.disciplina)):''}${t.prazo?(', '+fmtDate(t.prazo)+(overdue?' (atrasado)':'')):''}</div>
@@ -5577,6 +5772,7 @@ function renderTarefas(){
   document.getElementById('tarefasList').innerHTML = mainArr.length
     ? mainHtml + doneSection
     : (doneSection || `<div class="empty">Nenhuma tarefa${filterStatus!=='Todas'||filterCat||filterPrio||search||filterDisc||hojeActive?' com esse filtro':' por aqui'}</div>`);
+  if(_editingTarefaId) linkFieldLabels(document.getElementById('tarefasList'));
 
   updateNavBadges();
 
@@ -5592,6 +5788,22 @@ function renderTarefas(){
     };
     el.addEventListener('click', fn);
     el.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); fn(e); } });
+  });
+  // círculo de concluir: um toque conclui, outro reabre
+  document.querySelectorAll('[data-check-tarefa]').forEach(el => {
+    el.addEventListener('click', async e => {
+      const t = STATE.tarefas.find(x => x.id === el.dataset.checkTarefa);
+      if(!t) return;
+      if(t.status !== 'Concluído'){
+        const r = el.getBoundingClientRect();
+        burst(e.clientX || r.left + r.width/2, e.clientY || r.top + r.height/2);
+        t.status = 'Concluído';
+      } else {
+        t.status = 'Pendente';
+      }
+      await storeSet('tarefas', STATE.tarefas);
+      renderTarefas(); renderPainel(); renderLab();
+    });
   });
   document.querySelectorAll('[data-edit-tarefa]').forEach(el => {
     el.addEventListener('click', () => { _editingTarefaId = el.dataset.editTarefa; renderTarefas(); });
@@ -5745,24 +5957,36 @@ document.getElementById('btnSaveConfig').addEventListener('click', async () => {
 });
 
 // ---------------- render: Provas (calendário de provas) ----------------
-function populateProvasDisciplinaSelect(){
-  const sel = document.getElementById('pDisciplinaSelect');
-  if(!sel) return;
-  const atuais = STATE.config.disciplinasAtuais || [];
-  const opts = atuais.map(sigla => {
+// Disciplina guardada na prova: "Nome (SIGLA)", o mesmo formato do calendário oficial,
+// para a prova se ligar à disciplina (agenda, plano de estudos, detalhes)
+function provaDiscValor(sigla){
+  const item = STATE.historico.find(i => i.sigla === sigla);
+  return item && item.disciplina && item.disciplina !== sigla ? `${item.disciplina} (${sigla})` : sigla;
+}
+function provaDiscOptions(){
+  return (STATE.config.disciplinasAtuais || []).map(sigla => {
     const item = STATE.historico.find(i => i.sigla === sigla);
     const nome = item ? item.disciplina : sigla;
-    return `<option value="${esc(nome)}">${esc(sigla)} — ${esc(nome)}</option>`;
-  });
-  opts.unshift('<option value="">Selecione uma disciplina…</option>');
-  opts.push('<option value="__outro__">Outro…</option>');
-  sel.innerHTML = opts.join('');
+    return `<option value="${esc(provaDiscValor(sigla))}">${esc(sigla)} — ${esc(nome)}</option>`;
+  }).join('');
+}
+// select de disciplina + campo "Outro…" (formulário da aba Provas e o de adicionar rápido)
+function fillProvaDiscSelect(sel, custom){
+  if(!sel) return;
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">Selecione uma disciplina…</option>' + provaDiscOptions() + '<option value="__outro__">Outra…</option>';
+  if(prev && [...sel.options].some(o => o.value === prev)) sel.value = prev;
+  custom.style.display = sel.value === '__outro__' ? 'block' : 'none';
   sel.onchange = () => {
-    const custom = document.getElementById('pDisciplinaCustom');
     custom.style.display = sel.value === '__outro__' ? 'block' : 'none';
     if(sel.value === '__outro__') custom.focus();
   };
 }
+function populateProvasDisciplinaSelect(){
+  fillProvaDiscSelect(document.getElementById('pDisciplinaSelect'), document.getElementById('pDisciplinaCustom'));
+}
+// sigla da prova ("Nome (P10-A)" → "P10"), ou vazio
+function provaSigla(p){ return (((/\(([^)]+)\)\s*$/.exec(p.disciplina || '') || [])[1]) || '').split('-')[0].trim(); }
 
 function renderProvas(){
   populateProvasDisciplinaSelect();
@@ -5771,7 +5995,7 @@ function renderProvas(){
   const next = upcoming[0];
   sub.innerHTML = `
     <span class="meta-chip"><b>${STATE.provas.length}</b> provas marcadas</span>
-    ${next ? `<span class="meta-chip" style="color:var(--blue);border-color:var(--blue-dim);">próxima ${diasLabel(daysUntil(next.data))}</span>` : ''}
+    ${next ? `<span class="meta-chip" style="color:var(--blue);border-color:var(--blue-dim);">próxima: ${diasLabel(daysUntil(next.data))}</span>` : ''}
   `;
 
   renderCalendarGrid();
@@ -5783,9 +6007,10 @@ function renderProvas(){
     const opts = atuais.map(sigla => {
       const item = STATE.historico.find(i=>i.sigla===sigla);
       const nome = item ? item.disciplina : sigla;
-      const sel = nome === currentDisc;
+      const sel = !matched && provaDaDisciplina({disciplina: currentDisc}, sigla, nome);
       if(sel) matched = true;
-      return `<option value="${esc(nome)}"${sel?' selected':''}>${esc(sigla)} — ${esc(nome)}</option>`;
+      // a disciplina atual mantém o texto original (com a turma, como "(P10-A)")
+      return `<option value="${esc(sel ? currentDisc : provaDiscValor(sigla))}"${sel?' selected':''}>${esc(sigla)} — ${esc(nome)}</option>`;
     });
     opts.push(`<option value="__outro__"${!matched?' selected':''}>Outro…</option>`);
     return opts.join('');
@@ -5807,7 +6032,7 @@ function renderProvas(){
           <div class="field"><label>Hora</label><input id="pEditHora_${p.id}" type="time" value="${p.hora||''}"></div>
         </div>
         <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:end;">
-          <div class="field" style="margin:0;"><label>Local</label><input id="pEditLocal_${p.id}" value="${(p.local||'').replace(/"/g,'&quot;')}" placeholder="ex: Lab A203"></div>
+          <div class="field" style="margin:0;"><label>Local</label><input id="pEditLocal_${p.id}" value="${esc(p.local||'')}" placeholder="ex: Lab A203"></div>
           <button class="btn" data-cancel-edit-prova="${p.id}">Cancelar</button>
           <button class="btn btn-primary" data-save-prova="${p.id}">Salvar</button>
         </div>
@@ -5817,12 +6042,13 @@ function renderProvas(){
       <div class="datebox"><div class="d">${new Date(p.data+'T00:00:00').getDate()}</div><div class="m">${MESES[new Date(p.data+'T00:00:00').getMonth()].slice(0,3)}</div></div>
       <div class="info">
         <div class="t">${esc(p.disciplina)} <span class="badge badge-blue" style="margin-left:4px;">${esc(p.tipo)}</span></div>
-        <div class="s">${p.hora?p.hora+'h, ':''}${p.local || 'local não informado'}, faltam ${daysUntil(p.data)===0?'0 dias (hoje)':daysUntil(p.data)+' dias'}</div>
+        <div class="s">${(() => { const n = daysUntil(p.data); return n === 0 ? 'Hoje' : n === 1 ? 'Amanhã' : `Em ${n} dias`; })()}${p.hora ? ' às ' + esc(p.hora) : ''}${p.local ? ', ' + esc(p.local) : ''}</div>
       </div>
       <button class="btn btn-ghost" data-edit-prova="${p.id}" title="Editar" aria-label="Editar prova">${ico('edit')}</button>
       <button class="btn btn-ghost" data-del-prova="${p.id}" title="Excluir" aria-label="Excluir prova de ${esc(p.disciplina)}">✕</button>
     </div>`;
-  }).join('') : `<div class="empty">Nenhuma prova marcada ainda. Adicione a primeira acima.</div>`;
+  }).join('') : `<div class="empty">Nenhuma prova marcada ainda. ${matchMedia('(max-width:880px)').matches ? 'Toque no + ou num dia do calendário para marcar.' : 'Adicione a primeira acima.'}</div>`;
+  if(_editingProvaId) linkFieldLabels(list);
 
   document.querySelectorAll('[data-edit-prova]').forEach(el => {
     el.addEventListener('click', () => { _editingProvaId = el.dataset.editProva; renderProvas(); });
@@ -5857,8 +6083,7 @@ function renderProvas(){
   });
 
   // Provas realizadas (passadas) — colapsável com delete
-  const todayIso = localISO(new Date());
-  const passadas = sortedProvas().filter(p => p.data < todayIso).reverse();
+  const passadas = sortedProvas().filter(p => !provaPendente(p)).reverse();
   const passadasEl = document.getElementById('provasPassadasList');
   const passadasSection = document.getElementById('provasPassadasSection');
   if(passadasSection) passadasSection.style.display = passadas.length ? '' : 'none';
@@ -5879,7 +6104,7 @@ function renderProvas(){
         <div class="datebox"><div class="d">${new Date(p.data+'T00:00:00').getDate()}</div><div class="m">${MESES[new Date(p.data+'T00:00:00').getMonth()].slice(0,3)}</div></div>
         <div class="info">
           <div class="t">${esc(p.disciplina)} <span class="badge badge-blue" style="margin-left:4px;">${esc(p.tipo)}</span></div>
-          <div class="s">${p.hora?p.hora+'h, ':''}${p.local || 'local não informado'}</div>
+          <div class="s">${esc([p.hora ? 'às ' + p.hora : '', p.local || ''].filter(Boolean).join(', '))}</div>
         </div>
         <button class="btn btn-ghost" data-del-prova="${p.id}" title="Excluir" aria-label="Excluir prova de ${esc(p.disciplina)}">✕</button>
       </div>`).join('');
@@ -5924,12 +6149,24 @@ function renderCalendarGrid(){
     const exams = examsByDay[c.iso] || [];
     const isToday = c.iso === todayIso;
     let inner = `<div class="num">${c.day}</div>`;
-    exams.slice(0,2).forEach(p => { inner += `<div class="exam-dot" title="${esc(p.disciplina)} ${esc(p.tipo)}">${esc(examLabel(p))}</div>`; });
+    exams.slice(0,2).forEach(p => { inner += `<div class="exam-dot" title="${esc(p.disciplina)} ${esc(p.tipo)}"><span class="ed-full">${esc(examLabel(p))}</span><span class="ed-short">${esc(provaSigla(p) || p.tipo)}</span></div>`; });
     if(exams.length > 2) inner += `<div class="exam-more">+${exams.length-2}</div>`;
-    return `<div class="navday${isToday?' today':''}">${inner}</div>`;
+    return `<div class="navday${isToday?' today':''}" data-cal-dia="${c.iso}" role="button" tabindex="0" aria-label="${c.day} de ${MESES[m]}${exams.length ? ', ' + exams.length + (exams.length === 1 ? ' prova' : ' provas') : ''}. Marcar prova neste dia">${inner}</div>`;
   }).join('');
 
   grid.innerHTML = html;
+  // tocar num dia abre o formulário de prova com a data já preenchida
+  grid.querySelectorAll('[data-cal-dia]').forEach(el => {
+    const go = () => {
+      if(matchMedia('(max-width:880px)').matches){ openQuickAdd('prova', el.dataset.calDia); return; }
+      document.getElementById('pData').value = el.dataset.calDia;
+      const sel = document.getElementById('pDisciplinaSelect');
+      sel.scrollIntoView({behavior:'smooth', block:'center'});
+      sel.focus({preventScroll:true});
+    };
+    el.addEventListener('click', go);
+    el.addEventListener('keydown', e => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); go(); } });
+  });
 }
 document.getElementById('calPrev').addEventListener('click', () => {
   STATE.calMonth.m--; if(STATE.calMonth.m<0){ STATE.calMonth.m=11; STATE.calMonth.y--; }
@@ -5952,7 +6189,7 @@ document.getElementById('btnAddProva').addEventListener('click', async () => {
     ? document.getElementById('pDisciplinaCustom').value.trim()
     : sel.value;
   const data = document.getElementById('pData').value;
-  if(!disciplina || !data) return;
+  if(!disciplina || !data){ showToast(!disciplina ? 'Escolha a disciplina da prova.' : 'Escolha a data da prova.', 'error'); return; }
   const p = {
     id: 'p-'+Date.now(),
     disciplina, tipo: document.getElementById('pTipo').value,
@@ -5961,7 +6198,9 @@ document.getElementById('btnAddProva').addEventListener('click', async () => {
   };
   STATE.provas.push(p);
   await storeSet('provas', STATE.provas);
+  showToast('Prova marcada', 'success');
   sel.value = '';
+  document.getElementById('pDisciplinaCustom').value = '';
   document.getElementById('pDisciplinaCustom').style.display = 'none';
   document.getElementById('pData').value='';
   document.getElementById('pHora').value=''; document.getElementById('pLocal').value='';
@@ -6038,28 +6277,13 @@ document.getElementById('fileImport').addEventListener('change', (e) => {
       }
       if(backup.base_data) await storeSet('base_data', backup.base_data);
       await storeSet('setup_done', true);
-      if(backup.config) await storeSet('config', backup.config);
-      if(backup.historico_overrides) await storeSet('historico_overrides', backup.historico_overrides);
-      if(backup.historico_custom) await storeSet('historico_custom', backup.historico_custom);
-      if(backup.historico_removidos) await storeSet('historico_removidos', backup.historico_removidos);
-      if(backup.tarefas) await storeSet('tarefas', backup.tarefas);
-      if(backup.lab_concluido) await storeSet('lab_concluido', backup.lab_concluido);
-      if(backup.provas) await storeSet('provas', backup.provas);
-      if(backup.faltas) await storeSet('faltas', backup.faltas);
-      if(backup.faltas_limites) await storeSet('faltas_limites', backup.faltas_limites);
-      if(backup.relatorios_ocultos) await storeSet('relatorios_ocultos', backup.relatorios_ocultos);
-      if(backup.relatorios_overrides) await storeSet('relatorios_overrides', backup.relatorios_overrides);
-      if(backup.horas_comp) await storeSet('horas_comp', backup.horas_comp);
-      if(backup.horas_global) await storeSet('horas_global', backup.horas_global);
-      if(backup.aulas_custom) await storeSet('aulas_custom', backup.aulas_custom);
-      if(backup.turmas_custom) await storeSet('turmas_custom', backup.turmas_custom);
-      if(backup.notas_parciais) await storeSet('notas_parciais', backup.notas_parciais);
-      if(backup.metas_notas) await storeSet('metas_notas', backup.metas_notas);
-      if(backup.tema) await storeSet('tema', backup.tema);
-      if(backup.lembretes) await storeSet('lembretes', backup.lembretes);
-      if(backup.pom_sessions) await storeSet('pom_sessions', backup.pom_sessions);
-      if(backup.disc_notes) await storeSet('disc_notes', backup.disc_notes);
-      if(backup.estudos_materiais) await storeSet('estudos_materiais', backup.estudos_materiais);
+      // tudo o que o backup traz substitui o atual, inclusive valores vazios
+      // (ex.: aulas_custom = null volta para o horário original em vez de manter o editado)
+      const BACKUP_KEYS = ['config','historico_overrides','historico_custom','historico_removidos','tarefas',
+        'lab_concluido','provas','faltas','faltas_limites','relatorios_ocultos','relatorios_overrides','horas_comp',
+        'horas_global','aulas_custom','turmas_custom','notas_parciais','metas_notas','tema','lembretes',
+        'pom_sessions','disc_notes','estudos_materiais'];
+      for(const k of BACKUP_KEYS){ if(k in backup) await storeSet(k, backup[k]); }
       const msg = document.getElementById('importMsg'); msg.classList.add('show');
       setTimeout(()=>msg.classList.remove('show'), 1800);
       showToast('Backup restaurado! Recarregando…', 'success', 900);
@@ -6865,11 +7089,11 @@ function showProfilePicker(){
     const initials = displayName.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('');
     const days = p.createdAt ? Math.floor((Date.now()-p.createdAt)/86400000) : null;
     const since = days===null ? '' : days===0 ? 'criado hoje' : `há ${days} dia${days===1?'':'s'}`;
-    return `<div class="profile-card" data-profile-id="${p.id}">
-      <button class="pc-del-btn" data-del-id="${p.id}" title="Excluir perfil" onclick="event.stopPropagation(); confirmDeleteProfile('${p.id}')">×</button>
-      <div class="pc-avatar">${initials||'?'}</div>
-      <div class="pc-name">${displayName}</div>
-      <div class="pc-curso">${p.curso||''}</div>
+    return `<div class="profile-card" data-profile-id="${esc(p.id)}">
+      <button class="pc-del-btn" data-del-id="${esc(p.id)}" title="Excluir perfil" aria-label="Excluir perfil de ${esc(displayName)}" onclick="event.stopPropagation(); confirmDeleteProfile(this.dataset.delId)">×</button>
+      <div class="pc-avatar">${esc(initials)||'?'}</div>
+      <div class="pc-name">${esc(displayName)}</div>
+      <div class="pc-curso">${esc(p.curso||'')}</div>
       ${since ? `<div class="pc-since">${since}</div>` : ''}
     </div>`;
   }).join('') + (cloudUser()
@@ -6901,16 +7125,16 @@ function confirmDeleteProfile(profileId){
   const p = profiles.find(x => x.id === profileId);
   if(!p) return;
   // Substituir o card pelo estado de confirmação
-  const card = document.querySelector(`.profile-card[data-profile-id="${profileId}"]`);
+  const card = document.querySelector(`.profile-card[data-profile-id="${CSS.escape(profileId)}"]`);
   if(!card) return;
   card.style.cursor = 'default';
   card.innerHTML = `
     <div class="pc-confirm">
-      <p>Excluir perfil<br><span class="pc-confirm-name">${p.name}</span>?</p>
+      <p>Excluir perfil<br><span class="pc-confirm-name">${esc(p.name)}</span>?</p>
       <p style="font-size:11px; color:var(--text-faint);">Todos os dados serão apagados<br>e não poderão ser recuperados.</p>
       <div class="pc-confirm-btns">
-        <button class="del-yes" onclick="deleteProfile('${profileId}')">Excluir</button>
-        <button class="del-no" onclick="showProfilePicker()">Cancelar</button>
+        <button class="del-yes" data-del-id="${esc(profileId)}" onclick="event.stopPropagation(); deleteProfile(this.dataset.delId)">Excluir</button>
+        <button class="del-no" onclick="event.stopPropagation(); showProfilePicker()">Cancelar</button>
       </div>
     </div>`;
 }
@@ -7013,8 +7237,10 @@ function closeWizard(){
 // ============================================================
 // QUICK ADD (Ctrl+K)
 // ============================================================
-function openQuickAdd(tab){
+function openQuickAdd(tab, data){
   const overlay = document.getElementById('quickAddOverlay');
+  if(STATE.config) fillProvaDiscSelect(document.getElementById('qaProvaDisciplina'), document.getElementById('qaProvaDiscCustom'));
+  if(data) document.getElementById('qaProvaData').value = data;
   overlay.style.display = 'flex';
   switchQATab(tab || 'tarefa');
   setTimeout(() => {
@@ -7052,6 +7278,7 @@ function switchQATab(tab){
   document.getElementById('quickAddOverlay').addEventListener('click', e => {
     if(e.target === e.currentTarget) closeQuickAdd();
   });
+  document.getElementById('qaClose').addEventListener('click', closeQuickAdd);
 
   document.querySelectorAll('.qa-tab-btn').forEach(btn => {
     btn.addEventListener('click', () => switchQATab(btn.dataset.qaTab));
@@ -7109,7 +7336,8 @@ function switchQATab(tab){
   });
 
   document.getElementById('qaBtnAddProva').addEventListener('click', async () => {
-    const disc = document.getElementById('qaProvaDisciplina').value.trim();
+    const sel = document.getElementById('qaProvaDisciplina');
+    const disc = sel.value === '__outro__' ? document.getElementById('qaProvaDiscCustom').value.trim() : sel.value;
     const data = document.getElementById('qaProvaData').value;
     if(!disc || !data){ showToast('Preencha disciplina e data', 'error'); return; }
     const p = {
@@ -7121,7 +7349,9 @@ function switchQATab(tab){
     };
     STATE.provas.push(p);
     await storeSet('provas', STATE.provas);
-    document.getElementById('qaProvaDisciplina').value = '';
+    sel.value = '';
+    document.getElementById('qaProvaDiscCustom').value = '';
+    document.getElementById('qaProvaDiscCustom').style.display = 'none';
     document.getElementById('qaProvaData').value = '';
     document.getElementById('qaProvaHora').value = '';
     document.getElementById('qaProvaLocal').value = '';
@@ -7163,6 +7393,7 @@ function wizardRender(){
   // Renderiza passo
   const body = document.getElementById('wizardBody');
   [,wizardStep1,wizardStep2,wizardStep3,wizardStep4,wizardStep5][WIZARD_STEP](body);
+  linkFieldLabels(body);
   body.scrollTop = 0;
 }
 
@@ -7738,6 +7969,16 @@ document.getElementById('btnNewProfile').addEventListener('click', () => {
 
 function esc(s){ return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
+// <label> de um .field sem "for": liga ao campo, para o leitor de tela anunciar o nome dele
+function linkFieldLabels(root){
+  (root || document).querySelectorAll('.field, .wiz-field').forEach(f => {
+    const label = f.querySelector(':scope > label');
+    if(!label || label.htmlFor || label.querySelector('input, select, textarea')) return;
+    const ctl = f.querySelector('input:not([type=hidden]), select, textarea');
+    if(ctl && ctl.id) label.htmlFor = ctl.id;
+  });
+}
+
 // ============================================================
 // TOAST
 // ============================================================
@@ -7754,7 +7995,7 @@ function showToast(text, type='success', duration=3000){
   toast.className = `toast toast-${type}`;
   const icon = type==='success' ? '✓' : type==='error' ? '✕' : 'ℹ';
   const iconColor = type==='success' ? 'var(--green)' : type==='error' ? 'var(--red)' : 'var(--blue)';
-  toast.innerHTML = `<span style="font-weight:700;font-family:var(--mono);color:${iconColor}">${icon}</span><span>${text}</span>`;
+  toast.innerHTML = `<span style="font-weight:700;font-family:var(--mono);color:${iconColor}">${icon}</span><span>${esc(text)}</span>`;
   container.appendChild(toast);
   const remove = () => {
     toast.classList.add('leaving');
@@ -7788,13 +8029,15 @@ function burst(x, y){
 // STAT COUNT-UP
 // ============================================================
 function animateCount(el, target, duration=550){
-  if(isNaN(target)||target===0){el.textContent=target;return;}
-  if(Number(el.textContent)===target){return;}
+  const key = el.dataset.countKey;
+  const from = key && _countShown[key] != null ? _countShown[key] : 0;
+  if(key) _countShown[key] = target;
+  if(isNaN(target) || from === target || matchMedia('(prefers-reduced-motion: reduce)').matches){ el.textContent = target; return; }
   const start=performance.now();
   const update=t=>{
     const p=Math.min(1,Math.max(0,(t-start)/duration));
     const eased=1-(1-p)**3;
-    el.textContent=Math.round(target*eased);
+    el.textContent=Math.round(from + (target-from)*eased);
     if(p<1) requestAnimationFrame(update);
     else el.textContent=target;
   };
@@ -7930,7 +8173,11 @@ const POM = {
   interval: null,
   focusDur: 25 * 60,
   breakDur: 5 * 60,
+  endAt: null,   // hora em que a fase atual termina: o tempo sai do relógio, não da contagem de ticks
+  disc: '',      // disciplina escolhida quando o foco começou
 };
+// guardado só neste aparelho (fora do prefixo sincronizado), para o timer sobreviver a recarregar o app
+const POM_KEY = 'cc_pomodoro';
 
 function pomRender(){
   const display = document.getElementById('pomDisplay');
@@ -7982,15 +8229,15 @@ function pomBeep(){
   }catch(e){}
 }
 
-async function pomLogSession(){
+async function pomLogSession(fimEm){
   const sel = document.getElementById('pomDiscSelect');
-  const sigla = sel ? sel.value : '';
+  const sigla = POM.disc || (sel ? sel.value : '');
   if(!sigla) return;
   const item = STATE.historico.find(i => i.sigla === sigla);
   const nome = item ? item.disciplina : sigla;
   const duracaoMin = Math.round(POM.focusDur / 60);
   if(!STATE.pomSessions) STATE.pomSessions = [];
-  STATE.pomSessions.push({sigla, nome, duracaoMin, ts: new Date().toISOString()});
+  STATE.pomSessions.push({sigla, nome, duracaoMin, ts: new Date(fimEm || Date.now()).toISOString()});
   // Keep only last 90 days to avoid unbounded growth
   const cutoff = new Date(); cutoff.setDate(cutoff.getDate()-90);
   STATE.pomSessions = STATE.pomSessions.filter(s => new Date(s.ts) >= cutoff);
@@ -8003,7 +8250,7 @@ function pomPopulateDiscSelect(){
   const sel = document.getElementById('pomDiscSelect');
   if(!sel) return;
   const disc = STATE.config ? (STATE.config.disciplinasAtuais || []) : [];
-  const prev = sel.value;
+  const prev = sel.value || POM.disc;
   sel.innerHTML = `<option value="">— Disciplina estudada —</option>` +
     disc.map(sigla => {
       const item = STATE.historico.find(i => i.sigla === sigla);
@@ -8013,40 +8260,93 @@ function pomPopulateDiscSelect(){
   if(prev) sel.value = prev;
 }
 
+function pomSave(){
+  try{
+    localStorage.setItem(POM_KEY, JSON.stringify({running:POM.running, isBreak:POM.isBreak, timeLeft:POM.timeLeft, round:POM.round, endAt:POM.endAt, disc:POM.disc}));
+  }catch(e){}
+}
+function pomStart(){
+  const sel = document.getElementById('pomDiscSelect');
+  if(!POM.isBreak) POM.disc = sel ? sel.value : '';
+  POM.running = true;
+  POM.endAt = Date.now() + POM.timeLeft * 1000;
+  clearInterval(POM.interval);
+  POM.interval = setInterval(pomTick, 1000);
+  pomSave();
+}
+function pomStop(){
+  if(POM.running && POM.endAt) POM.timeLeft = Math.max(0, Math.ceil((POM.endAt - Date.now()) / 1000));
+  clearInterval(POM.interval);
+  POM.interval = null; POM.running = false; POM.endAt = null;
+  pomSave();
+}
+// Aviso de fim de fase quando o app não está na tela (no computador, com outra aba aberta)
+function pomNotify(title, body){
+  if(document.visibilityState === 'visible' || !('Notification' in window) || Notification.permission !== 'granted') return;
+  const opts = {body, tag:'pomodoro', icon:'icons/icon-192.png'};
+  ('serviceWorker' in navigator ? navigator.serviceWorker.getRegistration() : Promise.resolve(null))
+    .then(reg => reg ? reg.showNotification(title, opts) : new Notification(title, opts)).catch(() => {});
+}
+// O tempo restante vem da hora de término: o celular congela o app em segundo plano e os ticks param
 function pomTick(){
-  POM.timeLeft--;
+  if(!POM.running) return;
+  POM.timeLeft = Math.max(0, Math.ceil((POM.endAt - Date.now()) / 1000));
   if(POM.timeLeft <= 0){
-    pomBeep();
+    const fimEm = POM.endAt;
+    const atrasado = Date.now() - fimEm > 5000; // terminou com o app fechado ou em segundo plano
+    clearInterval(POM.interval);
+    POM.interval = null; POM.running = false; POM.endAt = null;
     if(POM.isBreak){
+      if(!atrasado) pomBeep();
+      pomNotify('Pausa encerrada', 'Hora de voltar para mais uma rodada de foco.');
       POM.isBreak = false;
       POM.timeLeft = POM.focusDur;
       POM.round = Math.min(POM.round + 1, POM.totalRounds);
     } else {
-      pomLogSession();
+      if(!atrasado) pomBeep();
+      pomNotify('Foco concluído', `Bom trabalho. Faça uma pausa de ${POM.breakDur/60} minutos.`);
+      if(atrasado && document.visibilityState === 'visible') showToast(`Seu foco de ${POM.focusDur/60} min terminou enquanto o app estava fechado.`, 'info', 5000);
+      pomLogSession(fimEm);
       POM.isBreak = true;
       POM.timeLeft = POM.breakDur;
     }
-    clearInterval(POM.interval);
-    POM.running = false;
-    POM.interval = null;
+    pomSave();
   }
   pomRender();
 }
+// Retoma um timer que estava correndo antes de o app recarregar (chamado depois do init)
+let _pomRestored = false;
+function pomRestore(){
+  if(_pomRestored) return;
+  _pomRestored = true;
+  let s = null;
+  try{ s = JSON.parse(localStorage.getItem(POM_KEY) || 'null'); }catch(e){}
+  if(!s) return;
+  POM.isBreak = !!s.isBreak;
+  POM.round = Number(s.round) || 1;
+  POM.timeLeft = Number(s.timeLeft) || (POM.isBreak ? POM.breakDur : POM.focusDur);
+  POM.disc = s.disc || '';
+  if(s.running && s.endAt){
+    POM.running = true;
+    POM.endAt = Number(s.endAt);
+    POM.interval = setInterval(pomTick, 1000);
+    pomTick();
+  }
+  pomRender();
+}
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible' && POM.running) pomTick(); });
 
 document.getElementById('pomToggle').addEventListener('click', () => {
-  if(POM.running){
-    clearInterval(POM.interval); POM.interval = null; POM.running = false;
-  } else {
-    POM.running = true;
-    POM.interval = setInterval(pomTick, 1000);
-  }
+  if(POM.running) pomStop(); else pomStart();
   pomRender();
 });
 document.getElementById('pomReset').addEventListener('click', () => {
-  clearInterval(POM.interval); POM.interval = null;
-  POM.running = false; POM.isBreak = false; POM.timeLeft = POM.focusDur; POM.round = 1;
+  pomStop();
+  POM.isBreak = false; POM.timeLeft = POM.focusDur; POM.round = 1;
+  pomSave();
   pomRender();
 });
+document.getElementById('pomDiscSelect').addEventListener('change', e => { if(POM.running && !POM.isBreak){ POM.disc = e.target.value; pomSave(); } });
 document.getElementById('pomodoroBtn').addEventListener('click', () => {
   const w = document.getElementById('pomodoroWidget');
   const open = w.style.display === 'none';

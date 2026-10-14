@@ -49,10 +49,10 @@ Atualizações chegam sozinhas: a cada nova versão publicada, o app instalado s
 - **Horas complementares** e **Laboratório** (turmas e entrega de relatórios)
 
 **Organização**
-- Tarefas em lista ou em quadro kanban, com prioridade, categoria e filtros
-- Calendário de provas
-- Grade de horário semanal
-- Timer Pomodoro com registro de sessões de estudo por disciplina
+- Tarefas em lista ou em quadro kanban, com prioridade, categoria, filtros e conclusão com um toque
+- Calendário de provas: tocar num dia já abre o formulário com a data
+- Grade de horário semanal (no celular, um dia por vez, começando por hoje)
+- Timer Pomodoro com registro de sessões de estudo por disciplina, que segue contando com a tela bloqueada ou o app fechado
 
 **Do jeito de um app**
 - Funciona offline e sincroniza quando a internet volta
@@ -76,12 +76,12 @@ Atualizações chegam sozinhas: a cada nova versão publicada, o app instalado s
 | Parte | Tecnologia |
 |---|---|
 | Interface | HTML, CSS e JavaScript puros, num único `index.html`, sem framework nem etapa de build no desenvolvimento |
-| Gráficos | [Chart.js](https://www.chartjs.org/) |
+| Gráficos | [Chart.js](https://www.chartjs.org/), carregado só quando a aba Notas abre |
 | App instalável e offline | Web App Manifest + Service Worker (`sw.js`) |
 | Conta e sincronização | [Supabase](https://supabase.com/) (Auth + Postgres + Realtime), em `sync.js` |
 | Publicação | GitHub Pages via GitHub Actions |
 
-**Sincronização em resumo:** cada gravação local é marcada com horário e enviada para a tabela `kv` (uma linha por item). Ao abrir o app, ao voltar para ele e em tempo real, as alterações mais novas de outros aparelhos são aplicadas. Em caso de conflito, vale a alteração mais recente de cada item.
+**Sincronização em resumo:** cada gravação local é marcada com horário e enviada para a tabela `kv` (uma linha por item). Ao abrir o app, ao voltar para ele e em tempo real, as alterações mais novas de outros aparelhos são aplicadas; ao voltar para o app, ele confere primeiro só os horários e baixa apenas os itens que mudaram. Em caso de conflito, vale a alteração mais recente de cada item.
 
 ## Desenvolvimento
 

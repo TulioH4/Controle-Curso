@@ -16,9 +16,13 @@ const SHELL = [
   './icons/apple-touch-icon.png',
 ];
 const CDN_HOSTS = ['cdnjs.cloudflare.com', 'cdn.jsdelivr.net'];
+// The charts library loads only when the Notas tab opens; keep a copy so the tab also works offline.
+const OPTIONAL = ['https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js'];
 
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  event.waitUntil(caches.open(CACHE)
+    .then(c => c.addAll(SHELL).then(() => Promise.all(OPTIONAL.map(u => c.add(u).catch(() => {})))))
+    .then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', event => {
@@ -156,13 +160,14 @@ self.addEventListener('fetch', event => {
   }
 
   if (url.origin === self.location.origin) {
+    const network = caches.open(CACHE).then(cache =>
+      fetch(req).then(res => { if (res.ok) return cache.put(req, res.clone()).then(() => res); return res; }));
     event.respondWith(
-      caches.open(CACHE).then(async cache => {
-        const cached = await cache.match(req, {ignoreSearch: true});
-        const network = fetch(req).then(res => { if (res.ok) cache.put(req, res.clone()); return res; }).catch(() => cached);
-        return cached || network;
-      })
+      caches.open(CACHE).then(async cache => (await cache.match(req, {ignoreSearch: true})) || network)
+        .catch(() => network)
     );
+    // the background refresh must finish even after the cached copy was already returned
+    event.waitUntil(network.catch(() => {}));
     return;
   }
 

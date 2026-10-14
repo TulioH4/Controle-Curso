@@ -110,17 +110,29 @@
     return true;
   }
 
+  // Runs every time the app comes back to the screen, so it first asks only for keys and
+  // timestamps (a few KB) and then downloads the values of the keys that changed elsewhere.
   async function pull(){
     if (!client || !state.user) return false;
     if (!navigator.onLine) { setStatus('offline'); return false; }
     setStatus('syncing');
     let changed = false;
     try {
+      const newer = [];
       for (let from = 0; ; from += 1000) {
-        const { data, error } = await client.from('kv').select('key,value,updated_at').range(from, from + 999);
+        const { data, error } = await client.from('kv').select('key,updated_at').range(from, from + 999);
+        if (error) throw error;
+        data.forEach(r => {
+          if (!r.key || !isSynced(PREFIX + r.key)) return;
+          const local = meta[r.key];
+          if (!local || local.t < Date.parse(r.updated_at)) newer.push(r.key);
+        });
+        if (data.length < 1000) break;
+      }
+      for (let i = 0; i < newer.length; i += 100) {
+        const { data, error } = await client.from('kv').select('key,value,updated_at').in('key', newer.slice(i, i + 100));
         if (error) throw error;
         data.forEach(r => { if (applyRow(r)) changed = true; });
-        if (data.length < 1000) break;
       }
       // anything stored here that the account has never seen gets uploaded
       for (let i = 0; i < ls.length; i++) {
