@@ -1619,6 +1619,7 @@
   .day-overview{margin:18px 0 0; max-width:68ch; font-size:16px; line-height:1.55; color:var(--text-dim); text-wrap:pretty;}
   .day-overview b{color:var(--text); font-weight:600;}
   .day-overview__hi{color:var(--text); font-weight:600;}
+  .day-overview__nota{display:block; margin-top:8px;}
   .notif-list{list-style:none; margin:14px 0 0; padding:0; display:flex; flex-direction:column; gap:8px;}
   .notif-list li{display:flex; gap:12px; font-size:13px; line-height:1.45; color:var(--text-dim);}
   .notif-list b{flex:0 0 64px; color:var(--text); font-weight:600;}
@@ -3923,7 +3924,7 @@ function renderDayOverview(){
   }
   // nota que já deve ter saído (prova de 3 a 21 dias atrás): vem por último, sem tirar lugar dos prazos
   const pNota = provasSemNota().find(p => daysUntil(p.data) <= -3 && daysUntil(p.data) >= -21);
-  const nudge = pNota && frases.length < 3 ? ` Já saiu a nota da <b>${esc(pNota.tipo)} de ${esc(disc(pNota))}</b>? <button type="button" class="link-btn" data-lancar-nota="${esc(pNota.id)}">Lançar nota</button>` : '';
+  const nudge = pNota && frases.length < 3 ? `<span class="day-overview__nota">Já saiu a nota da <b>${esc(pNota.tipo)} de ${esc(disc(pNota))}</b>? <button type="button" class="link-btn" data-lancar-nota="${esc(pNota.id)}">Lançar nota</button></span>` : '';
   el.innerHTML = `<span class="day-overview__hi">${saud}${nome ? ', ' + esc(nome) : ''}.</span> ${frases.slice(0,3).join(' ')}${nudge}`;
 }
 document.getElementById('dayOverview').addEventListener('click', e => {
