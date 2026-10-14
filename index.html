@@ -305,10 +305,10 @@
   .notas-card-nome{font-size:12.5px; font-weight:500; flex:1; line-height:1.35;}
   .notas-entries{display:flex; flex-direction:column; gap:5px;}
   .nota-row{display:flex; align-items:center; gap:6px;}
-  .nota-label-input{width:50px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.09); border-radius:3px; padding:4px 6px; color:var(--text); font-family:var(--mono); font-size:11px;}
-  .nota-valor-input{flex:1; min-width:0; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.09); border-radius:3px; padding:4px 8px; color:var(--text); font-family:var(--mono); font-size:12.5px; text-align:right;}
+  .nota-label-input{flex:1; min-width:0; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.09); border-radius:3px; padding:4px 6px; color:var(--text); font-family:var(--mono); font-size:11px;}
+  .nota-valor-input{flex:0 0 72px; width:72px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.09); border-radius:3px; padding:4px 8px; color:var(--text); font-family:var(--mono); font-size:12.5px; text-align:right;}
   .nota-peso-sep{font-size:10px; color:var(--text-faint); padding:0 1px; flex-shrink:0;}
-  .nota-peso-input{width:36px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); border-radius:3px; padding:4px 4px; color:var(--text-dim); font-family:var(--mono); font-size:11px; text-align:center;}
+  .nota-peso-input{width:46px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); border-radius:3px; padding:4px 4px; color:var(--text-dim); font-family:var(--mono); font-size:11px; text-align:center;}
   .nota-peso-input:focus{outline:none; border-color:rgba(167,139,250,.5); color:var(--text);}
   .nota-label-input:focus,.nota-valor-input:focus{outline:none; border-color:rgba(96,165,250,.5);}
   .nota-del{background:none; border:none; color:var(--text-faint); cursor:pointer; font-size:17px; padding:0 3px; line-height:1; opacity:.6;}
@@ -1293,6 +1293,8 @@
   .screen__header h2{font-size:28px; font-weight:700; letter-spacing:-.025em; margin:0;}
   .screen__header .sub{color:var(--text-dim);}
   .section-label{text-transform:none; letter-spacing:-.01em; font-size:15px; font-weight:650; color:var(--text); margin:34px 0 12px;}
+  /* nesses blocos o título é o primeiro filho e perde a margem (:first-child): o espaço vai no bloco */
+  #asyncWrap, #profilesSection, #railSettings{margin-top:34px;}
   .section-label::after{display:none;}
   .stat__label, th, .field label, .pom-label, .rail__brand p, .rail__clock .date,
   .chip, .meta-chip, .badge, .profile-screen__title, .wizard-step-title{text-transform:none; letter-spacing:0;}
@@ -1948,6 +1950,7 @@
     .screen__header{flex-direction:row; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px;}
     .screen__header h2{font-size:31px; letter-spacing:-.025em; line-height:1.1;}
     .section-label{margin-top:26px;}
+    #asyncWrap, #profilesSection, #railSettings{margin-top:26px;}
 
     /* tab bar */
     .mtabbar{
@@ -3585,6 +3588,8 @@ function tarefaDaDisciplina(t, sigla, nome){
 const notaOk = e => !!e && e.valor !== null && e.valor !== undefined && e.valor !== '' && !isNaN(Number(e.valor));
 // Números com vírgula, como se escreve em português
 const fmtNum = (n, d = 1) => Number(n).toFixed(d).replace('.', ',');
+// peso de uma nota parcial: pode ser quebrado (0,5 para uma prova que vale metade da NP1)
+const fmtPeso = p => String(Number(p) || 1).replace('.', ',');
 
 
 // ---------------- Disciplinas em Risco (painel) ----------------
@@ -4335,7 +4340,7 @@ function showDiscDetail(sigla){
       <div class="section-label" style="margin:0 0 8px;">Notas parciais</div>
       ${entradas.map(e => {
         const v = (e.valor !== null && e.valor !== '' && !isNaN(e.valor)) ? Number(e.valor) : null;
-        return `<div class="sim-row"><span class="sim-sigla">${esc(e.label||'?')}</span><span style="font-size:11.5px;color:var(--text-faint);">peso ${Number(e.peso)||1}</span><span style="flex:1;"></span><span class="sim-atual" style="color:${v!==null?(v>=notaMin?'var(--green)':'var(--red)'):'var(--text-faint)'};">${v !== null ? fmtNum(v) : '—'}</span></div>`;
+        return `<div class="sim-row"><span class="sim-sigla">${esc(e.label||'?')}</span><span style="font-size:11.5px;color:var(--text-faint);">peso ${fmtPeso(e.peso)}</span><span style="flex:1;"></span><span class="sim-atual" style="color:${v!==null?(v>=notaMin?'var(--green)':'var(--red)'):'var(--text-faint)'};">${v !== null ? fmtNum(v) : '—'}</span></div>`;
       }).join('')}
     </div>` : ''}
     ${provasDisc.length ? `
@@ -4519,9 +4524,9 @@ function renderNotasSemestre(){
               value="${e.valor!==null&&e.valor!==''&&!isNaN(e.valor)?Number(e.valor):''}" placeholder="—"
               data-nota-valor data-sigla="${esc(sigla)}" data-idx="${i}">
             <span class="nota-peso-sep" title="Peso desta nota">×</span>
-            <input class="nota-peso-input" type="number" min="1" max="100" step="1"
-              value="${Number(e.peso)||1}" title="Peso (para média ponderada)"
-              data-nota-peso data-sigla="${esc(sigla)}" data-idx="${i}">
+            <input class="nota-peso-input" type="text" inputmode="decimal" autocomplete="off" maxlength="5"
+              value="${fmtPeso(e.peso)}" title="Peso (para média ponderada). Aceita números quebrados, como 0,5"
+              aria-label="Peso de ${esc(e.label || 'nota')}" data-nota-peso data-sigla="${esc(sigla)}" data-idx="${i}">
             <button class="nota-del" data-nota-del data-sigla="${esc(sigla)}" data-idx="${i}" title="Remover linha">×</button>
           </div>`).join('')}
         <div class="nota-foot">
@@ -4593,8 +4598,9 @@ async function addNotaRow(sigla){
 }
 async function updateNotaPeso(sigla, idx, val){
   if(!STATE.notasParciais[sigla]) return;
-  const p = Math.max(1, parseInt(val, 10) || 1);
-  STATE.notasParciais[sigla][idx].peso = p;
+  // "0,5" com vírgula também vale; vazio, zero ou texto voltam para 1
+  const n = parseFloat(String(val).replace(',', '.'));
+  STATE.notasParciais[sigla][idx].peso = n > 0 ? Math.min(100, Math.round(n * 100) / 100) : 1;
   await storeSet('notas_parciais', STATE.notasParciais);
   renderNotasSemestre();
 }
