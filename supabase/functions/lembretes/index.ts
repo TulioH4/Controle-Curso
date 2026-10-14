@@ -4,7 +4,7 @@
 // subscribed device it reads the synced data (kv table) and, in the device's time zone,
 // sends at most once:
 //   - from 07:00, a summary of today (exams, tasks due, lab reports due, overdue tasks);
-//   - from 20:00, a heads-up about tomorrow;
+//   - from 20:00, a heads-up about tomorrow (on Sundays, a summary of the week ahead instead);
 //   - an alert when an exam starts in two hours or less.
 // Days with nothing due send nothing. POST {"test": true} with a user's access token
 // sends a test notification to that user's devices only.
@@ -34,6 +34,7 @@ const minutes = (hm) => { const [h, m] = String(hm).split(':').map(Number); retu
 const hora = (hm) => { if (!hm) return ''; const [H, M] = hm.split(':'); return ` às ${Number(H)}h${M && M !== '00' ? M : ''}`; };
 const semSigla = (s) => String(s || '').replace(/\s*\([^)]*\)\s*$/, '');
 const provaTxt = (p) => `${p.tipo || 'Prova'} de ${semSigla(p.disciplina)}${hora(p.hora)}`;
+const DIAS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
 // kv rows of one account → open tasks, exams and pending lab reports of every profile
 export function collect(kv) {
@@ -87,7 +88,26 @@ export function plan(all, now) {
     }
   }
 
-  if (agora >= 20 * 60) {
+  // Sunday 20:00: the week ahead (it already covers Monday, so no separate heads-up)
+  const domingo = new Date(hoje + 'T12:00:00Z').getUTCDay() === 0;
+  if (agora >= 20 * 60 && domingo) {
+    const dias = Array.from({ length: 7 }, (_, i) => addDays(hoje, i + 1));
+    const quando = (d) => (d === amanha ? 'Amanhã' : DIAS[new Date(d + 'T12:00:00Z').getUTCDay()]);
+    const provas = all.provas.filter((p) => dias.includes(p.data))
+      .sort((a, b) => (a.data + (a.hora || '')).localeCompare(b.data + (b.hora || '')));
+    const prazos = [
+      ...all.tarefas.filter((t) => dias.includes(t.prazo)).map((t) => ({ d: t.prazo, txt: t.nome })),
+      ...all.rels.filter((r) => dias.includes(r.fim)).map((r) => ({ d: r.fim, txt: `entrega do ${r.nome}` })),
+    ].sort((a, b) => a.d.localeCompare(b.d));
+    if (provas.length || prazos.length) {
+      const partes = [];
+      if (provas.length) partes.push(provas.length === 1 ? '1 prova' : `${provas.length} provas`);
+      if (prazos.length) partes.push(prazos.length === 1 ? '1 prazo' : `${prazos.length} prazos`);
+      const linhas = [...provas.map((p) => `${quando(p.data)}: ${provaTxt(p)}`), ...prazos.map((x) => `${quando(x.d)}: ${x.txt}`)];
+      msgs.push({ tag: `semana-${hoje}`, title: `Sua semana: ${partes.join(' e ')}`, url: './',
+        body: lista(linhas.length > 5 ? [...linhas.slice(0, 4), `e mais ${linhas.length - 4}`] : linhas) });
+    }
+  } else if (agora >= 20 * 60) {
     const provas = provasDia(amanha);
     const outros = [
       ...tarefasDia(amanha).map((t) => `Vence amanhã: ${t.nome}`),

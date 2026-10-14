@@ -54,6 +54,26 @@ const hora = hm => { if (!hm) return ''; const [H, M] = hm.split(':'); return ` 
 const semSigla = s => String(s || '').replace(/\s*\([^)]*\)\s*$/, '');
 const provaTxt = p => `${p.tipo || 'Prova'} de ${semSigla(p.disciplina)}${hora(p.hora)}`;
 const mins = hm => { const [h, m] = String(hm).split(':').map(Number); return h * 60 + (m || 0); };
+const DIAS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+// Sunday evening: what the coming week (Monday to Sunday) holds, exams first
+function resumoSemana(snap, now) {
+  const dias = Array.from({ length: 7 }, (_, i) => isoDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() + i + 1)));
+  const quando = d => d === dias[0] ? 'Amanhã' : DIAS[new Date(d + 'T12:00:00').getDay()];
+  const provas = (snap.provas || []).filter(p => dias.includes(p.data))
+    .sort((a, b) => (a.data + (a.hora || '')).localeCompare(b.data + (b.hora || '')));
+  const prazos = [
+    ...(snap.tarefas || []).filter(t => dias.includes(t.prazo)).map(t => ({ d: t.prazo, txt: t.nome })),
+    ...(snap.rels || []).filter(r => dias.includes(r.fim)).map(r => ({ d: r.fim, txt: `entrega do ${r.nome}` })),
+  ].sort((a, b) => a.d.localeCompare(b.d));
+  if (!provas.length && !prazos.length) return null;
+  const partes = [];
+  if (provas.length) partes.push(provas.length === 1 ? '1 prova' : `${provas.length} provas`);
+  if (prazos.length) partes.push(prazos.length === 1 ? '1 prazo' : `${prazos.length} prazos`);
+  const linhas = [...provas.map(p => `${quando(p.data)}: ${provaTxt(p)}`), ...prazos.map(x => `${quando(x.d)}: ${x.txt}`)];
+  const corpo = linhas.length > 5 ? [...linhas.slice(0, 4), `e mais ${linhas.length - 4}`] : linhas;
+  return { tag: `semana-${isoDay(now)}`, url: './', title: `Sua semana: ${partes.join(' e ')}`, body: corpo.join('\n') };
+}
 
 async function checkReminders() {
   if (self.Notification && Notification.permission !== 'granted') return;
@@ -83,8 +103,13 @@ async function checkReminders() {
   else if (outrosHoje.length) notes.push({ tag: `dia-${hoje}`, url: './?aba=tarefas', title: outrosHoje.length === 1 ? outrosHoje[0] : 'Seu dia hoje',
     body: outrosHoje.length === 1 ? 'Não esquece.' : outrosHoje.join('\n') });
 
-  // tomorrow: once, from 17h
-  if (agora >= 17 * 60) {
+  // Sunday, from 17h: the week ahead (it already covers Monday, so no separate heads-up)
+  if (agora >= 17 * 60 && now.getDay() === 0) {
+    const semana = resumoSemana(snap, now);
+    if (semana) notes.push(semana);
+  }
+  // other days, from 17h: tomorrow
+  else if (agora >= 17 * 60) {
     const a = doDia(amanha);
     const outros = [...a.tarefas.map(t => `Vence amanhã: ${t.nome}`), ...a.rels.map(r => `Entrega amanhã: ${r.nome}`)];
     if (a.provas.length === 1) notes.push({ tag: `vespera-${hoje}`, url: './?aba=provas', title: `Amanhã tem ${provaTxt(a.provas[0])}`,

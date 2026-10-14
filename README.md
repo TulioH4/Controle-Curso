@@ -34,7 +34,7 @@ Atualizações chegam sozinhas: a cada nova versão publicada, o app instalado s
 ## Funcionalidades
 
 **Painel**
-- Um recado curto do dia: provas de hoje e amanhã, tarefas atrasadas ou vencendo e relatórios perto do prazo
+- Um recado curto do dia: provas de hoje e amanhã, tarefas atrasadas ou vencendo, relatórios perto do prazo e a nota de prova que já deve ter saído
 - Resumo do dia: aulas, próxima aula, próxima prova e prazos da semana
 - Próximas provas com data, horário e sala; prazos de laboratório em aberto
 - Agenda da semana em grade, juntando aulas, provas, entregas e tarefas (no dia de uma prova, a aula da disciplina dá lugar a ela)
@@ -42,8 +42,8 @@ Atualizações chegam sozinhas: a cada nova versão publicada, o app instalado s
 - Linha do tempo de provas e plano de estudos sugerido para os próximos 7 dias
 
 **Acompanhamento acadêmico**
-- **Notas:** notas parciais com peso, meta por disciplina, calculadora de quanto falta na prova final, simulador de IRA e gráficos de desempenho
-- **Faltas:** contador com limite editável por disciplina, aviso quando chega perto do limite e ranking de risco
+- **Notas:** notas parciais com peso, meta por disciplina, calculadora de quanto falta na prova final, simulador de IRA e gráficos de desempenho; a nota de uma prova realizada pode ser lançada direto nela, e vai para a aba Notas
+- **Faltas:** contador com limite editável por disciplina, aviso quando chega perto do limite, ranking de risco e um botão **Faltei** nas aulas de hoje do painel
 - **Histórico** do curso inteiro, com busca, filtros e edição
 - **Mapa de Sucesso:** o currículo organizado semestre a semestre
 - **Horas complementares** e **Laboratório** (turmas e entrega de relatórios)
@@ -51,14 +51,15 @@ Atualizações chegam sozinhas: a cada nova versão publicada, o app instalado s
 **Organização**
 - Tarefas em lista ou em quadro kanban, com prioridade, categoria, filtros e conclusão com um toque
 - Calendário de provas: tocar num dia já abre o formulário com a data
+- Provas, tarefas e entregas exportadas para a agenda do celular (arquivo .ics, com aviso na véspera), ou uma prova por vez no Google Agenda
 - Grade de horário semanal (no celular, um dia por vez, começando por hoje)
-- Timer Pomodoro com registro de sessões de estudo por disciplina, que segue contando com a tela bloqueada ou o app fechado
+- Timer Pomodoro de 25 ou 50 minutos, com pausa longa a cada 4 rodadas e registro das sessões por disciplina; segue contando com a tela bloqueada ou o app fechado
 
 **Do jeito de um app**
 - Funciona offline e sincroniza quando a internet volta
 - `Ctrl K` adiciona tarefa ou prova de qualquer tela; teclas `1` a `9` trocam de aba; `?` mostra os atalhos
 - Atalhos no ícone (clique direito no Windows, toque longo no Android): nova tarefa, provas, tarefas
-- Notificações de provas e prazos do dia e do dia seguinte
+- Notificações de provas e prazos do dia e do dia seguinte e, no domingo à noite, o resumo da semana
 - Tema claro e escuro, no estilo *Liquid Glass*
 - Assistente de configuração para novos usuários: a grade de Engenharia de Produção do INATEL é montada com toques (escolha o semestre e ajuste as disciplinas); outros cursos importam via Excel ou texto
 - Backup em arquivo e, sem conta, vários perfis no mesmo aparelho

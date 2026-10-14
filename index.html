@@ -982,6 +982,9 @@
   .pom-disc-wrap select{width:100%;background:rgba(255,255,255,.07);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.10);border-radius:var(--r);color:var(--text);padding:5px 8px;font-size:11.5px;font-family:var(--sans);}
   .pom-disc-wrap select:focus{outline:none;border-color:var(--blue);}
   .pom-last-sess{font-size:10px;color:var(--text-faint);font-family:var(--mono);text-align:center;margin-top:5px;min-height:14px;}
+  .pom-modos{display:flex; gap:2px; padding:3px; margin-bottom:12px; border-radius:11px; background:var(--lg-fill); box-shadow:var(--lg-inner);}
+  .pom-modos button{flex:1; border:none; background:none; border-radius:8px; padding:5px 0; cursor:pointer; font:inherit; font-size:12px; color:var(--text-dim);}
+  .pom-modos button.active{background:var(--lg-fill-active); color:var(--text); font-weight:600; box-shadow:var(--lg-inner), 0 1px 3px rgba(0,0,0,.12);}
 
   /* ===== KANBAN ===== */
   .kanban-board{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-items:start;}
@@ -1872,6 +1875,45 @@
   .task-check:hover{border-color:var(--green); color:var(--green);}
   .task-check.is-done{background:var(--green); border-color:var(--green); color:#fff;}
   .qa-close, .ed-short, .hday{display:none;}
+  /* provas realizadas: a nota fica ao lado, a prova em si um pouco apagada */
+  .exam-row.is-past .datebox, .exam-row.is-past .info{opacity:.6;}
+  .prova-nota{width:64px !important; flex-shrink:0; text-align:center; font-size:14px !important; font-weight:600;}
+  .prova-nota.is-empty{border-style:dashed !important;}
+  .provas-semnota{font-size:11px; font-weight:600; color:var(--amber); text-transform:none; letter-spacing:0;}
+  .provas-semnota:empty{display:none;}
+  .link-btn{border:none; background:none; padding:0; font:inherit; color:var(--blue); font-weight:600; cursor:pointer; text-decoration:underline; text-underline-offset:3px;}
+  /* aulas de hoje: a aula que passou fica apagada, mas o botão Faltei continua legível */
+  .row-item.past{opacity:1;}
+  .row-item.past > .time, .row-item.past > .info{opacity:.45;}
+  .row-end{display:flex; align-items:center; gap:6px; flex-shrink:0;}
+  .grid-3 .row-item > .row-end{grid-area:badge;}
+  .falta-chip{
+    border:1px solid var(--line); background:transparent; color:var(--text-dim); border-radius:999px;
+    padding:4px 11px; font:inherit; font-size:12px; font-weight:500; cursor:pointer; white-space:nowrap;
+    transition:background .15s, color .15s, border-color .15s;
+  }
+  .falta-chip:hover{border-color:var(--red); color:var(--red);}
+  .falta-chip.is-on{background:var(--red-dim); border-color:transparent; color:var(--red); font-weight:600;}
+  /* levar para a agenda */
+  .agenda-btn{margin-top:14px; width:100%; justify-content:center; gap:7px;}
+  .agenda-btn .i{width:16px; height:16px;}
+  .agenda-intro{margin:0 0 14px; font-size:13.5px; line-height:1.5; color:var(--text-dim);}
+  .agenda-opcs{display:flex; flex-direction:column; border-radius:14px; background:var(--lg-fill); box-shadow:var(--lg-inner); padding:4px 12px;}
+  .agenda-opc{display:flex; align-items:center; gap:10px; padding:10px 0; font-size:14px; color:var(--text); cursor:pointer;}
+  .agenda-opc + .agenda-opc{border-top:1px solid var(--line-soft);}
+  .agenda-opc span{flex:1;}
+  .agenda-opc b{font-size:13px; color:var(--text-faint); font-weight:600;}
+  .agenda-opc input{width:18px; height:18px; accent-color:var(--blue);}
+  .agenda-help{margin:14px 0 0; font-size:12.5px; line-height:1.5; color:var(--text-faint);}
+  .agenda-help b{color:var(--text-dim);}
+  .agenda-links{display:flex; flex-direction:column;}
+  .agenda-link{display:flex; align-items:center; gap:10px; padding:10px 2px; border-bottom:1px solid var(--line-soft); color:var(--text); text-decoration:none;}
+  .agenda-link:last-child{border-bottom:none;}
+  .agenda-link__t{flex:1; min-width:0; display:flex; flex-direction:column; font-size:13.5px;}
+  .agenda-link__t span{font-size:12px; color:var(--text-faint);}
+  .agenda-link__add{font-size:12.5px; font-weight:600; color:var(--blue); flex-shrink:0;}
+  .faltas-conta{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:16px; font-size:12.5px; color:var(--text-dim);}
+  .faltas-conta select{background:var(--bg-alt); border:1px solid var(--line); border-radius:var(--r); color:var(--text); padding:6px 9px; font-size:12.5px;}
   .navday:not(.out){cursor:pointer;}
 
   .mtabbar, .mfab, .msheet, .msheet-backdrop, .agenda-list{display:none;}
@@ -2486,6 +2528,13 @@
       <div class="faltas-grid" id="faltasGrid"></div>
       <div class="section-label" style="margin-top:22px;">Ranking de risco</div>
       <div id="faltasRanking" class="panel panel--pad" style="--accent:var(--red)"></div>
+      <div class="faltas-conta">
+        <label for="cFaltasPorAula">O botão Faltei, nas aulas de hoje do painel, conta</label>
+        <select id="cFaltasPorAula">
+          <option value="hora-aula">1 falta por hora-aula (50 min)</option>
+          <option value="aula">1 falta por aula</option>
+        </select>
+      </div>
     </section>
 
     <!-- HORAS COMPLEMENTARES -->
@@ -2624,11 +2673,13 @@
         <div class="panel panel--pad" style="--accent:var(--red)">
           <div class="stat__label" style="margin-bottom:6px;">Próximas provas</div>
           <div id="provasList"></div>
+          <button class="btn btn-sm agenda-btn" id="btnAgendaExport" data-ico="calendar">Levar para a agenda do celular</button>
         </div>
         <div class="panel panel--pad" id="provasPassadasSection" style="display:none;--accent:var(--muted)">
-          <div class="stat__label" style="margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;" id="provasPassadasToggle">
+          <div class="stat__label" style="margin-bottom:6px;display:flex;align-items:center;gap:8px;cursor:pointer;" id="provasPassadasToggle" role="button" tabindex="0">
             <span>Provas realizadas</span>
-            <span id="provasPassadasChevron" style="font-size:.8em;opacity:.6;">▼</span>
+            <span class="provas-semnota" id="provasPassadasCount"></span>
+            <span id="provasPassadasChevron" style="font-size:.8em;opacity:.6;margin-left:auto;">▼</span>
           </div>
           <div id="provasPassadasList" style="display:none;"></div>
         </div>
@@ -2750,6 +2801,21 @@
   </div>
 </div>
 
+<!-- MODAL: levar provas e prazos para a agenda do celular -->
+<div class="modal-overlay" id="modalAgenda">
+  <div class="modal" style="max-width:540px;">
+    <div class="modal-head">
+      <h3>Levar para a agenda</h3>
+      <button class="btn btn-ghost" id="closeModalAgenda" style="padding:4px 8px; font-size:16px;" aria-label="Fechar">✕</button>
+    </div>
+    <div class="modal-body" id="agendaBody"></div>
+    <div class="modal-foot">
+      <button class="btn" id="cancelModalAgenda">Fechar</button>
+      <button class="btn btn-primary" id="baixarAgenda">Baixar arquivo da agenda</button>
+    </div>
+  </div>
+</div>
+
 <!-- Datalist para autocomplete de disciplinas -->
 <datalist id="discSuggestList"></datalist>
 
@@ -2758,7 +2824,11 @@
 <div id="pomodoroWidget" class="pomodoro-widget" style="display:none;">
   <div class="pom-header">
     <span class="pom-label" id="pomLabel">Foco de 25 min</span>
-    <button class="pom-close-btn" id="pomClose" title="Fechar">✕</button>
+    <button class="pom-close-btn" id="pomClose" title="Fechar" aria-label="Fechar timer">✕</button>
+  </div>
+  <div class="pom-modos" role="radiogroup" aria-label="Ritmo do timer">
+    <button type="button" role="radio" data-pom-modo="25" aria-checked="true">25 min</button>
+    <button type="button" role="radio" data-pom-modo="50" aria-checked="false">50 min</button>
   </div>
   <div class="pom-progress"><div class="pom-progress-bar" id="pomProgressFill" style="width:100%;"></div></div>
   <div class="pom-display" id="pomDisplay">25:00</div>
@@ -3026,6 +3096,7 @@ async function init(opts = {}){
   STATE.relatoriosOverrides = await storeGet('relatorios_overrides', {});
   STATE.faltas = await storeGet('faltas', {});
   STATE.faltasLimites = await storeGet('faltas_limites', {});
+  STATE.faltasRegistro = await storeGet('faltas_registro', []);
   STATE.horasComp = await storeGet('horas_comp', []);
   STATE.horasGlobal = await storeGet('horas_global', {confirmadas:0, consumidas:0, previstas:0, creditos:0});
   STATE.aulasCustom = await storeGet('aulas_custom', null);
@@ -3150,6 +3221,7 @@ const ICONS = {
   list:'<path d="M9 6.5h11M9 12h11M9 17.5h11M4.5 6.5h.01M4.5 12h.01M4.5 17.5h.01"/>',
   board:'<rect x="3.5" y="4" width="17" height="16" rx="3"/><path d="M9.2 4v16M14.8 4v16"/>',
   keyboard:'<rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6.5 10h.01M10 10h.01M14 10h.01M17.5 10h.01M7.5 14h9"/>',
+  calendar:'<rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
 };
 function ico(name, cls){
   return `<svg class="i${cls?' '+cls:''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]||''}</svg>`;
@@ -3341,7 +3413,7 @@ function closeMoreSheet(){
   const SYNC_KEYS = new Set([
     'config','historico_overrides','historico_custom','historico_removidos',
     'tarefas','lab_concluido','relatorios_ocultos','relatorios_overrides',
-    'provas','faltas','faltas_limites','horas_comp','horas_global',
+    'provas','faltas','faltas_limites','faltas_registro','horas_comp','horas_global',
     'aulas_custom','turmas_custom','notas_parciais','metas_notas','tema','lembretes','pom_sessions','disc_notes','estudos_materiais','labs'
   ]);
   let _syncTimeout = null;
@@ -3361,6 +3433,7 @@ function closeMoreSheet(){
         if(bareKey === 'provas')                STATE.provas = fresh;
         if(bareKey === 'faltas')                STATE.faltas = fresh;
         if(bareKey === 'faltas_limites')        STATE.faltasLimites = fresh;
+        if(bareKey === 'faltas_registro')       STATE.faltasRegistro = fresh;
         if(bareKey === 'historico_overrides')   STATE.historicoOverrides = fresh;
         if(bareKey === 'historico_custom')      STATE.historicoCustom = fresh;
         if(bareKey === 'historico_removidos')   STATE.historicoRemovidos = fresh;
@@ -3660,14 +3733,22 @@ function renderPainel(){
   `;
   document.querySelectorAll('#resumoStats [data-count]').forEach(el => animateCount(el, Number(el.dataset.count)));
 
+  const hojeIso = localISO(now);
   document.getElementById('aulasHojeList').innerHTML = aulasHoje.length ? aulasHoje.map(a => {
     const state = a.fim <= nowHM ? 'past' : (a.inicio <= nowHM ? 'now' : 'upcoming');
+    // "Faltei": registra a falta da aula na disciplina, um toque de novo desfaz
+    const sigla = aulaSigla(a);
+    const reg = sigla ? faltaDaAula(hojeIso, a.inicio, sigla) : null;
+    const chip = !sigla ? '' : `<button type="button" class="falta-chip${reg ? ' is-on' : ''}" data-faltei="${esc(a.inicio)}|${esc(sigla)}|${esc(a.fim || '')}"
+      aria-pressed="${!!reg}" aria-label="${reg ? `Falta registrada em ${esc(sigla)}, toque para desfazer` : `Registrar falta em ${esc(sigla)}`}"
+      title="${reg ? `${reg.n === 1 ? '1 falta registrada' : reg.n + ' faltas registradas'}. Toque para desfazer` : `Registrar falta em ${esc(sigla)}`}">${reg ? 'Faltou' : 'Faltei'}</button>`;
     return `<div class="row-item ${state}">
-      <div class="time mono">${a.inicio}–${a.fim}</div>
+      <div class="time mono">${esc(a.inicio)}–${esc(a.fim)}</div>
       <div class="info"><div class="t">${esc(a.disciplina)}</div><div class="s">${esc(a.local)}</div></div>
-      ${state==='now' ? '<span class="badge badge-amber">agora</span>' : ''}
+      <span class="row-end">${state==='now' ? '<span class="badge badge-amber">agora</span>' : ''}${chip}</span>
     </div>`;
   }).join('') : `<div class="empty">Nenhuma aula hoje</div>`;
+  document.querySelectorAll('#aulasHojeList [data-faltei]').forEach(b => b.addEventListener('click', () => alternarFalta(b.dataset.faltei)));
 
   const relOficiais = DATA.relatorios
     .filter(r => !STATE.relatoriosOcultos.includes(r.nome))
@@ -3840,8 +3921,15 @@ function renderDayOverview(){
       ? `Nada urgente por hoje. A próxima prova é <b>${prova(prox)}</b> ${diasLabel(daysUntil(prox.data))}, dá tempo de se organizar com calma.`
       : 'Nenhuma prova ou prazo à vista hoje. Aproveite o dia.');
   }
-  el.innerHTML = `<span class="day-overview__hi">${saud}${nome ? ', ' + esc(nome) : ''}.</span> ${frases.slice(0,3).join(' ')}`;
+  // nota que já deve ter saído (prova de 3 a 21 dias atrás): vem por último, sem tirar lugar dos prazos
+  const pNota = provasSemNota().find(p => daysUntil(p.data) <= -3 && daysUntil(p.data) >= -21);
+  const nudge = pNota && frases.length < 3 ? ` Já saiu a nota da <b>${esc(pNota.tipo)} de ${esc(disc(pNota))}</b>? <button type="button" class="link-btn" data-lancar-nota="${esc(pNota.id)}">Lançar nota</button>` : '';
+  el.innerHTML = `<span class="day-overview__hi">${saud}${nome ? ', ' + esc(nome) : ''}.</span> ${frases.slice(0,3).join(' ')}${nudge}`;
 }
+document.getElementById('dayOverview').addEventListener('click', e => {
+  const b = e.target.closest('[data-lancar-nota]');
+  if(b) abrirLancarNota(b.dataset.lancarNota);
+});
 
 // último número mostrado em cada card: o painel se redesenha a cada minuto e não deve recontar do zero
 const _countShown = {};
@@ -4787,6 +4875,58 @@ function renderMapaSucesso(){
   });
 }
 
+// ---------------- "Faltei" nas aulas de hoje ----------------
+// sigla em curso de uma aula ("P10", "P10-A" ou o nome da disciplina), ou null
+function aulaSigla(a){
+  const d = String(a.disciplina || '').trim();
+  const atuais = STATE.config.disciplinasAtuais || [];
+  if(atuais.includes(d)) return d;
+  const base = d.split('-')[0].trim();
+  if(atuais.includes(base)) return base;
+  const porNome = STATE.historico.find(i => atuais.includes(i.sigla) && normalizeStr(i.disciplina) === normalizeStr(d));
+  return porNome ? porNome.sigla : null;
+}
+const hmMin = hm => { const [h, m] = String(hm).split(':').map(Number); return h * 60 + (m || 0); };
+// quantas faltas uma aula vale: por hora-aula de 50 min (padrão) ou 1 por aula
+function faltasPorAula(inicio, fim){
+  if((STATE.config.faltasPorAula || 'hora-aula') === 'aula' || !inicio || !fim) return 1;
+  return Math.max(1, Math.round((hmMin(fim) - hmMin(inicio)) / 50));
+}
+function faltaDaAula(data, inicio, sigla){
+  return (STATE.faltasRegistro || []).find(r => r.data === data && r.inicio === inicio && r.sigla === sigla) || null;
+}
+async function alternarFalta(chave){
+  const [inicio, sigla, fim] = chave.split('|');
+  const hoje = localISO(new Date());
+  const item = STATE.historico.find(x => x.sigla === sigla);
+  const nome = item ? item.disciplina : sigla;
+  STATE.faltasRegistro = STATE.faltasRegistro || [];
+  STATE.faltas[sigla] = STATE.faltas[sigla] || {faltas:0};
+  const reg = faltaDaAula(hoje, inicio, sigla);
+  if(reg){
+    STATE.faltas[sigla].faltas = Math.max(0, (STATE.faltas[sigla].faltas || 0) - reg.n);
+    STATE.faltasRegistro = STATE.faltasRegistro.filter(r => r !== reg);
+    showToast(`Falta desfeita em ${nome}`, 'info');
+  } else {
+    const n = faltasPorAula(inicio, fim);
+    STATE.faltas[sigla].faltas = (STATE.faltas[sigla].faltas || 0) + n;
+    STATE.faltasRegistro.push({data: hoje, inicio, sigla, n});
+    const limite = faltaLimite(sigla, item ? (item.ch || 60) : 60);
+    showToast(`${n === 1 ? '1 falta' : n + ' faltas'} em ${nome}: ${STATE.faltas[sigla].faltas} de ${limite}`, 'info', 4000);
+  }
+  // o registro só serve para desfazer e conferir: guarda os últimos 4 meses
+  const corte = localISO(new Date(Date.now() - 120 * 86400000));
+  STATE.faltasRegistro = STATE.faltasRegistro.filter(r => r.data >= corte);
+  await storeSet('faltas', STATE.faltas);
+  await storeSet('faltas_registro', STATE.faltasRegistro);
+  renderPainel(); renderFaltas();
+}
+document.getElementById('cFaltasPorAula').addEventListener('change', async e => {
+  STATE.config.faltasPorAula = e.target.value;
+  await storeSet('config', STATE.config);
+  showToast('Contagem do botão Faltei atualizada', 'success', 2000);
+});
+
 // ---------------- render: Faltas ----------------
 function faltaLimite(sigla, ch){
   if(STATE.faltasLimites && STATE.faltasLimites[sigla] != null) return STATE.faltasLimites[sigla];
@@ -4794,6 +4934,8 @@ function faltaLimite(sigla, ch){
 }
 function renderFaltas(){
   const atuais = STATE.config.disciplinasAtuais || [];
+  const contaSel = document.getElementById('cFaltasPorAula');
+  if(contaSel && document.activeElement !== contaSel) contaSel.value = STATE.config.faltasPorAula || 'hora-aula';
   const disc = atuais.map(sigla => {
     const item = STATE.historico.find(i => i.sigla === sigla);
     return {sigla, nome: item ? item.disciplina : sigla, ch: item ? (item.ch||60) : 60};
@@ -5610,6 +5752,7 @@ document.addEventListener('keydown', e => {
   if(e.key !== 'Escape') return;
   if(document.getElementById('modalHorario').classList.contains('open')) closeModalHorario();
   else if(document.getElementById('modalTurmas').classList.contains('open')) closeModalTurmas();
+  else if(document.getElementById('modalAgenda').classList.contains('open')) fecharModalAgenda();
 });
 
 // ---------------- modal: editar turmas ----------------
@@ -6082,32 +6225,61 @@ function renderProvas(){
     });
   });
 
-  // Provas realizadas (passadas) — colapsável com delete
+  // Provas realizadas: cada uma recebe a nota, que vai para a aba Notas
   const passadas = sortedProvas().filter(p => !provaPendente(p)).reverse();
   const passadasEl = document.getElementById('provasPassadasList');
   const passadasSection = document.getElementById('provasPassadasSection');
   if(passadasSection) passadasSection.style.display = passadas.length ? '' : 'none';
+  const semNota = provasSemNota();
+  const countEl = document.getElementById('provasPassadasCount');
+  if(countEl) countEl.textContent = semNota.length ? `${semNota.length} sem nota` : '';
+  // abre sozinha quando há nota para lançar, até a pessoa fechar
+  const aberta = _passadasAberta !== null ? _passadasAberta : semNota.length > 0;
+  if(passadasEl) passadasEl.style.display = aberta ? '' : 'none';
+  const chev = document.getElementById('provasPassadasChevron');
+  if(chev) chev.textContent = aberta ? '▲' : '▼';
   const provasToggle = document.getElementById('provasPassadasToggle');
   if(provasToggle && !provasToggle._listenerSet){
     provasToggle._listenerSet = true;
-    provasToggle.addEventListener('click', () => {
-      const list = document.getElementById('provasPassadasList');
-      const chev = document.getElementById('provasPassadasChevron');
-      const open = list.style.display !== 'none';
-      list.style.display = open ? 'none' : '';
-      if(chev) chev.textContent = open ? '▼' : '▲';
-    });
+    const toggle = () => {
+      _passadasAberta = document.getElementById('provasPassadasList').style.display === 'none';
+      renderProvas();
+    };
+    provasToggle.addEventListener('click', toggle);
+    provasToggle.addEventListener('keydown', e => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggle(); } });
   }
   if(passadasEl){
-    passadasEl.innerHTML = passadas.map(p => `
-      <div class="exam-row" style="opacity:.55;">
+    passadasEl.innerHTML = passadas.map(p => {
+      const nota = provaNota(p);
+      const sigla = provaDiscAtual(p);
+      const destino = sigla ? `Vai para a nota ${p.tipo} de ${sigla} na aba Notas` : 'Nota desta prova';
+      return `<div class="exam-row is-past">
         <div class="datebox"><div class="d">${new Date(p.data+'T00:00:00').getDate()}</div><div class="m">${MESES[new Date(p.data+'T00:00:00').getMonth()].slice(0,3)}</div></div>
         <div class="info">
           <div class="t">${esc(p.disciplina)} <span class="badge badge-blue" style="margin-left:4px;">${esc(p.tipo)}</span></div>
           <div class="s">${esc([p.hora ? 'às ' + p.hora : '', p.local || ''].filter(Boolean).join(', '))}</div>
         </div>
+        <input class="cell-input prova-nota${nota === null ? ' is-empty' : ''}" type="text" inputmode="decimal" autocomplete="off" maxlength="5"
+          data-prova-nota="${esc(p.id)}" value="${nota === null ? '' : esc(String(nota).replace('.', ','))}" placeholder="Nota"
+          title="${esc(destino)}" aria-label="Nota de ${esc(p.tipo)} de ${esc(p.disciplina)}">
         <button class="btn btn-ghost" data-del-prova="${p.id}" title="Excluir" aria-label="Excluir prova de ${esc(p.disciplina)}">✕</button>
-      </div>`).join('');
+      </div>`;
+    }).join('');
+    passadasEl.querySelectorAll('[data-prova-nota]').forEach(inp => {
+      inp.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); inp.blur(); } });
+      inp.addEventListener('change', async () => {
+        const p = STATE.provas.find(x => x.id === inp.dataset.provaNota);
+        if(!p) return;
+        const raw = inp.value.trim().replace(',', '.');
+        const n = Number(raw);
+        if(raw !== '' && (isNaN(n) || n < 0 || n > 100)){ showToast('Use uma nota de 0 a 100.', 'error'); inp.value = ''; return; }
+        await setProvaNota(p, raw === '' ? null : Math.round(n * 10) / 10);
+        const sigla = provaDiscAtual(p);
+        if(raw !== '') showToast(sigla ? `Nota da ${p.tipo} de ${sigla} lançada em Notas` : 'Nota salva', 'success');
+        renderProvas(); renderPainel();
+        if(document.getElementById('tab-desempenho').classList.contains('active')) renderCharts();
+      });
+    });
     passadasEl.querySelectorAll('[data-del-prova]').forEach(el => {
       el.addEventListener('click', async () => {
         STATE.provas = STATE.provas.filter(x=>x.id!==el.dataset.delProva);
@@ -6116,6 +6288,54 @@ function renderProvas(){
       });
     });
   }
+}
+
+// ---------------- nota das provas realizadas ----------------
+let _passadasAberta = null; // null: decide sozinho (aberta quando há nota para lançar)
+// disciplina em curso a que a prova pertence (sigla), ou null
+function provaDiscAtual(p){
+  return (STATE.config.disciplinasAtuais || []).find(s => provaDaDisciplina(p, s, (STATE.historico.find(i => i.sigla === s) || {}).disciplina)) || null;
+}
+const rotuloIgual = (a, b) => normalizeStr(a).trim() === normalizeStr(b).trim();
+// nota da prova: a da aba Notas com o mesmo rótulo (P1, P2...) ou a guardada na própria prova
+function provaNota(p){
+  const s = provaDiscAtual(p);
+  if(s){
+    const e = (STATE.notasParciais[s] || []).find(x => rotuloIgual(x.label, p.tipo));
+    if(e) return notaOk(e) ? Number(e.valor) : null;
+  }
+  return notaOk({valor: p.nota}) ? Number(p.nota) : null;
+}
+async function setProvaNota(p, valor){
+  const s = provaDiscAtual(p);
+  if(s){
+    if(!STATE.notasParciais[s]) STATE.notasParciais[s] = [{label:'P1',valor:null,peso:1},{label:'P2',valor:null,peso:1}];
+    const lista = STATE.notasParciais[s];
+    let e = lista.find(x => rotuloIgual(x.label, p.tipo));
+    if(!e){
+      if(valor === null) return;
+      e = {label: p.tipo, valor: null, peso: 1};
+      lista.push(e);
+    }
+    e.valor = valor;
+    await storeSet('notas_parciais', STATE.notasParciais);
+    if('nota' in p){ delete p.nota; await storeSet('provas', STATE.provas); }
+  } else {
+    if(valor === null) delete p.nota; else p.nota = valor;
+    await storeSet('provas', STATE.provas);
+  }
+}
+// provas das últimas semanas ainda sem nota (as mais recentes primeiro)
+function provasSemNota(){
+  return sortedProvas().filter(p => !provaPendente(p) && daysUntil(p.data) >= -45 && provaNota(p) === null).reverse();
+}
+// leva até a prova na aba Provas, com o campo de nota em foco
+function abrirLancarNota(id){
+  _passadasAberta = true;
+  switchTab('provas');
+  renderProvas();
+  const inp = document.querySelector(`[data-prova-nota="${CSS.escape(id)}"]`);
+  if(inp){ inp.scrollIntoView({behavior:'smooth', block:'center'}); setTimeout(() => inp.focus({preventScroll:true}), 350); }
 }
 function renderCalendarGrid(){
   const {y,m} = STATE.calMonth;
@@ -6183,6 +6403,125 @@ document.getElementById('calToday').addEventListener('click', () => {
 document.getElementById('pLocal').addEventListener('keydown', e => {
   if(e.key === 'Enter') document.getElementById('btnAddProva').click();
 });
+
+// ---------------- levar provas e prazos para a agenda do celular ----------------
+// Cada prova, tarefa com prazo e entrega do laboratório vira um evento com aviso na véspera,
+// e o próprio celular lembra, mesmo com o app fechado e sem servidor de notificações.
+const semParenteses = s => String(s || '').replace(/\s*\([^)]*\)\s*$/, '');
+function relatoriosAbertos(){
+  return (DATA.relatorios || [])
+    .filter(r => !(STATE.relatoriosOcultos || []).includes(r.nome))
+    .map(r => { const ov = (STATE.relatoriosOverrides || {})[r.nome] || {}; return Object.assign({}, r, {nome: ov.nome || r.nome, fim: ov.fim || r.fim}); })
+    .filter(r => r.fim && relatorioStatus(r).label !== 'Concluído');
+}
+function agendaItens(){
+  const hoje = localISO(new Date());
+  return {
+    provas: upcomingProvas(),
+    tarefas: STATE.tarefas.filter(t => t.status !== 'Concluído' && t.prazo && t.prazo >= hoje).sort((a, b) => a.prazo.localeCompare(b.prazo)),
+    rels: relatoriosAbertos().filter(r => r.fim >= hoje),
+  };
+}
+const icsTexto = s => String(s ?? '').replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+// o formato pede linhas de no máximo 75 bytes, continuadas com um espaço
+function icsLinha(linha){
+  const enc = new TextEncoder(), partes = [];
+  let atual = '', n = 0;
+  for(const ch of linha){
+    const b = enc.encode(ch).length;
+    if(n + b > 75){ partes.push(atual); atual = ' ' + ch; n = 1 + b; } else { atual += ch; n += b; }
+  }
+  partes.push(atual);
+  return partes.join('\r\n');
+}
+const icsData = iso => iso.replace(/-/g, '');
+function icsHora(iso, hm, somaMin = 0){
+  const d = new Date(`${iso}T${hm}:00`);
+  d.setMinutes(d.getMinutes() + somaMin);
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}T${p(d.getHours())}${p(d.getMinutes())}00`;
+}
+function icsDiaSeguinte(iso){ const d = new Date(iso + 'T12:00:00'); d.setDate(d.getDate() + 1); return icsData(localISO(d)); }
+function gerarICS(sel){
+  const {provas, tarefas, rels} = agendaItens();
+  const carimbo = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+  const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Centro de Controle//PT-BR', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'X-WR-CALNAME:Centro de Controle'];
+  const aviso = (quando, texto) => ['BEGIN:VALARM', 'ACTION:DISPLAY', `TRIGGER:${quando}`, `DESCRIPTION:${icsTexto(texto)}`, 'END:VALARM'];
+  // dia inteiro: o aviso de -15h cai às 9h da véspera
+  const diaInteiro = iso => [`DTSTART;VALUE=DATE:${icsData(iso)}`, `DTEND;VALUE=DATE:${icsDiaSeguinte(iso)}`];
+  const evento = (uid, titulo, quando, extra, avisos) => L.push('BEGIN:VEVENT', `UID:${uid}@centro-de-controle`, `DTSTAMP:${carimbo}`,
+    ...quando, `SUMMARY:${icsTexto(titulo)}`, ...extra, ...avisos.flat(), 'END:VEVENT');
+  let total = 0;
+  if(sel.provas) provas.forEach(p => {
+    const titulo = `${p.tipo} de ${semParenteses(p.disciplina)}`;
+    const extra = [p.local ? `LOCATION:${icsTexto(p.local)}` : '', `DESCRIPTION:${icsTexto(p.disciplina)}`].filter(Boolean);
+    if(p.hora) evento(`prova-${p.id}`, titulo, [`DTSTART:${icsHora(p.data, p.hora)}`, `DTEND:${icsHora(p.data, p.hora, 120)}`], extra,
+      [aviso('-P1D', `Amanhã: ${titulo}`), aviso('-PT2H', `${titulo} em 2 horas`)]);
+    else evento(`prova-${p.id}`, titulo, diaInteiro(p.data), extra, [aviso('-PT15H', `Amanhã: ${titulo}`)]);
+    total++;
+  });
+  if(sel.tarefas) tarefas.forEach(t => {
+    evento(`tarefa-${t.id}`, `Prazo: ${t.nome}`, diaInteiro(t.prazo),
+      [`DESCRIPTION:${icsTexto([t.categoria, t.disciplina].filter(Boolean).join(', '))}`], [aviso('-PT15H', `Amanhã vence: ${t.nome}`)]);
+    total++;
+  });
+  if(sel.rels) rels.forEach(r => {
+    evento(`relatorio-${normalizeStr(r.nome).replace(/[^a-z0-9]+/g, '-')}`, `Entrega: ${r.nome}`, diaInteiro(r.fim),
+      ['DESCRIPTION:Laboratório'], [aviso('-PT15H', `Amanhã: entrega do ${r.nome}`)]);
+    total++;
+  });
+  L.push('END:VCALENDAR');
+  return {texto: L.map(icsLinha).join('\r\n') + '\r\n', total};
+}
+// atalho do Google Agenda para uma prova (abre o app no celular com o evento preenchido)
+function googleAgendaLink(p){
+  const datas = p.hora ? `${icsHora(p.data, p.hora)}/${icsHora(p.data, p.hora, 120)}` : `${icsData(p.data)}/${icsDiaSeguinte(p.data)}`;
+  const q = new URLSearchParams({action: 'TEMPLATE', text: `${p.tipo} de ${semParenteses(p.disciplina)}`, dates: datas, details: p.disciplina || ''});
+  if(p.local) q.set('location', p.local);
+  try{ q.set('ctz', Intl.DateTimeFormat().resolvedOptions().timeZone); }catch(e){}
+  return 'https://calendar.google.com/calendar/render?' + q.toString();
+}
+function abrirModalAgenda(){
+  const {provas, tarefas, rels} = agendaItens();
+  const opc = (id, rotulo, n) => `<label class="agenda-opc"><input type="checkbox" id="${id}"${n ? ' checked' : ' disabled'}><span>${rotulo}</span><b>${n}</b></label>`;
+  document.getElementById('agendaBody').innerHTML = `
+    <p class="agenda-intro">Suas provas e prazos viram eventos na agenda do celular, com aviso na véspera e 2 horas antes de cada prova. Assim o próprio celular lembra, mesmo sem abrir o app.</p>
+    <div class="agenda-opcs">
+      ${opc('agProvas', 'Provas', provas.length)}
+      ${opc('agTarefas', 'Tarefas com prazo', tarefas.length)}
+      ${opc('agRels', 'Entregas do laboratório', rels.length)}
+    </div>
+    <p class="agenda-help"><b>No celular:</b> baixe e abra o arquivo, e ele entra na agenda que você escolher (Samsung Agenda, Outlook e outras abrem direto). <b>No Google Agenda:</b> importe o arquivo pelo computador em calendar.google.com, em Configurações, Importar e exportar, ou adicione as provas uma por vez aqui embaixo.</p>
+    ${provas.length ? `<div class="section-label" style="margin:18px 0 8px;">Uma prova por vez no Google Agenda</div>
+    <div class="agenda-links">${provas.slice(0, 12).map(p => `<a class="agenda-link" href="${esc(googleAgendaLink(p))}" target="_blank" rel="noopener">
+      <span class="agenda-link__t"><b>${esc(p.tipo)} de ${esc(semParenteses(p.disciplina))}</b><span>${fmtDate(p.data)}${p.hora ? ' às ' + esc(p.hora) : ''}</span></span>
+      <span class="agenda-link__add">Adicionar</span></a>`).join('')}</div>` : ''}`;
+  const baixar = document.getElementById('baixarAgenda');
+  const atualiza = () => { baixar.disabled = !['agProvas', 'agTarefas', 'agRels'].some(id => document.getElementById(id).checked); };
+  ['agProvas', 'agTarefas', 'agRels'].forEach(id => document.getElementById(id).addEventListener('change', atualiza));
+  atualiza();
+  document.getElementById('modalAgenda').classList.add('open');
+}
+function fecharModalAgenda(){ document.getElementById('modalAgenda').classList.remove('open'); }
+document.getElementById('baixarAgenda').addEventListener('click', () => {
+  const {texto, total} = gerarICS({
+    provas: document.getElementById('agProvas').checked,
+    tarefas: document.getElementById('agTarefas').checked,
+    rels: document.getElementById('agRels').checked,
+  });
+  if(!total){ showToast('Nada para levar para a agenda agora.', 'info'); return; }
+  const url = URL.createObjectURL(new Blob([texto], {type: 'text/calendar;charset=utf-8'}));
+  const a = document.createElement('a');
+  a.href = url; a.download = `centro-de-controle-agenda-${localISO(new Date())}.ics`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  showToast(`${total} ${total === 1 ? 'evento pronto' : 'eventos prontos'}. Abra o arquivo baixado para adicionar à agenda.`, 'success', 5000);
+});
+document.getElementById('btnAgendaExport').addEventListener('click', abrirModalAgenda);
+document.getElementById('closeModalAgenda').addEventListener('click', fecharModalAgenda);
+document.getElementById('cancelModalAgenda').addEventListener('click', fecharModalAgenda);
+document.getElementById('modalAgenda').addEventListener('click', e => { if(e.target === e.currentTarget) fecharModalAgenda(); });
+document.getElementById('notifPanel').addEventListener('click', e => { if(e.target.closest('[data-abrir-agenda]')) abrirModalAgenda(); });
 document.getElementById('btnAddProva').addEventListener('click', async () => {
   const sel = document.getElementById('pDisciplinaSelect');
   const disciplina = sel.value === '__outro__'
@@ -6222,6 +6561,7 @@ document.getElementById('btnExport').addEventListener('click', async () => {
     provas: STATE.provas,
     faltas: STATE.faltas,
     faltas_limites: STATE.faltasLimites,
+    faltas_registro: STATE.faltasRegistro,
     relatorios_ocultos: STATE.relatoriosOcultos,
     relatorios_overrides: STATE.relatoriosOverrides,
     horas_comp: STATE.horasComp,
@@ -6280,7 +6620,7 @@ document.getElementById('fileImport').addEventListener('change', (e) => {
       // tudo o que o backup traz substitui o atual, inclusive valores vazios
       // (ex.: aulas_custom = null volta para o horário original em vez de manter o editado)
       const BACKUP_KEYS = ['config','historico_overrides','historico_custom','historico_removidos','tarefas',
-        'lab_concluido','provas','faltas','faltas_limites','relatorios_ocultos','relatorios_overrides','horas_comp',
+        'lab_concluido','provas','faltas','faltas_limites','faltas_registro','relatorios_ocultos','relatorios_overrides','horas_comp',
         'horas_global','aulas_custom','turmas_custom','notas_parciais','metas_notas','tema','lembretes',
         'pom_sessions','disc_notes','estudos_materiais'];
       for(const k of BACKUP_KEYS){ if(k in backup) await storeSet(k, backup[k]); }
@@ -6418,8 +6758,9 @@ async function renderNotifPanel(){
   const quando = `<ul class="notif-list">
       <li><b>7h</b><span>o resumo do dia: provas, tarefas que vencem, entregas do laboratório e o que estiver atrasado</span></li>
       <li><b>20h</b><span>o que vem amanhã, para dar tempo de se preparar</span></li>
+      <li><b>Domingo</b><span>às 20h, o resumo da semana que vem no lugar do aviso de amanhã</span></li>
       <li><b>2h antes</b><span>de cada prova, com horário e sala</span></li>
-    </ul><p class="notif-note">Dias sem nada para lembrar não geram notificação.</p>`;
+    </ul><p class="notif-note">Dias sem nada para lembrar não geram notificação.</p>${AGENDA_NOTA}`;
   const row = (dot, t, s, btns) => `<div class="sync-row"><span class="sync-dot ${dot}"></span><div class="sync-info"><div class="t">${t}</div><div class="s">${s}</div></div>${btns || ''}</div>`;
   if(!pushSupported()){
     p.innerHTML = row('is-local', 'Este navegador não recebe notificações', isIOS()
@@ -6464,15 +6805,18 @@ async function renderNotifPanel(){
     renderNotifPanel();
   };
 }
+// com a agenda do celular os avisos chegam mesmo com o app fechado, sem servidor
+const AGENDA_NOTA = `<p class="notif-note">Quer avisos mesmo com o app fechado? <button type="button" class="link-btn" data-abrir-agenda>Leve provas e prazos para a agenda do celular</button>.</p>`;
 function renderLocalNotifPanel(){
   const p = document.getElementById('notifPanel');
   if(!p) return;
   const quando = `<ul class="notif-list">
       <li><b>No dia</b><span>provas, tarefas que vencem, entregas do laboratório e o que estiver atrasado</span></li>
       <li><b>Na véspera</b><span>a partir das 17h, o que vem amanhã</span></li>
+      <li><b>Domingo</b><span>a partir das 17h, o resumo da semana que vem no lugar do aviso de véspera</span></li>
       <li><b>2h antes</b><span>de cada prova, com horário e sala</span></li>
     </ul>
-    <p class="notif-note">Os avisos aparecem quando você abre o app e enquanto ele estiver aberto. No Android, com o app instalado, o celular também confere sozinho de tempos em tempos. Cada aviso aparece uma vez só, e dias sem nada não geram notificação.</p>`;
+    <p class="notif-note">Os avisos aparecem quando você abre o app e enquanto ele estiver aberto. No Android, com o app instalado, o celular também confere sozinho de tempos em tempos. Cada aviso aparece uma vez só, e dias sem nada não geram notificação.</p>${AGENDA_NOTA}`;
   const row = (dot, t, s, btns) => `<div class="sync-row"><span class="sync-dot ${dot}"></span><div class="sync-info"><div class="t">${t}</div><div class="s">${s}</div></div>${btns || ''}</div>`;
   if(!('Notification' in window)){
     p.innerHTML = row('is-local', 'Este navegador não mostra notificações', isIOS() ? 'No iPhone, instale o app na tela de início (Compartilhar, depois Adicionar à Tela de Início) e ative por lá.' : 'Tente pelo Chrome ou pelo app instalado.') + quando;
@@ -8164,20 +8508,44 @@ function renderLembretes(){
 // ============================================================
 // POMODORO
 // ============================================================
+// Dois ritmos: 25 min de foco (pausas de 5 e, a cada 4 rodadas, 15) ou 50 min (10 e 20)
+const POM_MODOS = {25: {foco:25, pausa:5, longa:15}, 50: {foco:50, pausa:10, longa:20}};
 const POM = {
   running: false,
   isBreak: false,
+  isLong: false,  // a pausa atual é a longa (depois da 4ª rodada)
   timeLeft: 25 * 60,
+  phaseLen: 25 * 60, // duração da fase atual, para a barra e para registrar a sessão
+  fresh: true,       // a fase ainda não começou: trocar o ritmo ajusta o tempo
   round: 1,
   totalRounds: 4,
   interval: null,
+  modo: 25,
   focusDur: 25 * 60,
   breakDur: 5 * 60,
+  longDur: 15 * 60,
   endAt: null,   // hora em que a fase atual termina: o tempo sai do relógio, não da contagem de ticks
   disc: '',      // disciplina escolhida quando o foco começou
 };
 // guardado só neste aparelho (fora do prefixo sincronizado), para o timer sobreviver a recarregar o app
 const POM_KEY = 'cc_pomodoro';
+
+// aplica o ritmo escolhido; uma fase que ainda não começou passa a ter a duração nova
+function pomSetModo(modo){
+  const m = POM_MODOS[modo] || POM_MODOS[25];
+  POM.modo = m.foco;
+  POM.focusDur = m.foco * 60; POM.breakDur = m.pausa * 60; POM.longDur = m.longa * 60;
+  if(POM.fresh && !POM.running){
+    POM.phaseLen = POM.timeLeft = !POM.isBreak ? POM.focusDur : (POM.isLong ? POM.longDur : POM.breakDur);
+  }
+  const btn = document.getElementById('pomodoroBtn');
+  if(btn) btn.title = `Timer de estudo (${m.foco} min de foco, ${m.pausa} de pausa)`;
+}
+function pomFase(isBreak, isLong){
+  POM.isBreak = isBreak; POM.isLong = !!isLong;
+  POM.phaseLen = POM.timeLeft = !isBreak ? POM.focusDur : (isLong ? POM.longDur : POM.breakDur);
+  POM.fresh = true;
+}
 
 function pomRender(){
   const display = document.getElementById('pomDisplay');
@@ -8191,16 +8559,20 @@ function pomRender(){
   const m = Math.floor(POM.timeLeft / 60);
   const s = POM.timeLeft % 60;
   display.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-
-  const dur = POM.isBreak ? POM.breakDur : POM.focusDur;
-  fill.style.width = Math.round(POM.timeLeft / dur * 100) + '%';
+  fill.style.width = Math.round(POM.timeLeft / (POM.phaseLen || 1) * 100) + '%';
 
   display.className = 'pom-display' + (POM.running && !POM.isBreak ? ' running' : '');
   widget.classList.toggle('break-mode', POM.isBreak);
 
-  label.textContent = POM.isBreak ? `Pausa de ${POM.breakDur/60} min` : `Foco de ${POM.focusDur/60} min`;
-  toggle.textContent = POM.running ? 'Pausar' : 'Iniciar';
-  rounds.textContent = `Rodada ${POM.round} de ${POM.totalRounds}`;
+  label.textContent = !POM.isBreak ? `Foco de ${Math.round(POM.phaseLen/60)} min`
+    : `${POM.isLong ? 'Pausa longa' : 'Pausa'} de ${Math.round(POM.phaseLen/60)} min`;
+  toggle.textContent = POM.running ? 'Pausar' : (POM.fresh ? 'Iniciar' : 'Continuar');
+  rounds.textContent = POM.isBreak && POM.isLong ? `Ciclo de ${POM.totalRounds} rodadas completo` : `Rodada ${POM.round} de ${POM.totalRounds}`;
+  document.querySelectorAll('[data-pom-modo]').forEach(b => {
+    const on = Number(b.dataset.pomModo) === POM.modo;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-checked', on);
+  });
 
   const floatBtn = document.getElementById('pomodoroBtn');
   if(floatBtn){
@@ -8229,13 +8601,12 @@ function pomBeep(){
   }catch(e){}
 }
 
-async function pomLogSession(fimEm){
+async function pomLogSession(fimEm, duracaoMin){
   const sel = document.getElementById('pomDiscSelect');
   const sigla = POM.disc || (sel ? sel.value : '');
   if(!sigla) return;
   const item = STATE.historico.find(i => i.sigla === sigla);
   const nome = item ? item.disciplina : sigla;
-  const duracaoMin = Math.round(POM.focusDur / 60);
   if(!STATE.pomSessions) STATE.pomSessions = [];
   STATE.pomSessions.push({sigla, nome, duracaoMin, ts: new Date(fimEm || Date.now()).toISOString()});
   // Keep only last 90 days to avoid unbounded growth
@@ -8262,13 +8633,15 @@ function pomPopulateDiscSelect(){
 
 function pomSave(){
   try{
-    localStorage.setItem(POM_KEY, JSON.stringify({running:POM.running, isBreak:POM.isBreak, timeLeft:POM.timeLeft, round:POM.round, endAt:POM.endAt, disc:POM.disc}));
+    localStorage.setItem(POM_KEY, JSON.stringify({running:POM.running, isBreak:POM.isBreak, isLong:POM.isLong, timeLeft:POM.timeLeft,
+      phaseLen:POM.phaseLen, fresh:POM.fresh, round:POM.round, endAt:POM.endAt, disc:POM.disc}));
   }catch(e){}
 }
 function pomStart(){
   const sel = document.getElementById('pomDiscSelect');
   if(!POM.isBreak) POM.disc = sel ? sel.value : '';
   POM.running = true;
+  POM.fresh = false;
   POM.endAt = Date.now() + POM.timeLeft * 1000;
   clearInterval(POM.interval);
   POM.interval = setInterval(pomTick, 1000);
@@ -8296,19 +8669,20 @@ function pomTick(){
     const atrasado = Date.now() - fimEm > 5000; // terminou com o app fechado ou em segundo plano
     clearInterval(POM.interval);
     POM.interval = null; POM.running = false; POM.endAt = null;
+    if(!atrasado) pomBeep();
     if(POM.isBreak){
-      if(!atrasado) pomBeep();
-      pomNotify('Pausa encerrada', 'Hora de voltar para mais uma rodada de foco.');
-      POM.isBreak = false;
-      POM.timeLeft = POM.focusDur;
-      POM.round = Math.min(POM.round + 1, POM.totalRounds);
+      pomNotify(POM.isLong ? 'Pausa longa encerrada' : 'Pausa encerrada', 'Hora de voltar para mais uma rodada de foco.');
+      // depois da pausa longa começa um ciclo novo
+      POM.round = POM.isLong ? 1 : Math.min(POM.round + 1, POM.totalRounds);
+      pomFase(false);
     } else {
-      if(!atrasado) pomBeep();
-      pomNotify('Foco concluído', `Bom trabalho. Faça uma pausa de ${POM.breakDur/60} minutos.`);
-      if(atrasado && document.visibilityState === 'visible') showToast(`Seu foco de ${POM.focusDur/60} min terminou enquanto o app estava fechado.`, 'info', 5000);
-      pomLogSession(fimEm);
-      POM.isBreak = true;
-      POM.timeLeft = POM.breakDur;
+      const focoMin = Math.round(POM.phaseLen / 60);
+      const longa = POM.round >= POM.totalRounds;
+      pomFase(true, longa);
+      const pausaMin = Math.round(POM.phaseLen / 60);
+      pomNotify('Foco concluído', longa ? `Você fechou ${POM.totalRounds} rodadas. Pausa longa de ${pausaMin} minutos.` : `Bom trabalho. Faça uma pausa de ${pausaMin} minutos.`);
+      if(atrasado && document.visibilityState === 'visible') showToast(`Seu foco de ${focoMin} min terminou enquanto o app estava fechado.`, 'info', 5000);
+      pomLogSession(fimEm, focoMin);
     }
     pomSave();
   }
@@ -8317,15 +8691,20 @@ function pomTick(){
 // Retoma um timer que estava correndo antes de o app recarregar (chamado depois do init)
 let _pomRestored = false;
 function pomRestore(){
-  if(_pomRestored) return;
+  pomSetModo(STATE.config && STATE.config.pomodoro);
+  if(_pomRestored){ pomRender(); return; }
   _pomRestored = true;
   let s = null;
   try{ s = JSON.parse(localStorage.getItem(POM_KEY) || 'null'); }catch(e){}
-  if(!s) return;
+  if(!s){ pomRender(); return; }
   POM.isBreak = !!s.isBreak;
+  POM.isLong = !!s.isLong;
   POM.round = Number(s.round) || 1;
-  POM.timeLeft = Number(s.timeLeft) || (POM.isBreak ? POM.breakDur : POM.focusDur);
+  POM.fresh = s.fresh !== false && !s.running;
+  POM.phaseLen = Number(s.phaseLen) || (!POM.isBreak ? POM.focusDur : (POM.isLong ? POM.longDur : POM.breakDur));
+  POM.timeLeft = Number(s.timeLeft) || POM.phaseLen;
   POM.disc = s.disc || '';
+  if(POM.fresh) pomSetModo(POM.modo); // fase parada no início segue o ritmo atual
   if(s.running && s.endAt){
     POM.running = true;
     POM.endAt = Number(s.endAt);
@@ -8342,11 +8721,23 @@ document.getElementById('pomToggle').addEventListener('click', () => {
 });
 document.getElementById('pomReset').addEventListener('click', () => {
   pomStop();
-  POM.isBreak = false; POM.timeLeft = POM.focusDur; POM.round = 1;
+  POM.round = 1;
+  pomFase(false);
   pomSave();
   pomRender();
 });
 document.getElementById('pomDiscSelect').addEventListener('change', e => { if(POM.running && !POM.isBreak){ POM.disc = e.target.value; pomSave(); } });
+// ritmo 25 ou 50 min: vale para a próxima fase (ou para a atual, se ainda não começou)
+document.querySelectorAll('[data-pom-modo]').forEach(b => b.addEventListener('click', async () => {
+  const modo = Number(b.dataset.pomModo);
+  pomSetModo(modo);
+  pomSave();
+  pomRender();
+  if(STATE.config && STATE.config.pomodoro !== modo){
+    STATE.config.pomodoro = modo;
+    await storeSet('config', STATE.config);
+  }
+}));
 document.getElementById('pomodoroBtn').addEventListener('click', () => {
   const w = document.getElementById('pomodoroWidget');
   const open = w.style.display === 'none';
