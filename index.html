@@ -2493,9 +2493,7 @@
       <div class="section-label" style="margin-bottom:14px;">Histórico do curso</div>
       <div class="charts-grid">
         <div class="panel chart-wrap" style="--accent:var(--green)"><canvas id="chartSituacao"></canvas></div>
-        <div class="panel chart-wrap" style="--accent:var(--blue)"><canvas id="chartNotas"></canvas></div>
-        <div class="panel chart-wrap" id="chartTendenciaWrap" style="--accent:var(--purple); grid-column:1/-1; height:220px;"><canvas id="chartTendencia"></canvas></div>
-      </div>
+        <div class="panel chart-wrap" style="--accent:var(--blue)"><canvas id="chartNotas"></canvas></div>      </div>
       <div class="section-label" style="margin:22px 0 12px;">Simulador de IRA</div>
       <div id="simuladorPanel" class="panel panel--pad" style="--accent:var(--blue)"></div>
       <div class="section-label" style="margin:22px 0 12px;">Sessões de estudo nos últimos 7 dias</div>
@@ -4367,14 +4365,14 @@ function showDiscDetail(sigla){
 }
 
 // ---------------- render: Desempenho ----------------
-let chartSituacaoRef=null, chartNotasRef=null, chartTendenciaRef=null;
+let chartSituacaoRef=null, chartNotasRef=null;
 function renderCharts(){
   renderNotasSemestre();
   renderSimuladorIRA();
   renderSessoesEstudo();
   renderCalculadoraFinal();
   renderProdutividade();
-  const CHART_IDS = ['chartSituacao','chartNotas','chartTendencia'];
+  const CHART_IDS = ['chartSituacao','chartNotas'];
   if(typeof Chart === 'undefined'){
     loadChartJs().then(() => {
       if(document.getElementById('tab-desempenho').classList.contains('active')) renderCharts();
@@ -4384,7 +4382,6 @@ function renderCharts(){
     return;
   }
   const stats = cursoStatsCompute();
-  const notaMin = STATE.config ? (STATE.config.notaMinima || 60) : 60;
   const cs = getComputedStyle(document.documentElement);
   const cv = v => cs.getPropertyValue(v).trim();
   const cGreen=cv('--green'), cAmber=cv('--amber'), cRed=cv('--red'), cGray=cv('--gray');
@@ -4421,50 +4418,6 @@ function renderCharts(){
       plugins:{ legend:{display:false},
         title:{display:true, text:'Notas por disciplina', color:cText, font:{size:13, weight:'600'}} } }
   });
-
-  // Tendência semestral — agrupa aprovados/reprovados por semestre
-  const semMap = {};
-  STATE.historico.forEach(item => {
-    const s = situacao(item);
-    if(s !== 'Aprovado' && s !== 'Reprovado') return;
-    if(typeof item.nota !== 'number' || isNaN(item.nota)) return;
-    const sem = (item.semestre || '').toString().trim();
-    if(!sem) return;
-    if(!semMap[sem]) semMap[sem] = [];
-    semMap[sem].push(item.nota);
-  });
-  const semKeys = Object.keys(semMap).sort((a,b) => a.localeCompare(b, undefined, {numeric:true}));
-  const semAvgs = semKeys.map(k => +(semMap[k].reduce((a,b)=>a+b,0)/semMap[k].length).toFixed(2));
-  const ctx3 = document.getElementById('chartTendencia');
-  const wrap3 = document.getElementById('chartTendenciaWrap');
-  if(chartTendenciaRef){ chartTendenciaRef.destroy(); chartTendenciaRef=null; }
-  if(semKeys.length >= 2 && ctx3){
-    if(wrap3) wrap3.style.display = '';
-    chartEmpty(ctx3, null);
-    chartTendenciaRef = new Chart(ctx3, {
-      type:'line',
-      data:{ labels: semKeys,
-        datasets:[
-          { label:'Média do semestre', data: semAvgs,
-            borderColor: cAmber, backgroundColor: hexA(cAmber,.1),
-            pointBackgroundColor: semAvgs.map(v => v >= notaMin ? cGreen : cRed),
-            pointBorderColor: semAvgs.map(v => v >= notaMin ? cGreen : cRed),
-            pointRadius: 5, borderWidth: 2, tension: .35, fill: true },
-          { label: `Mínimo (${notaMin})`, data: semKeys.map(() => notaMin),
-            borderColor: hexA(cRed, .45), borderDash: [5,4], borderWidth: 1.5,
-            pointRadius: 0, fill: false }
-        ]},
-      options:{ scales:{
-          y:{ min: Math.max(0, Math.min(...semAvgs) - 15), max: 100,
-              grid:{color:cLineSoft}, ticks:{color:cTextFaint, font:{size:10}} },
-          x:{ grid:{display:false}, ticks:{color:cTextFaint, font:{size:10}} } },
-        plugins:{ legend:{display:true, position:'bottom', labels:{color:cTextFaint, font:{size:10}, boxWidth:12}},
-          title:{display:true, text:'Evolução da média por semestre', color:cText, font:{size:13, weight:'600'}} } }
-    });
-  } else if(ctx3){
-    if(wrap3) wrap3.style.display = '';
-    chartEmpty(ctx3, 'Preencha o semestre das disciplinas no Histórico para ver a evolução.');
-  }
 }
 
 // ---------------- render: Notas do Semestre ----------------
