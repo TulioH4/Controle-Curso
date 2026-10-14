@@ -509,7 +509,6 @@
   .faltas-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:12px;}
   .falta-card{padding:14px 16px;}
   .falta-card .disc{font-weight:600; font-size:13px; margin-bottom:4px;}
-  .falta-card .disc-ch{font-size:11px; color:var(--text-faint); font-family:var(--mono);}
   .counter-row{display:flex; align-items:center; gap:8px; margin:10px 0 6px;}
   .falta-card .disc{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .falta-main{display:flex; align-items:center; justify-content:space-between; gap:12px; margin:12px 0 12px;}
@@ -839,6 +838,7 @@
   .toast-error{border-left:3px solid var(--red);}
   .toast-info{border-left:3px solid var(--blue);}
   .toast.leaving{animation:toastOut .22s ease forwards;}
+  .toast__acao{margin-left:auto; padding:2px 2px 2px 10px; background:none; border:none; color:var(--blue); font:inherit; font-weight:600; cursor:pointer; white-space:nowrap;}
   @keyframes toastIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
   @keyframes toastOut{to{opacity:0;transform:translateY(6px);}}
 
@@ -940,7 +940,6 @@
   .risco-bar-fill{height:100%;border-radius:3px;}
 
   /* ===== FALTA FORECAST ===== */
-  .falta-forecast{font-size:10.5px;font-family:var(--mono);margin-top:4px;padding-top:4px;border-top:1px solid var(--line-soft);}
 
   /* ===== DISC NOTES ===== */
   .disc-notes-area{width:100%;min-height:60px;background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r);color:var(--text);padding:8px 10px;font-size:12.5px;font-family:var(--sans);resize:vertical;line-height:1.5;}
@@ -2088,7 +2087,8 @@
     .task-row > .status-btn{grid-column:3; grid-row:2;}
     .task-check{width:26px; height:26px;}
     .task-row .name .t{font-size:14.5px;}
-    .task-edit-panel > div[style*="grid-template-columns"]{grid-template-columns:1fr 1fr !important;}
+    .task-edit-panel > div[style*="grid-template-columns"]{grid-template-columns:repeat(2,minmax(0,1fr)) !important;}
+    .task-edit-panel .edit-span{grid-column:1 / -1;}
 
     /* performance: the backdrop is already a soft blurred gradient, so blurring it again behind
        every panel costs a lot of GPU on phones and changes almost nothing. Panels keep the glass
@@ -2504,9 +2504,6 @@
       <div class="section-label" style="margin:22px 0 12px;">Calculadora de prova final</div>
       <div id="calcFinalPanel" class="panel panel--pad" style="--accent:var(--green)"></div>
 
-      <div class="section-label" style="margin:22px 0 12px;">Evolução do IRA por semestre</div>
-      <div class="panel chart-wrap" id="chartIRAEvolWrap" style="--accent:var(--blue);height:240px;"><canvas id="chartIRAEvol"></canvas></div>
-
       <div class="section-label" style="margin:22px 0 12px;">Produtividade total de estudos</div>
       <div id="produtividadePanel" class="panel panel--pad" style="--accent:var(--purple)"></div>
     </section>
@@ -2768,7 +2765,7 @@
   <div class="modal">
     <div class="modal-head">
       <h3>Editar grade de aulas</h3>
-      <button class="btn btn-ghost" id="closeModalHorario" style="padding:4px 8px; font-size:16px;">✕</button>
+      <button class="btn btn-ghost" id="closeModalHorario" style="padding:4px 8px; font-size:16px;" aria-label="Fechar">✕</button>
     </div>
     <div class="modal-body">
       <div class="modal-head-row">
@@ -2789,7 +2786,7 @@
   <div class="modal">
     <div class="modal-head">
       <h3>Editar turmas de laboratório</h3>
-      <button class="btn btn-ghost" id="closeModalTurmas" style="padding:4px 8px; font-size:16px;">✕</button>
+      <button class="btn btn-ghost" id="closeModalTurmas" style="padding:4px 8px; font-size:16px;" aria-label="Fechar">✕</button>
     </div>
     <div class="modal-body">
       <p style="font-size:12.5px; color:var(--text-dim); margin:0 0 14px;">Uma turma por linha em cada dia (ex: <span style="font-family:var(--mono)">L6 (19h30)</span>).</p>
@@ -2848,13 +2845,13 @@
 
 <!-- DISC DETAIL MODAL -->
 <div id="discDetailOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:500;align-items:center;justify-content:center;padding:16px;">
-  <div class="disc-modal">
+  <div class="disc-modal" role="dialog" aria-modal="true" aria-labelledby="ddNome">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:2px;">
       <div>
         <h3 id="ddNome">—</h3>
         <div class="dm-sigla" id="ddSigla">—</div>
       </div>
-      <button id="discModalClose" style="background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:20px;padding:0 4px;flex-shrink:0;line-height:1;">✕</button>
+      <button id="discModalClose" aria-label="Fechar" style="background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:20px;padding:0 4px;flex-shrink:0;line-height:1;">✕</button>
     </div>
     <div id="discModalBody"></div>
   </div>
@@ -2865,7 +2862,7 @@
   <div class="lg-sheet" style="width:100%;max-width:440px;padding:24px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;border-bottom:1px solid var(--line-soft);padding-bottom:12px;">
       <span style="font-weight:600;font-size:15px;">Atalhos de teclado</span>
-      <button id="shortcutsClose" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:18px;padding:0 4px;">✕</button>
+      <button id="shortcutsClose" aria-label="Fechar" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:18px;padding:0 4px;">✕</button>
     </div>
     <table style="width:100%;border-collapse:collapse;font-size:13px;">
       <tbody>
@@ -3411,58 +3408,56 @@ function closeMoreSheet(){
 
 // ---------------- multi-tab sync (A-6) ----------------
 (function setupMultiTabSync(){
-  const SYNC_KEYS = new Set([
-    'config','historico_overrides','historico_custom','historico_removidos',
-    'tarefas','lab_concluido','relatorios_ocultos','relatorios_overrides',
-    'provas','faltas','faltas_limites','faltas_registro','horas_comp','horas_global',
-    'aulas_custom','turmas_custom','notas_parciais','metas_notas','tema','lembretes','pom_sessions','disc_notes','estudos_materiais','labs'
-  ]);
+  // chave salva -> campo do STATE
+  const CAMPOS = {
+    tarefas:'tarefas', provas:'provas', faltas:'faltas', faltas_limites:'faltasLimites', faltas_registro:'faltasRegistro',
+    historico_overrides:'historicoOverrides', historico_custom:'historicoCustom', historico_removidos:'historicoRemovidos',
+    lab_concluido:'labConcluido', relatorios_ocultos:'relatoriosOcultos', relatorios_overrides:'relatoriosOverrides',
+    horas_comp:'horasComp', horas_global:'horasGlobal', aulas_custom:'aulasCustom', turmas_custom:'turmasCustom',
+    notas_parciais:'notasParciais', metas_notas:'metasNotas', lembretes:'lembretes', pom_sessions:'pomSessions',
+    disc_notes:'discNotes', estudos_materiais:'estudos',
+  };
+  const SYNC_KEYS = new Set([...Object.keys(CAMPOS), 'config', 'tema', 'labs']);
+  // várias chaves mudam juntas (o "Faltei" grava faltas e o registro; a nuvem traz várias de uma vez):
+  // junta todas e aplica de uma vez, senão só a última chegava e a janela ficava com dados velhos
+  const pendentes = new Set();
   let _syncTimeout = null;
-  window.addEventListener('storage', async (e) => {
+  window.addEventListener('storage', (e) => {
     if(!e.key || !ACTIVE_PROFILE_ID) return;
     const prefix = LS_PREFIX + ACTIVE_PROFILE_ID + '_';
     if(!e.key.startsWith(prefix)) return;
     const bareKey = e.key.slice(prefix.length);
     if(!SYNC_KEYS.has(bareKey) || e.newValue === null) return;
-    // Reload that one key into STATE and re-render
+    pendentes.add(bareKey);
     clearTimeout(_syncTimeout);
-    _syncTimeout = setTimeout(async () => {
-      try {
-        const fresh = JSON.parse(e.newValue);
-        if(bareKey === 'config')                { STATE.config = fresh; renderAll(); return; }
-        if(bareKey === 'tarefas')               STATE.tarefas = fresh;
-        if(bareKey === 'provas')                STATE.provas = fresh;
-        if(bareKey === 'faltas')                STATE.faltas = fresh;
-        if(bareKey === 'faltas_limites')        STATE.faltasLimites = fresh;
-        if(bareKey === 'faltas_registro')       STATE.faltasRegistro = fresh;
-        if(bareKey === 'historico_overrides')   STATE.historicoOverrides = fresh;
-        if(bareKey === 'historico_custom')      STATE.historicoCustom = fresh;
-        if(bareKey === 'historico_removidos')   STATE.historicoRemovidos = fresh;
-        if(bareKey === 'lab_concluido')         STATE.labConcluido = fresh;
-        if(bareKey === 'relatorios_ocultos')    STATE.relatoriosOcultos = fresh;
-        if(bareKey === 'relatorios_overrides')  STATE.relatoriosOverrides = fresh;
-        if(bareKey === 'horas_comp')            STATE.horasComp = fresh;
-        if(bareKey === 'horas_global')          STATE.horasGlobal = fresh;
-        if(bareKey === 'aulas_custom')          STATE.aulasCustom = fresh;
-        if(bareKey === 'turmas_custom')         STATE.turmasCustom = fresh;
-        if(bareKey === 'notas_parciais')        STATE.notasParciais = fresh;
-        if(bareKey === 'metas_notas')           STATE.metasNotas = fresh;
-        if(bareKey === 'lembretes')             STATE.lembretes = fresh;
-        if(bareKey === 'pom_sessions')          STATE.pomSessions = fresh;
-        if(bareKey === 'disc_notes')            STATE.discNotes = fresh;
-        if(bareKey === 'estudos_materiais')     STATE.estudos = fresh;
-        if(bareKey === 'labs'){ STATE.labs = fresh || {}; renderNav(); }
-        if(bareKey === 'tema'){ STATE.tema = fresh; document.documentElement.setAttribute('data-theme', fresh); return; }
-        // Rebuild merged historico if overrides/custom/removidos changed
-        if(['historico_overrides','historico_custom','historico_removidos'].includes(bareKey)){
-          const base = DATA.historico.filter(d => !STATE.historicoRemovidos.includes(d.sigla))
-            .map(d => { const ov = STATE.historicoOverrides[d.sigla]||{}; return Object.assign({}, d, ov); });
-          STATE.historico = [...base, ...STATE.historicoCustom];
-        }
-        renderAll();
-      } catch(err){ /* ignore parse errors */ }
-    }, 200);
+    _syncTimeout = setTimeout(aplicarPendentes, 200);
   });
+  function aplicarPendentes(){
+    const prefix = LS_PREFIX + ACTIVE_PROFILE_ID + '_';
+    const keys = [...pendentes];
+    pendentes.clear();
+    let mudou = false;
+    keys.forEach(bareKey => {
+      let fresh;
+      try{
+        const raw = localStorage.getItem(prefix + bareKey);
+        if(raw === null) return;
+        fresh = JSON.parse(raw);
+      }catch(err){ return; }
+      if(bareKey === 'tema'){ STATE.tema = fresh; applyTheme(fresh); return; }
+      if(bareKey === 'config') STATE.config = fresh;
+      else if(bareKey === 'labs'){ STATE.labs = fresh || {}; renderNav(); }
+      else STATE[CAMPOS[bareKey]] = fresh;
+      mudou = true;
+    });
+    if(!mudou) return;
+    if(keys.some(k => k.startsWith('historico_'))){
+      const base = DATA.historico.filter(d => !STATE.historicoRemovidos.includes(d.sigla))
+        .map(d => { const ov = STATE.historicoOverrides[d.sigla]||{}; return Object.assign({}, d, ov); });
+      STATE.historico = [...base, ...STATE.historicoCustom];
+    }
+    renderAll();
+  }
 })();
 
 // ---------------- clock ----------------
@@ -3543,8 +3538,15 @@ function daysUntil(d){
   const dt = new Date(d+'T00:00:00'); const now = new Date(); now.setHours(0,0,0,0);
   return Math.round((dt-now)/86400000);
 }
+// Relatórios oficiais visíveis, com o nome e o prazo editados. "Concluído" fica guardado
+// com o nome original (orig): renomear um relatório não pode fazê-lo voltar a ficar pendente.
+function relatoriosOficiais(){
+  return (DATA.relatorios || [])
+    .filter(r => !(STATE.relatoriosOcultos || []).includes(r.nome))
+    .map(r => { const ov = (STATE.relatoriosOverrides || {})[r.nome] || {}; return Object.assign({}, r, {nome: ov.nome || r.nome, fim: ov.fim || r.fim, orig: r.nome}); });
+}
 function relatorioStatus(r){
-  const done = !!STATE.labConcluido[r.nome];
+  const done = !!STATE.labConcluido[r.orig || r.nome];
   if(done) return {label:'Concluído', cls:'green'};
   const dr = daysUntil(r.fim);
   const startDr = daysUntil(r.inicio);
@@ -3645,9 +3647,11 @@ function renderDiscRisco(){
 // ---------------- Streak de Estudo ----------------
 function calcStudyStreak(){
   if(!STATE.pomSessions || !STATE.pomSessions.length) return 0;
-  const today = new Date(); today.setHours(0,0,0,0);
   const sessSet = new Set(STATE.pomSessions.map(s => new Date(s.ts).toDateString()));
-  let streak = 0, d = new Date(today);
+  const d = new Date(); d.setHours(0,0,0,0);
+  // sem sessão hoje ainda, a sequência conta até ontem: não some de manhã antes de a pessoa estudar
+  if(!sessSet.has(d.toDateString())) d.setDate(d.getDate()-1);
+  let streak = 0;
   while(sessSet.has(d.toDateString())){
     streak++;
     d.setDate(d.getDate()-1);
@@ -3751,12 +3755,7 @@ function renderPainel(){
   }).join('') : `<div class="empty">Nenhuma aula hoje</div>`;
   document.querySelectorAll('#aulasHojeList [data-faltei]').forEach(b => b.addEventListener('click', () => alternarFalta(b.dataset.faltei)));
 
-  const relOficiais = DATA.relatorios
-    .filter(r => !STATE.relatoriosOcultos.includes(r.nome))
-    .map(r => {
-      const ov = STATE.relatoriosOverrides[r.nome] || {};
-      return Object.assign({}, r, {nome: ov.nome||r.nome, fim: ov.fim||r.fim});
-    });
+  const relOficiais = relatoriosOficiais();
   const relTarefas = STATE.tarefas.filter(t => t.categoria==='Relatório de Lab.' && t.prazo);
   const todosRels = [...relOficiais, ...relTarefas.map(t => ({nome:t.nome, fim:t.prazo, _tarefa:t}))];
   todosRels.sort((a,b) => (a.fim||'').localeCompare(b.fim||''));
@@ -3890,10 +3889,7 @@ function renderDayOverview(){
   const prova = p => `${esc(p.tipo)} de ${esc(disc(p))}${hora(p.hora)}`;
   const lista = arr => arr.length < 2 ? arr.join('') : arr.slice(0,-1).join(', ') + ' e ' + arr[arr.length-1];
   const abertas = STATE.tarefas.filter(t => t.status !== 'Concluído' && t.prazo);
-  const rels = DATA.relatorios
-    .filter(r => !STATE.relatoriosOcultos.includes(r.nome))
-    .map(r => { const ov = STATE.relatoriosOverrides[r.nome] || {}; return Object.assign({}, r, {nome: ov.nome||r.nome, fim: ov.fim||r.fim}); })
-    .filter(r => r.fim && relatorioStatus(r).label !== 'Concluído');
+  const rels = relatoriosAbertos();
 
   const frases = [];
   const provasHoje = upcomingProvas().filter(p => daysUntil(p.data) === 0 && (!p.hora || p.hora > nowHM));
@@ -4018,26 +4014,20 @@ function renderLab(){
   });
   document.getElementById('turmasGrid').innerHTML = html;
 
-  // Aplicar overrides e filtrar ocultos
-  const oficiais = DATA.relatorios
-    .filter(r => !STATE.relatoriosOcultos.includes(r.nome))
-    .map(r => {
-      const ov = STATE.relatoriosOverrides[r.nome] || {};
-      const nomeExib = ov.nome || r.nome;
-      const fimExib = ov.fim || r.fim;
-      const rEfetivo = Object.assign({}, r, {nome: nomeExib, fim: fimExib});
-      const st = relatorioStatus(rEfetivo);
-      const dr = daysUntil(fimExib);
-      const done = !!STATE.labConcluido[r.nome];
-      return `<tr data-rel-id="${esc(r.nome)}">
-        <td class="rel-nome-cell">${esc(nomeExib)}</td>
-        <td class="mono rel-prazo-cell">${fmtDate(fimExib)}</td>
+  // Oficiais com os nomes e prazos editados; os botões usam o nome original
+  const oficiais = relatoriosOficiais().map(r => {
+      const st = relatorioStatus(r);
+      const dr = daysUntil(r.fim);
+      const done = !!STATE.labConcluido[r.orig];
+      return `<tr data-rel-id="${esc(r.orig)}">
+        <td class="rel-nome-cell">${esc(r.nome)}</td>
+        <td class="mono rel-prazo-cell">${fmtDate(r.fim)}</td>
         <td class="mono">${(done || dr<0) ? '—' : dr}</td>
         <td><span class="badge badge-${st.cls}">${st.label}</span></td>
         <td style="display:flex;gap:4px;align-items:center;">
-          <button class="btn btn-sm ${done?'':'btn-primary'}" data-lab-toggle="${esc(r.nome)}">${done?'Reabrir':'Marcar concluído'}</button>
-          <button class="btn btn-ghost btn-sm" data-lab-edit="${esc(r.nome)}" title="Editar" aria-label="Editar">${ico('edit')}</button>
-          <button class="btn btn-ghost btn-sm" data-lab-del="${esc(r.nome)}" title="Excluir">✕</button>
+          <button class="btn btn-sm ${done?'':'btn-primary'}" data-lab-toggle="${esc(r.orig)}">${done?'Reabrir':'Marcar concluído'}</button>
+          <button class="btn btn-ghost btn-sm" data-lab-edit="${esc(r.orig)}" title="Editar" aria-label="Editar ${esc(r.nome)}">${ico('edit')}</button>
+          <button class="btn btn-ghost btn-sm" data-lab-del="${esc(r.orig)}" title="Excluir" aria-label="Excluir ${esc(r.nome)}">✕</button>
         </td>
       </tr>`;
     }).join('');
@@ -4081,50 +4071,53 @@ function renderLab(){
     });
   });
 
+  // lápis: o primeiro toque abre os campos na linha, o segundo (já como ✓) salva.
+  // Um único listener: antes o do lápis rodava de novo no ✓, recriava os campos sem a chave e nada era salvo.
   document.querySelectorAll('[data-lab-edit]').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const nomeId = btn.dataset.labEdit;
-      const ov = STATE.relatoriosOverrides[nomeId] || {};
-      const orig = DATA.relatorios.find(r => r.nome === nomeId) || {};
       const row = btn.closest('tr');
       const nomeCell = row.querySelector('.rel-nome-cell');
       const prazoCell = row.querySelector('.rel-prazo-cell');
-      const nomeAtual = ov.nome || orig.nome || nomeId;
-      const prazoAtual = ov.fim || orig.fim || '';
-      nomeCell.innerHTML = `<input class="cell-input" id="editRelNome_${CSS.escape(nomeId)}" value="${esc(nomeAtual)}" style="width:100%">`;
-      prazoCell.innerHTML = `<input class="cell-input" id="editRelPrazo_${CSS.escape(nomeId)}" type="date" value="${prazoAtual}" style="width:110px;">`;
-      btn.innerHTML = ico('save');
-      btn.title = 'Salvar';
-      delete btn.dataset.labEdit;
-      // Registrar listener imediatamente — não via querySelectorAll (o botão já existia no DOM)
-      btn.addEventListener('click', async function saveHandler() {
-        btn.removeEventListener('click', saveHandler);
-        const safeId = CSS.escape(nomeId);
-        const nomeInput = document.getElementById('editRelNome_'+safeId);
-        const prazoInput = document.getElementById('editRelPrazo_'+safeId);
-        if(!nomeInput || !prazoInput) { renderLab(); return; }
+      if(btn.dataset.editando){
         STATE.relatoriosOverrides[nomeId] = {
-          nome: nomeInput.value.trim() || nomeId,
-          fim: prazoInput.value,
+          nome: nomeCell.querySelector('input').value.trim() || nomeId,
+          fim: prazoCell.querySelector('input').value,
         };
         await storeSet('relatorios_overrides', STATE.relatoriosOverrides);
         showToast('Relatório atualizado', 'success');
         renderLab(); renderPainel();
-      }, {once: true});
+        return;
+      }
+      btn.dataset.editando = '1';
+      const r = relatoriosOficiais().find(x => x.orig === nomeId) || {nome: nomeId, fim: ''};
+      nomeCell.innerHTML = `<input class="cell-input" value="${esc(r.nome)}" aria-label="Nome do relatório" style="width:100%">`;
+      prazoCell.innerHTML = `<input class="cell-input" type="date" value="${esc(r.fim || '')}" aria-label="Prazo final" style="width:110px;">`;
+      btn.innerHTML = ico('save');
+      btn.title = 'Salvar'; btn.setAttribute('aria-label', 'Salvar');
+      row.querySelectorAll('input').forEach(i => i.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); btn.click(); } }));
+      nomeCell.querySelector('input').focus();
     });
   });
 
   document.querySelectorAll('[data-lab-del]').forEach(btn => {
     btn.addEventListener('click', async () => {
       const nomeId = btn.dataset.labDel;
+      const override = STATE.relatoriosOverrides[nomeId];
       if(!STATE.relatoriosOcultos.includes(nomeId)) STATE.relatoriosOcultos.push(nomeId);
       await storeSet('relatorios_ocultos', STATE.relatoriosOcultos);
       // Limpar override correspondente para não acumular dados órfãos
-      if(STATE.relatoriosOverrides[nomeId]){
+      if(override){
         delete STATE.relatoriosOverrides[nomeId];
         await storeSet('relatorios_overrides', STATE.relatoriosOverrides);
       }
       renderLab(); renderPainel();
+      showToast('Relatório excluído', 'info', 6000, {label:'Desfazer', fn: async () => {
+        STATE.relatoriosOcultos = STATE.relatoriosOcultos.filter(n => n !== nomeId);
+        await storeSet('relatorios_ocultos', STATE.relatoriosOcultos);
+        if(override){ STATE.relatoriosOverrides[nomeId] = override; await storeSet('relatorios_overrides', STATE.relatoriosOverrides); }
+        renderLab(); renderPainel();
+      }});
     });
   });
 
@@ -4139,11 +4132,8 @@ function renderLab(){
     el.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); fn(); } });
   });
   document.querySelectorAll('[data-del-lab-task]').forEach(el => {
-    el.addEventListener('click', async () => {
-      STATE.tarefas = STATE.tarefas.filter(x=>x.id!==el.dataset.delLabTask);
-      await storeSet('tarefas', STATE.tarefas);
-      renderLab(); renderTarefas(); renderPainel();
-    });
+    el.addEventListener('click', () => removerComDesfazer('tarefas', 'tarefas', x => x.id === el.dataset.delLabTask,
+      'Relatório excluído', () => { renderLab(); renderTarefas(); renderPainel(); }));
   });
 }
 
@@ -4295,10 +4285,7 @@ function exportHistoricoCSV(){
       .map(v => `"${String(v).replace(/"/g,'""')}"`).join(',');
   });
   const csv = 'Sigla,Disciplina,Nota,CH,Semestre,Situação\n' + rows.join('\n');
-  const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8;'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href=url; a.download='historico_academico.csv'; a.click();
-  URL.revokeObjectURL(url);
+  baixarArquivo(new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8;'}), 'historico_academico.csv');
   showToast('CSV exportado com sucesso!', 'success');
 }
 
@@ -4365,7 +4352,7 @@ function showDiscDetail(sigla){
     </div>` : ''}
     <div style="margin-top:16px;">
       <div class="section-label" style="margin:0 0 8px;">Anotações</div>
-      <textarea class="disc-notes-area" id="discNotes_${sigla}" placeholder="Anotações sobre esta disciplina…">${esc(STATE.discNotes[sigla] || '')}</textarea>
+      <textarea class="disc-notes-area" id="discNotes_${esc(sigla)}" aria-label="Anotações de ${esc(sigla)}" placeholder="Anotações sobre esta disciplina…">${esc(STATE.discNotes[sigla] || '')}</textarea>
     </div>
   `;
 
@@ -4387,7 +4374,7 @@ function renderCharts(){
   renderSessoesEstudo();
   renderCalculadoraFinal();
   renderProdutividade();
-  const CHART_IDS = ['chartSituacao','chartNotas','chartTendencia','chartIRAEvol'];
+  const CHART_IDS = ['chartSituacao','chartNotas','chartTendencia'];
   if(typeof Chart === 'undefined'){
     loadChartJs().then(() => {
       if(document.getElementById('tab-desempenho').classList.contains('active')) renderCharts();
@@ -4396,7 +4383,6 @@ function renderCharts(){
     });
     return;
   }
-  renderIRAEvolution();
   const stats = cursoStatsCompute();
   const notaMin = STATE.config ? (STATE.config.notaMinima || 60) : 60;
   const cs = getComputedStyle(document.documentElement);
@@ -4728,14 +4714,7 @@ function renderSimuladorIRA(){
         <div style="font-size:10px;color:var(--text-faint);font-family:var(--mono);margin-bottom:2px;text-transform:uppercase;letter-spacing:.06em;">Atual</div>
         <div style="font-size:20px;font-weight:600;font-family:var(--mono);color:var(--text-dim)">${iraAtual !== null ? fmtNum(iraAtual, 2) : '—'}</div>
       </div>
-      <div>
-        <div style="font-size:10px;color:var(--text-faint);font-family:var(--mono);margin-bottom:2px;text-transform:uppercase;letter-spacing:.06em;">Meta IRA</div>
-        <input type="number" id="simMeta" min="0" max="100" step="0.1" placeholder="ex: 75"
-          value="${STATE.config.metaIRA != null ? STATE.config.metaIRA : ''}"
-          style="width:72px;background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r);color:var(--text);padding:3px 7px;font-family:var(--mono);font-size:16px;font-weight:700;">
-      </div>
       <div id="simDelta" class="sim-delta"></div>
-      <div id="simMetaStatus" style="font-size:11px;font-family:var(--mono);align-self:flex-end;"></div>
     </div>
   `;
 
@@ -4765,27 +4744,10 @@ function renderSimuladorIRA(){
         deltaEl.textContent = (d >= 0 ? '▲ +' : '▼ ') + fmtNum(d, 2);
         deltaEl.style.color = d >= 0 ? 'var(--green)' : 'var(--red)';
       }
-      const metaEl = document.getElementById('simMeta');
-      const metaStatusEl = document.getElementById('simMetaStatus');
-      if(metaEl && metaStatusEl && metaEl.value !== '') {
-        const meta = parseFloat(metaEl.value);
-        if(!isNaN(meta)){
-          const diff = iraProj - meta;
-          metaStatusEl.textContent = diff >= 0 ? `✓ Meta atingida (+${fmtNum(diff, 2)})` : `Faltam ${fmtNum(Math.abs(diff), 2)} pts`;
-          metaStatusEl.style.color = diff >= 0 ? 'var(--green)' : 'var(--red)';
-        }
-      } else if(metaStatusEl){ metaStatusEl.textContent = ''; }
     }
   }
 
   panel.querySelectorAll('.sim-inp').forEach(inp => inp.addEventListener('input', recalcSim));
-  const metaInput = panel.querySelector('#simMeta');
-  if(metaInput) metaInput.addEventListener('input', async () => {
-    const v = parseFloat(metaInput.value);
-    STATE.config.metaIRA = isNaN(v) ? null : v;
-    await storeSet('config', STATE.config);
-    recalcSim();
-  });
   recalcSim();
 }
 
@@ -5093,10 +5055,7 @@ function renderAgendaSemanal(){
   const days = Array.from({length:7}, (_,i) => { const d = new Date(weekStart); d.setDate(weekStart.getDate()+i); return d; });
 
   const aulas = getAulas().filter(a => a.inicio && a.inicio !== '—');
-  const relsAbertos = DATA.relatorios
-    .filter(r => !STATE.relatoriosOcultos.includes(r.nome))
-    .map(r => { const ov = STATE.relatoriosOverrides[r.nome] || {}; return Object.assign({}, r, {nome: ov.nome||r.nome, fim: ov.fim||r.fim}); })
-    .filter(r => r.fim && relatorioStatus(r).label !== 'Concluído');
+  const relsAbertos = relatoriosAbertos();
   // Sunday only gets a column when something is due that day
   const domIso = localISO(days[6]);
   const domingoTemAlgo = STATE.provas.some(p => p.data === domIso)
@@ -5301,64 +5260,6 @@ function renderCalculadoraFinal(){
   `;
 }
 
-// ---------------- render: IRA por Semestre ----------------
-let chartIRAEvolRef = null;
-function renderIRAEvolution(){
-  const canvas = document.getElementById('chartIRAEvol');
-  if(!canvas || typeof Chart === 'undefined') return;
-  // Group historico by semestre (numeric sort)
-  const bySem = {};
-  STATE.historico.forEach(i => {
-    const s = i.semestre;
-    if(!s || s <= 0) return;
-    const sit = situacao(i);
-    if((sit !== 'Aprovado' && sit !== 'Reprovado') || typeof i.nota !== 'number') return;
-    if(!bySem[s]) bySem[s] = {soma:0, peso:0, count:0};
-    const ch = typeof i.ch === 'number' && i.ch > 0 ? i.ch : 1;
-    bySem[s].soma += i.nota * ch;
-    bySem[s].peso += ch;
-    bySem[s].count++;
-  });
-  // semestre pode ser número (3) ou período ("2025/1"): ordena pelos números que aparecem nele
-  const semKey = s => String(s).split(/\D+/).filter(Boolean).map(Number);
-  const sems = Object.keys(bySem).sort((a,b) => {
-    const ka = semKey(a), kb = semKey(b);
-    for(let i = 0; i < Math.max(ka.length, kb.length); i++){ const d = (ka[i]||0) - (kb[i]||0); if(d) return d; }
-    return 0;
-  });
-  if(chartIRAEvolRef){ chartIRAEvolRef.destroy(); chartIRAEvolRef = null; }
-  if(sems.length < 2){ chartEmpty(canvas, 'A evolução aparece quando houver notas de pelo menos 2 semestres no Histórico.'); return; }
-  chartEmpty(canvas, null);
-  const labels = sems.map(s => /^\d+$/.test(s) ? `${s}º` : s);
-  const vals = sems.map(s => bySem[s].peso > 0 ? bySem[s].soma/bySem[s].peso : null);
-  const isDark = document.documentElement.dataset.theme === 'dark' || (!document.documentElement.dataset.theme && window.matchMedia('(prefers-color-scheme:dark)').matches);
-  const textColor = isDark ? '#9ca3af' : '#6b7280';
-  chartIRAEvolRef = new Chart(canvas, {
-    type:'line',
-    data:{
-      labels,
-      datasets:[{
-        label:'IRA por Semestre',
-        data:vals,
-        borderColor:'#3b82f6',
-        backgroundColor:'rgba(59,130,246,.1)',
-        pointBackgroundColor:'#3b82f6',
-        pointRadius:5,
-        fill:true,
-        tension:.3
-      }]
-    },
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:v=>`IRA: ${fmtNum(v.raw, 2)}`}}},
-      scales:{
-        x:{grid:{color:'rgba(128,128,128,.1)'},ticks:{color:textColor}},
-        y:{min:0,max:100,grid:{color:'rgba(128,128,128,.1)'},ticks:{color:textColor,callback:v=>v.toFixed(0)}}
-      }
-    }
-  });
-}
-
 // ---------------- render: Produtividade Total ----------------
 function renderProdutividade(){
   const panel = document.getElementById('produtividadePanel');
@@ -5471,7 +5372,7 @@ function renderMetaNotas(){
       const v = parseFloat(inp.value);
       if(!STATE.metasNotas) STATE.metasNotas = {};
       if(isNaN(v) || inp.value === '') delete STATE.metasNotas[s];
-      else STATE.metasNotas[s] = v;
+      else STATE.metasNotas[s] = Math.min(100, Math.max(0, v));
       await storeSet('metas_notas', STATE.metasNotas);
       showToast('Meta salva', 'success', 1500);
     });
@@ -5547,11 +5448,7 @@ function renderHorasComp(){
     });
   });
   document.querySelectorAll('[data-del-hc]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      STATE.horasComp = STATE.horasComp.filter(x=>x.id!==btn.dataset.delHc);
-      await storeSet('horas_comp', STATE.horasComp);
-      renderHorasComp();
-    });
+    btn.addEventListener('click', () => removerComDesfazer('horasComp', 'horas_comp', x => x.id === btn.dataset.delHc, 'Atividade removida', renderHorasComp));
   });
 }
 
@@ -5859,8 +5756,8 @@ function renderTarefas(){
       const catOpts = (CATS.includes(t.categoria) ? CATS : [t.categoria, ...CATS]).map(c=>`<option${t.categoria===c?' selected':''}>${esc(c)}</option>`).join('');
       const prioOpts = PRIOS.map(p=>`<option${t.prioridade===p?' selected':''}>${p}</option>`).join('');
       return `<div class="task-edit-panel" id="tEdit_${t.id}">
-        <input id="tEditNome_${t.id}" class="input" value="${esc(t.nome)}" aria-label="Nome da tarefa" style="font-weight:600;margin-bottom:8px;width:100%;">
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:10px;">
+        <div class="field" style="margin-bottom:8px;"><input id="tEditNome_${t.id}" value="${esc(t.nome)}" aria-label="Nome da tarefa" style="font-weight:600;"></div>
+        <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:10px;">
           <div class="field"><label>Categoria</label><select id="tEditCat_${t.id}">${catOpts}</select></div>
           <div class="field"><label>Disciplina</label><input id="tEditDisc_${t.id}" value="${esc(t.disciplina||'')}" list="discSuggestList"></div>
           <div class="field"><label>Prazo</label><input id="tEditPrazo_${t.id}" type="date" value="${t.prazo||''}"></div>
@@ -5971,13 +5868,9 @@ function renderTarefas(){
       renderTarefas(); renderPainel(); renderLab();
     });
   });
-  document.querySelectorAll('[data-del]').forEach(el => {
-    el.addEventListener('click', async () => {
-      STATE.tarefas = STATE.tarefas.filter(x=>x.id!==el.dataset.del);
-      await storeSet('tarefas', STATE.tarefas);
-      _editingTarefaId = null;
-      renderTarefas(); renderPainel(); renderLab();
-    });
+  document.querySelectorAll('#tarefasList [data-del]').forEach(el => {
+    el.addEventListener('click', () => removerComDesfazer('tarefas', 'tarefas', x => x.id === el.dataset.del, 'Tarefa excluída',
+      () => { _editingTarefaId = null; renderTarefas(); renderPainel(); renderLab(); }));
   });
 }
 document.getElementById('fFiltroStatus').addEventListener('change', () => renderTarefas());
@@ -6165,8 +6058,8 @@ function renderProvas(){
     if(p.id === _editingProvaId){
       const tipoOpts = TIPOS_PROVA.map(t=>`<option${p.tipo===t?' selected':''}>${t}</option>`).join('');
       return `<div class="task-edit-panel" style="margin:4px 0;">
-        <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;margin-bottom:10px;">
-          <div class="field"><label>Disciplina</label>
+        <div style="display:grid;grid-template-columns:minmax(0,2fr) repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px;">
+          <div class="field edit-span"><label>Disciplina</label>
             <select id="pEditDisc_${p.id}">
               ${makeDiscOpts(p.disciplina)}
             </select>
@@ -6175,8 +6068,8 @@ function renderProvas(){
           <div class="field"><label>Data</label><input id="pEditData_${p.id}" type="date" value="${p.data}"></div>
           <div class="field"><label>Hora</label><input id="pEditHora_${p.id}" type="time" value="${p.hora||''}"></div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:end;">
-          <div class="field" style="margin:0;"><label>Local</label><input id="pEditLocal_${p.id}" value="${esc(p.local||'')}" placeholder="ex: Lab A203"></div>
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:end;">
+          <div class="field edit-span" style="margin:0;"><label>Local</label><input id="pEditLocal_${p.id}" value="${esc(p.local||'')}" placeholder="ex: Lab A203"></div>
           <button class="btn" data-cancel-edit-prova="${p.id}">Cancelar</button>
           <button class="btn btn-primary" data-save-prova="${p.id}">Salvar</button>
         </div>
@@ -6217,13 +6110,8 @@ function renderProvas(){
       renderProvas(); renderPainel();
     });
   });
-  document.querySelectorAll('[data-del-prova]').forEach(el => {
-    el.addEventListener('click', async () => {
-      STATE.provas = STATE.provas.filter(x=>x.id!==el.dataset.delProva);
-      await storeSet('provas', STATE.provas);
-      _editingProvaId = null;
-      renderProvas(); renderPainel();
-    });
+  list.querySelectorAll('[data-del-prova]').forEach(el => {
+    el.addEventListener('click', () => excluirProva(el.dataset.delProva));
   });
 
   // Provas realizadas: cada uma recebe a nota, que vai para a aba Notas
@@ -6282,13 +6170,13 @@ function renderProvas(){
       });
     });
     passadasEl.querySelectorAll('[data-del-prova]').forEach(el => {
-      el.addEventListener('click', async () => {
-        STATE.provas = STATE.provas.filter(x=>x.id!==el.dataset.delProva);
-        await storeSet('provas', STATE.provas);
-        renderProvas(); renderPainel();
-      });
+      el.addEventListener('click', () => excluirProva(el.dataset.delProva));
     });
   }
+}
+function excluirProva(id){
+  return removerComDesfazer('provas', 'provas', x => x.id === id, 'Prova excluída',
+    () => { _editingProvaId = null; renderProvas(); renderPainel(); });
 }
 
 // ---------------- nota das provas realizadas ----------------
@@ -6410,10 +6298,7 @@ document.getElementById('pLocal').addEventListener('keydown', e => {
 // e o próprio celular lembra, mesmo com o app fechado e sem servidor de notificações.
 const semParenteses = s => String(s || '').replace(/\s*\([^)]*\)\s*$/, '');
 function relatoriosAbertos(){
-  return (DATA.relatorios || [])
-    .filter(r => !(STATE.relatoriosOcultos || []).includes(r.nome))
-    .map(r => { const ov = (STATE.relatoriosOverrides || {})[r.nome] || {}; return Object.assign({}, r, {nome: ov.nome || r.nome, fim: ov.fim || r.fim}); })
-    .filter(r => r.fim && relatorioStatus(r).label !== 'Concluído');
+  return relatoriosOficiais().filter(r => r.fim && relatorioStatus(r).label !== 'Concluído');
 }
 function agendaItens(){
   const hoje = localISO(new Date());
@@ -6511,11 +6396,7 @@ document.getElementById('baixarAgenda').addEventListener('click', () => {
     rels: document.getElementById('agRels').checked,
   });
   if(!total){ showToast('Nada para levar para a agenda agora.', 'info'); return; }
-  const url = URL.createObjectURL(new Blob([texto], {type: 'text/calendar;charset=utf-8'}));
-  const a = document.createElement('a');
-  a.href = url; a.download = `centro-de-controle-agenda-${localISO(new Date())}.ics`;
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  baixarArquivo(new Blob([texto], {type: 'text/calendar;charset=utf-8'}), `centro-de-controle-agenda-${localISO(new Date())}.ics`);
   showToast(`${total} ${total === 1 ? 'evento pronto' : 'eventos prontos'}. Abra o arquivo baixado para adicionar à agenda.`, 'success', 5000);
 });
 document.getElementById('btnAgendaExport').addEventListener('click', abrirModalAgenda);
@@ -6576,15 +6457,20 @@ document.getElementById('btnExport').addEventListener('click', async () => {
     pom_sessions: STATE.pomSessions,
     disc_notes: STATE.discNotes,
     estudos_materiais: STATE.estudos,
+    labs: STATE.labs,
     base_data: currentBaseData(),
   };
-  const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
+  baixarArquivo(new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'}), `backup-centro-de-controle-${localISO(new Date())}.json`);
+});
+// Baixa um arquivo gerado no app. O endereço temporário só é liberado depois: no Android,
+// liberar logo após o clique pode cancelar o download.
+function baixarArquivo(blob, nome){
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = `backup-centro-de-controle-${localISO(new Date())}.json`;
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-});
+  a.href = url; a.download = nome;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
 document.getElementById('btnImportTrigger').addEventListener('click', () => { window._importIntoNewProfile = false; document.getElementById('fileImport').click(); });
 document.addEventListener('click', e => {
   if(!e.target.closest('#wizRestoreBackup')) return;
@@ -6595,6 +6481,9 @@ document.getElementById('fileImport').addEventListener('change', (e) => {
   const file = e.target.files[0];
   if(!file) return;
   const reader = new FileReader();
+  // lê e zera já: um arquivo errado ou um "cancelar" no assistente não pode afetar a próxima importação
+  const intoNewProfile = window._importIntoNewProfile;
+  window._importIntoNewProfile = false;
   reader.onload = async (ev) => {
     try{
       const backup = JSON.parse(ev.target.result);
@@ -6604,8 +6493,6 @@ document.getElementById('fileImport').addEventListener('change', (e) => {
       }
       const quando = backup.exportedAt ? ` de ${new Date(backup.exportedAt).toLocaleDateString('pt-BR')}` : '';
       if(!confirm(`Restaurar o backup${quando}? Os dados atuais deste perfil serão substituídos.`)) return;
-      const intoNewProfile = window._importIntoNewProfile;
-      window._importIntoNewProfile = false;
       if(!ACTIVE_PROFILE_ID || intoNewProfile){
         // fresh device, or restoring from the setup wizard: create the profile the backup belongs to
         const name = (backup.config.aluno || '').trim() || 'Meu perfil';
@@ -6623,7 +6510,7 @@ document.getElementById('fileImport').addEventListener('change', (e) => {
       const BACKUP_KEYS = ['config','historico_overrides','historico_custom','historico_removidos','tarefas',
         'lab_concluido','provas','faltas','faltas_limites','faltas_registro','relatorios_ocultos','relatorios_overrides','horas_comp',
         'horas_global','aulas_custom','turmas_custom','notas_parciais','metas_notas','tema','lembretes',
-        'pom_sessions','disc_notes','estudos_materiais'];
+        'pom_sessions','disc_notes','estudos_materiais','labs'];
       for(const k of BACKUP_KEYS){ if(k in backup) await storeSet(k, backup[k]); }
       const msg = document.getElementById('importMsg'); msg.classList.add('show');
       setTimeout(()=>msg.classList.remove('show'), 1800);
@@ -6691,11 +6578,7 @@ function saveReminderSnapshot(){
   clearTimeout(_snapTimer);
   _snapTimer = setTimeout(async () => {
     if(!('caches' in window) || !STATE.tarefas || !STATE.provas) return;
-    const rels = (DATA.relatorios || [])
-      .filter(r => !(STATE.relatoriosOcultos || []).includes(r.nome))
-      .map(r => { const ov = (STATE.relatoriosOverrides || {})[r.nome] || {}; return {nome: ov.nome || r.nome, fim: ov.fim || r.fim, inicio: r.inicio}; })
-      .filter(r => r.fim && relatorioStatus(r).label !== 'Concluído')
-      .map(r => ({nome: r.nome, fim: r.fim}));
+    const rels = relatoriosAbertos().map(r => ({nome: r.nome, fim: r.fim}));
     const snap = {
       provas: STATE.provas.map(p => ({tipo: p.tipo, disciplina: p.disciplina, data: p.data, hora: p.hora || null, local: p.local || null})),
       tarefas: STATE.tarefas.filter(t => t.status !== 'Concluído' && t.prazo).map(t => ({nome: t.nome, prazo: t.prazo})),
@@ -6721,7 +6604,10 @@ async function registerPeriodicReminders(){
   }catch(e){ /* só existe no Chrome do Android com o app instalado */ }
 }
 // confere de novo a cada 5 minutos com o app aberto (pega o aviso de 2h antes da prova)
-setInterval(() => { if(document.visibilityState === 'visible'){ saveReminderSnapshot(); setTimeout(askReminderCheck, 1500); } }, 5 * 60 * 1000);
+setInterval(() => {
+  if(document.visibilityState !== 'visible' || !('Notification' in window) || Notification.permission !== 'granted') return;
+  saveReminderSnapshot(); setTimeout(askReminderCheck, 1500);
+}, 5 * 60 * 1000);
 
 // ---------------- notificações push (com o app fechado) ----------------
 // Desligado até o Supabase ser configurado (supabase/push.sql e a função "lembretes").
@@ -7957,7 +7843,8 @@ function renderManualTable(){
 function loadSheetJS(cb){
   if(SHEETJS_LOADED){ cb(); return; }
   const s = document.createElement('script');
-  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+  // CDN oficial da SheetJS: a 0.18.5 do cdnjs (a última publicada lá) tem falhas de segurança conhecidas
+  s.src = 'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';
   s.onload = () => { SHEETJS_LOADED = true; cb(); };
   s.onerror = () => alert('Não foi possível carregar SheetJS (sem internet?). Use "Colar texto" ou "Digitar".');
   document.head.appendChild(s);
@@ -8029,14 +7916,13 @@ function autoDetectMapping(){
 function renderColMap(container){
   if(!container || !WIZARD_DATA.importHeaders.length) return;
   const fields = [{key:'sigla',label:'Sigla'},{key:'disciplina',label:'Disciplina'},{key:'nota',label:'Nota'},{key:'semestre',label:'Semestre Curricular'},{key:'situacao',label:'Situação (opcional)'}];
-  const opts = ['(ignorar)', ...WIZARD_DATA.importHeaders].map((h,i) => `<option value="${i-1}">${h}</option>`).join('');
   container.innerHTML = `<p style="font-size:12px;color:var(--text-dim);margin:0 0 10px;">Associe as colunas do seu arquivo aos campos do app:</p>
     <div class="col-map">` +
     fields.map(f => `
       <label>${f.label}</label>
       <div class="arrow">→</div>
       <select data-field="${f.key}" onchange="WIZARD_DATA.importMapping['${f.key}']=Number(this.value);applyMapping();renderGradePreview(document.getElementById('wizPreviewWrap'))">
-        ${['(ignorar)', ...WIZARD_DATA.importHeaders].map((h,i) => `<option value="${i-1}"${WIZARD_DATA.importMapping[f.key]===i-1?' selected':''}>${h}</option>`).join('')}
+        ${['(ignorar)', ...WIZARD_DATA.importHeaders].map((h,i) => `<option value="${i-1}"${WIZARD_DATA.importMapping[f.key]===i-1?' selected':''}>${esc(h)}</option>`).join('')}
       </select>`).join('') + `</div>`;
   renderGradePreview(document.getElementById('wizPreviewWrap'));
 }
@@ -8074,7 +7960,7 @@ function renderGradePreview(container){
   container.innerHTML = `<p style="font-size:12px;color:var(--green);margin:12px 0 6px;">✓ ${WIZARD_DATA.grade.length} disciplinas prontas para importar (mostrando as primeiras 8):</p>
     <div class="wiz-table-wrap"><table class="wiz-table">
       <thead><tr><th>Sigla</th><th>Disciplina</th><th>Nota</th><th>Sem.</th></tr></thead>
-      <tbody>${list.map(d=>`<tr><td>${esc(d.sigla)}</td><td>${esc(d.disciplina)}</td><td>${d.nota!=null?d.nota:''}</td><td>${d.semestre||''}</td></tr>`).join('')}</tbody>
+      <tbody>${list.map(d=>`<tr><td>${esc(d.sigla)}</td><td>${esc(d.disciplina)}</td><td>${esc(d.nota ?? '')}</td><td>${esc(d.semestre || '')}</td></tr>`).join('')}</tbody>
     </table></div>`;
 }
 
@@ -8217,22 +8103,8 @@ function wizardCollectStep(){
     wizBuildCatalogGrade();
     return true;
   }
-  if(WIZARD_STEP === 2){
-    // Validação: permitir continuar sem grade (grade vazia = começa do zero)
-    // mas avisar o usuário se o modo "Digitar" tem linhas parcialmente preenchidas
-    const manualRows = document.querySelectorAll('.wiz-manual-row');
-    if(manualRows.length && WIZARD_DATA.grade.length === 0){
-      // Coletar grade do modo manual se ainda não foi coletada
-      const grade = [];
-      manualRows.forEach(row => {
-        const sigla = row.querySelector('[data-wm-sigla]')?.value.trim().toUpperCase();
-        const nome  = row.querySelector('[data-wm-nome]')?.value.trim();
-        if(sigla && nome) grade.push({sigla, disciplina:nome, ch:null, nota:null, semestre:null, _custom:true});
-      });
-      WIZARD_DATA.grade = grade;
-    }
-    // Permitir grade vazia (usuário pode pular e adicionar depois)
-  }
+  // passo 2 sem catálogo: a grade já foi montada pelo arquivo, pelo texto colado ou pela tabela
+  // (vazia também vale: dá para adicionar as disciplinas depois)
   if(WIZARD_STEP === 3){
     WIZARD_DATA.disciplinasAtuais = Array.from(document.querySelectorAll('#wizardBody input[type=checkbox]:checked')).map(el => el.value);
   }
@@ -8327,7 +8199,8 @@ function linkFieldLabels(root){
 // ============================================================
 // TOAST
 // ============================================================
-function showToast(text, type='success', duration=3000){
+// acao opcional: {label, fn}, um botão no próprio aviso (ex.: "Desfazer")
+function showToast(text, type='success', duration=3000, acao){
   let container = document.getElementById('toastContainer');
   if(!container){
     container = document.createElement('div');
@@ -8341,6 +8214,12 @@ function showToast(text, type='success', duration=3000){
   const icon = type==='success' ? '✓' : type==='error' ? '✕' : 'ℹ';
   const iconColor = type==='success' ? 'var(--green)' : type==='error' ? 'var(--red)' : 'var(--blue)';
   toast.innerHTML = `<span style="font-weight:700;font-family:var(--mono);color:${iconColor}">${icon}</span><span>${esc(text)}</span>`;
+  if(acao){
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'toast__acao'; b.textContent = acao.label;
+    b.addEventListener('click', () => acao.fn()); // o clique também fecha o aviso (listener abaixo)
+    toast.appendChild(b);
+  }
   container.appendChild(toast);
   const remove = () => {
     toast.classList.add('leaving');
@@ -8348,6 +8227,22 @@ function showToast(text, type='success', duration=3000){
   };
   toast.addEventListener('click', remove);
   setTimeout(remove, duration);
+}
+
+// Tira um item de uma lista do STATE e oferece "Desfazer": no celular, o ✕ fica ao lado do lápis
+// e um toque errado apagava sem volta. O item volta para a mesma posição.
+async function removerComDesfazer(campo, chave, pred, texto, redesenhar){
+  const idx = STATE[campo].findIndex(pred);
+  if(idx < 0) return;
+  const [item] = STATE[campo].splice(idx, 1);
+  await storeSet(chave, STATE[campo]);
+  redesenhar();
+  showToast(texto, 'info', 6000, {label: 'Desfazer', fn: async () => {
+    if(STATE[campo].some(x => x.id === item.id)) return;
+    STATE[campo].splice(Math.min(idx, STATE[campo].length), 0, item);
+    await storeSet(chave, STATE[campo]);
+    redesenhar();
+  }});
 }
 
 // ============================================================
@@ -8473,11 +8368,7 @@ function renderLembretes(){
       </div>`).join('')}`;
 
   el.querySelectorAll('[data-del-lem]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      STATE.lembretes = STATE.lembretes.filter(x => x.id !== btn.dataset.delLem);
-      await storeSet('lembretes', STATE.lembretes);
-      renderLembretes();
-    });
+    btn.addEventListener('click', () => removerComDesfazer('lembretes', 'lembretes', x => x.id === btn.dataset.delLem, 'Lembrete removido', renderLembretes));
   });
 
   document.getElementById('postitAdd').addEventListener('click', () => {
@@ -8599,6 +8490,8 @@ function pomBeep(){
       osc.start(ctx.currentTime + offset);
       osc.stop(ctx.currentTime + offset + 0.3);
     });
+    // cada AudioContext aberto segura o áudio do aparelho: fecha depois dos três bipes
+    setTimeout(() => ctx.close().catch(() => {}), 1500);
   }catch(e){}
 }
 

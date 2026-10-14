@@ -17,7 +17,11 @@ const SHELL = [
 ];
 const CDN_HOSTS = ['cdnjs.cloudflare.com', 'cdn.jsdelivr.net'];
 // The charts library loads only when the Notas tab opens; keep a copy so the tab also works offline.
-const OPTIONAL = ['https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js'];
+// The sync library too: without it an offline launch opens with sync off until the next reload.
+const OPTIONAL = [
+  'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js',
+  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js',
+];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE)
@@ -178,7 +182,13 @@ self.addEventListener('fetch', event => {
       // no-cache: always revalidate with the server, so a new version shows up right after a deploy
       // (a navigate-mode Request cannot take options, so fetch by URL)
       fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' })
-        .then(res => { const copy = res.clone(); caches.open(CACHE).then(c => c.put('./index.html', copy)); return res; })
+        .then(res => {
+          // keep only a good copy of the app page itself: a 404 or a server error stored here
+          // would become the offline app
+          const appPage = url.pathname.replace(/index\.html$/, '') === new URL(self.registration.scope).pathname;
+          if (res.ok && appPage) { const copy = res.clone(); caches.open(CACHE).then(c => c.put('./index.html', copy)); }
+          return res;
+        })
         .catch(() => caches.match('./index.html'))
     );
     return;

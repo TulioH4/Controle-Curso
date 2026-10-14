@@ -57,6 +57,7 @@ Atualizações chegam sozinhas: a cada nova versão publicada, o app instalado s
 
 **Do jeito de um app**
 - Funciona offline e sincroniza quando a internet volta
+- Excluiu sem querer? O aviso traz **Desfazer** por alguns segundos (tarefas, provas, lembretes, relatórios e horas)
 - `Ctrl K` adiciona tarefa ou prova de qualquer tela; teclas `1` a `9` trocam de aba; `?` mostra os atalhos
 - Atalhos no ícone (clique direito no Windows, toque longo no Android): nova tarefa, provas, tarefas
 - Notificações de provas e prazos do dia e do dia seguinte e, no domingo à noite, o resumo da semana

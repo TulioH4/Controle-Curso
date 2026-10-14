@@ -52,7 +52,8 @@ export function collect(kv) {
     arr(base.relatorios).filter((r) => r && !ocultos.includes(r.nome)).forEach((r) => {
       const o = ov[r.nome] || {};
       const rel = { nome: o.nome || r.nome, fim: o.fim || r.fim };
-      if (rel.fim && !feitos[rel.nome]) all.rels.push(rel);
+      // "done" is stored under the original name, even after the report is renamed
+      if (rel.fim && !feitos[r.nome]) all.rels.push(rel);
     });
   }
   return all;
