@@ -614,7 +614,7 @@
   .hist-seg button[aria-checked="true"]{background:var(--blue); border-color:var(--blue); color:#fff;}
   .hist-add-msg{min-height:18px; margin:10px 0 0; font-size:12.5px; color:var(--red);}
   .hist-add-foot{display:flex; justify-content:flex-end; gap:8px; margin-top:6px;}
-  .hist-help{margin:-4px 0 14px; font-size:13px; color:var(--text-dim); line-height:1.5;}
+  .help-text{margin:-4px 0 14px; font-size:13px; color:var(--text-dim); line-height:1.5;}
   .hist-table tr.hist-sem td{padding:18px 4px 8px !important; border-bottom:none !important; cursor:default; background:none !important;}
   .hist-table tr.hist-sem:first-child td{padding-top:4px !important;}
   .hist-sem__t{font-size:14px; font-weight:650; color:var(--text);}
@@ -2486,7 +2486,7 @@
         </div>
       </div>
       <div class="meta-row" id="histSub" style="margin-bottom:14px;"></div>
-      <p class="hist-help">Todas as disciplinas do seu curso, separadas por semestre. Para lançar ou corrigir uma nota, toque no campo <b>Nota</b> e digite.</p>
+      <p class="help-text">Todas as disciplinas do seu curso, separadas por semestre. Para lançar ou corrigir uma nota, toque no campo <b>Nota</b> e digite.</p>
 
       <div id="histAddPanel" style="display:none; margin-bottom:14px;">
         <div class="panel--pad panel" style="--accent:var(--green)">
@@ -2755,12 +2755,17 @@
           <div class="field"><label>Instituição</label><input id="cInstituicao"></div>
           <div class="field"><label>Semestre atual</label><input id="cSemestre"></div>
           <div class="field"><label>Nota mínima de aprovação (0-100)</label><input id="cNotaMinima" type="number" min="0" max="100"></div>
-          <div class="field full"><label>Disciplinas cursando (siglas separadas por vírgula)</label><textarea id="cAtuais" rows="2"></textarea></div>
         </div>
         <div class="save-row">
           <button class="btn btn-primary" id="btnSaveConfig">Salvar configurações</button>
           <span class="save-msg" id="saveMsg">✓ Salvo</span>
         </div>
+      </div>
+
+      <div class="section-label">Disciplinas que você está cursando</div>
+      <div class="panel panel--pad" style="--accent:var(--blue)">
+        <p class="help-text" style="margin:0 0 14px;">Marque as disciplinas deste semestre. São elas que aparecem no Painel e nas abas Faltas e Notas. A mudança vale na hora, sem precisar salvar.</p>
+        <div id="cAtuaisLista"></div>
       </div>
 
       <div class="section-label">Backup dos dados</div>
@@ -4311,6 +4316,7 @@ function renderHistorico(filter){
       if(field === 'ch') renderFaltas(); // atualiza limites de falta
       renderPainel();
       renderMapaSucesso();
+      renderAtuaisConfig(); // uma nota de aprovação tira a disciplina da lista de marcar
     });
   });
 
@@ -4324,7 +4330,7 @@ function renderHistorico(filter){
       STATE.historicoOverrides[sigla].aprovado = true;
       await storeSet('historico_overrides', STATE.historicoOverrides);
       renderHistorico(document.getElementById('histSearch').value);
-      renderPainel(); renderMapaSucesso();
+      renderPainel(); renderMapaSucesso(); renderAtuaisConfig();
     });
   });
 
@@ -4337,7 +4343,7 @@ function renderHistorico(filter){
       if(STATE.historicoOverrides[sigla]) delete STATE.historicoOverrides[sigla].aprovado;
       await storeSet('historico_overrides', STATE.historicoOverrides);
       renderHistorico(document.getElementById('histSearch').value);
-      renderPainel(); renderMapaSucesso();
+      renderPainel(); renderMapaSucesso(); renderAtuaisConfig();
     });
   });
 
@@ -4345,7 +4351,8 @@ function renderHistorico(filter){
     btn.addEventListener('click', async () => {
       const sigla = btn.dataset.delDisc;
       const isCustom = STATE.historicoCustom.some(c => c.sigla === sigla);
-      if(!confirm(`Remover "${sigla}" do histórico? Esta ação não pode ser desfeita.`)) return;
+      const nome = (STATE.historico.find(i => i.sigla === sigla) || {}).disciplina || sigla;
+      if(!confirm(`Remover "${nome}" do histórico? Esta ação não pode ser desfeita.`)) return;
       if(isCustom){
         STATE.historicoCustom = STATE.historicoCustom.filter(c => c.sigla !== sigla);
         await storeSet('historico_custom', STATE.historicoCustom);
@@ -4355,7 +4362,7 @@ function renderHistorico(filter){
       }
       STATE.historico = STATE.historico.filter(i => i.sigla !== sigla);
       renderHistorico(document.getElementById('histSearch').value);
-      renderPainel(); renderMapaSucesso();
+      renderPainel(); renderMapaSucesso(); renderAtuaisConfig();
     });
   });
 }
@@ -5615,8 +5622,8 @@ document.getElementById('btnAddDisc').addEventListener('click', async () => {
   nomeInp.focus();
   showToast(`${nome} adicionada${per ? ` ao ${per}º semestre` : ''}`, 'success');
   renderHistorico(document.getElementById('histSearch').value);
-  renderPainel(); renderMapaSucesso();
-  if(cursando){ renderFaltas(); renderConfig(); updateDiscSuggestList(); }
+  renderPainel(); renderMapaSucesso(); renderAtuaisConfig();
+  if(cursando){ renderFaltas(); renderProvas(); renderMetaNotas(); updateDiscSuggestList(); }
 });
 
 // ---- Dashboard: link "ver todas" ----
@@ -6029,13 +6036,47 @@ document.getElementById('btnAddTarefa').addEventListener('click', async () => {
 });
 
 // ---------------- render: Config ----------------
+// Disciplinas cursando: lista de marcar por semestre, com as que ainda não foram aprovadas
+// (e as já marcadas). Cada toque salva na hora; a lista não se redesenha sob o dedo.
+function renderAtuaisConfig(){
+  const el = document.getElementById('cAtuaisLista');
+  if(!el) return;
+  const atuais = STATE.config.disciplinasAtuais || [];
+  const blocos = buildSemestresCurriculares()
+    .map(b => ({b, itens: b.disciplinas.filter(d => atuais.includes(d.sigla) || situacao(d) !== 'Aprovado')}))
+    .filter(x => x.itens.length);
+  // códigos marcados que não estão no histórico (digitados à mão antigamente) continuam na lista
+  const soltas = atuais.filter(s => !STATE.historico.some(d => d.sigla === s));
+  if(!blocos.length && !soltas.length){
+    el.innerHTML = `<div class="empty" style="padding:12px 0;">Nenhuma disciplina para marcar. Adicione as do seu curso na aba <b>Histórico</b>.</div>`;
+    return;
+  }
+  const item = (sigla, nome) => `<label class="wiz-check-item"><input type="checkbox" data-atual="${esc(sigla)}" data-nome="${esc(nome)}"${atuais.includes(sigla) ? ' checked' : ''}><span>${esc(nome)}</span></label>`;
+  const grupo = (titulo, itens) => `<div class="wiz-sem-block"><div class="wiz-sem-head"><span>${titulo}</span></div><div class="wiz-check-grid">${itens}</div></div>`;
+  el.innerHTML = blocos.map(({b, itens}) => grupo(tituloSemestre(b, blocos.length === 1), itens.map(d => item(d.sigla, d.disciplina)).join(''))).join('')
+    + (soltas.length ? grupo('Fora do histórico', soltas.map(s => item(s, s)).join('')) : '');
+  el.querySelectorAll('[data-atual]').forEach(cb => cb.addEventListener('change', async () => {
+    const s = cb.dataset.atual;
+    const lista = (STATE.config.disciplinasAtuais || []).filter(x => x !== s);
+    if(cb.checked) lista.push(s);
+    // na ordem do curso (a do histórico): é a ordem dos cartões em Faltas e Notas
+    const ordem = STATE.historico.map(d => d.sigla);
+    const pos = x => { const i = ordem.indexOf(x); return i < 0 ? Infinity : i; };
+    STATE.config.disciplinasAtuais = lista.sort((a, b) => pos(a) - pos(b));
+    await storeSet('config', STATE.config);
+    showToast(cb.checked ? `${cb.dataset.nome}: cursando` : `${cb.dataset.nome} saiu das disciplinas cursando`, 'success', 2200);
+    renderPainel(); renderFaltas(); renderProvas(); renderMapaSucesso(); renderMetaNotas();
+    renderHistorico(document.getElementById('histSearch').value);
+    updateDiscSuggestList(); updateNavBadges();
+  }));
+}
 function renderConfig(){
   document.getElementById('cAluno').value = STATE.config.aluno || '';
   document.getElementById('cCurso').value = STATE.config.curso || '';
   document.getElementById('cInstituicao').value = STATE.config.instituicao || '';
   document.getElementById('cSemestre').value = STATE.config.semestre || '';
   document.getElementById('cNotaMinima').value = STATE.config.notaMinima;
-  document.getElementById('cAtuais').value = STATE.config.disciplinasAtuais.join(', ');
+  renderAtuaisConfig();
   renderMetaNotas();
 
   const posGrid = document.getElementById('railPosGrid');
@@ -6086,7 +6127,6 @@ document.getElementById('btnSaveConfig').addEventListener('click', async () => {
     instituicao: document.getElementById('cInstituicao').value.trim(),
     semestre: document.getElementById('cSemestre').value.trim(),
     notaMinima: Number(document.getElementById('cNotaMinima').value) || 60,
-    disciplinasAtuais: document.getElementById('cAtuais').value.split(',').map(s=>s.trim()).filter(Boolean),
   };
   await storeSet('config', STATE.config);
   document.getElementById('brandCurso').textContent = STATE.config.curso;
