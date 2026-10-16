@@ -605,14 +605,27 @@
   .dash-task-info .s{font-size:11px; color:var(--text-faint);}
 
   /* ===== HIST CRUD ===== */
-  .hist-add-form{display:grid; grid-template-columns:80px 1fr 70px 70px auto; gap:10px; align-items:end;}
+  .hist-add-form{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; align-items:end;
+    grid-template-areas:"nome nome per" "sit sit sit" "nota cod .";}
+  .hist-add-form .ha-nome{grid-area:nome;} .hist-add-form .ha-per{grid-area:per;} .hist-add-form .ha-sit{grid-area:sit;}
+  .hist-add-form .ha-nota{grid-area:nota;} .hist-add-form .ha-cod{grid-area:cod;}
+  .hist-seg{display:flex; flex-wrap:wrap; gap:6px;}
+  .hist-seg button{min-height:38px; padding:0 14px; border-radius:10px; border:1px solid var(--line); background:var(--panel-2); color:var(--text); font:inherit; font-size:13px; cursor:pointer;}
+  .hist-seg button[aria-checked="true"]{background:var(--blue); border-color:var(--blue); color:#fff;}
+  .hist-add-msg{min-height:18px; margin:10px 0 0; font-size:12.5px; color:var(--red);}
+  .hist-add-foot{display:flex; justify-content:flex-end; gap:8px; margin-top:6px;}
+  .hist-help{margin:-4px 0 14px; font-size:13px; color:var(--text-dim); line-height:1.5;}
+  .hist-table tr.hist-sem td{padding:18px 4px 8px !important; border-bottom:none !important; cursor:default; background:none !important;}
+  .hist-table tr.hist-sem:first-child td{padding-top:4px !important;}
+  .hist-sem__t{font-size:14px; font-weight:650; color:var(--text);}
+  .hist-sem__n{margin-left:8px; font-size:12px; color:var(--text-faint);}
 
   @media(max-width:880px){
     .horas-form{grid-template-columns:repeat(2, minmax(0,1fr));}
     .horas-resumo{grid-template-columns:repeat(2,1fr);}
     .faltas-grid{grid-template-columns:repeat(2, minmax(0, 1fr));}
     .modal-row{grid-template-columns:1fr 1fr 1fr;}
-    .hist-add-form{grid-template-columns:repeat(2, minmax(0,1fr));}
+    .hist-add-form{grid-template-columns:repeat(2, minmax(0,1fr)); grid-template-areas:"nome nome" "sit sit" "per nota" "cod .";}
     #btnNotifications{display:none;}
   }
   @media(max-width:560px){
@@ -739,8 +752,8 @@
   .wiz-table td input{background:transparent; border:none; color:var(--text); width:100%; padding:2px; font-size:12.5px; font-family:inherit;}
   .wiz-table td input:focus{outline:1px solid var(--blue); border-radius:2px;}
   .wiz-table tr:hover td{background:var(--panel-2);}
-  .wiz-table .del-row{background:none; border:none; color:var(--red); cursor:pointer; font-size:14px; padding:2px 6px; opacity:.6;}
-  .wiz-table .del-row:hover{opacity:1;}
+  .wiz-table .del-row, .wiz-schedule-row .del-row{background:none; border:none; color:var(--red); cursor:pointer; font-size:14px; padding:2px 6px; opacity:.6;}
+  .wiz-table .del-row:hover, .wiz-schedule-row .del-row:hover{opacity:1;}
   .col-map{display:grid; grid-template-columns:1fr 20px 1fr; gap:8px 12px; align-items:center; margin-bottom:18px;}
   .col-map .arrow{color:var(--text-faint); text-align:center; font-size:12px;}
   .col-map select{background:var(--panel-2); border:1px solid var(--line); border-radius:var(--r); color:var(--text); padding:6px 8px; font-size:12px;}
@@ -1839,6 +1852,30 @@
     color:var(--text); padding:7px 9px; font-size:13px; text-align:right;
   }
   .wiz-nota-row input:focus{outline:none; border-color:var(--blue);}
+  /* "Outro curso": a pessoa escreve as disciplinas de cada semestre */
+  .wiz-disc-wrap{display:flex; gap:6px; align-items:stretch;}
+  .wiz-disc-wrap .wiz-disc{flex:1; min-width:0;}
+  .wiz-disc-del{flex-shrink:0; width:40px; border-radius:10px; border:1px solid var(--line); background:var(--panel-2); color:var(--text-faint); font:inherit; cursor:pointer;}
+  .wiz-disc-del:hover{color:var(--red);}
+  .wiz-add{display:flex; gap:6px; margin-top:6px;}
+  .wiz-add input{flex:1; min-width:0; background:var(--panel-2); border:1px dashed var(--line); border-radius:10px; color:var(--text); padding:9px 12px; font:inherit; font-size:13px;}
+  .wiz-add input:focus{outline:none; border-style:solid; border-color:var(--blue);}
+  .wiz-2col{grid-template-columns:repeat(2, minmax(0,1fr));}
+  @media (max-width:560px){
+    /* no celular o assistente ocupa a tela toda */
+    #wizardOverlay{padding:0; align-items:stretch;}
+    .wizard{max-height:none; height:100%; border-radius:0; border:none;}
+    .wizard-head{padding:calc(14px + env(safe-area-inset-top)) 18px 12px;}
+    .wizard-body{padding:20px 18px;}
+    .wizard-foot{padding:12px 18px calc(12px + env(safe-area-inset-bottom));}
+    .wiz-2col{grid-template-columns:minmax(0,1fr); gap:0;}
+    .wizard-pip{width:18px;}
+    .wiz-schedule-row{grid-template-columns:repeat(2, minmax(0,1fr)) 40px; grid-template-areas:"dia dia del" "ini fim fim" "disc disc disc" "loc loc loc";
+      padding:10px; margin-bottom:8px; border:1px solid var(--line-soft); border-radius:12px;}
+    .wiz-schedule-row [data-field="dia"]{grid-area:dia;} .wiz-schedule-row [data-field="inicio"]{grid-area:ini;}
+    .wiz-schedule-row [data-field="fim"]{grid-area:fim;} .wiz-schedule-row [data-field="disciplina"]{grid-area:disc;}
+    .wiz-schedule-row [data-field="local"]{grid-area:loc;} .wiz-schedule-row .del-row{grid-area:del;}
+  }
 
   /* installed app: respect notches and the gesture bar */
   .rail-icon-btn[hidden]{display:none;}
@@ -2171,14 +2208,15 @@
     .hist-table td[colspan], .horas-table td[colspan]{grid-column:1 / -1;}
     .hist-table td[data-label]::before, .horas-table td[data-label]::before{content:attr(data-label); display:block; margin-bottom:3px; font-size:11px; color:var(--text-faint);}
     .hist-table .cell-input, .horas-table .cell-input{width:100% !important;}
-    .hist-table tr{grid-template-columns:repeat(3, minmax(0,76px)) minmax(0,1fr) auto; grid-template-areas:"sig sig sig . sit" "disc disc disc disc disc" "nota ch sem . del";}
+    .hist-table tr{grid-template-columns:repeat(2, minmax(0,88px)) minmax(0,1fr) auto; grid-template-areas:"sig sig . sit" "disc disc disc disc" "nota ch . del";}
     .hist-table td:nth-child(1){grid-area:sig; font-size:12px; color:var(--text-dim);}
     .hist-table td:nth-child(2){grid-area:disc; font-size:14.5px; font-weight:600;}
     .hist-table td:nth-child(3){grid-area:nota;}
     .hist-table td:nth-child(4){grid-area:ch;}
-    .hist-table td:nth-child(5){grid-area:sem;}
-    .hist-table td:nth-child(6){grid-area:sit; justify-self:end; white-space:nowrap;}
-    .hist-table td:nth-child(7){grid-area:del; justify-self:end; align-self:end;}
+    .hist-table td:nth-child(5){grid-area:sit; justify-self:end; white-space:nowrap;}
+    .hist-table td:nth-child(6){grid-area:del; justify-self:end; align-self:end;}
+    .hist-table tr.hist-sem{display:block; padding:0; border-bottom:1px solid var(--line-soft);}
+    .hist-table tr.hist-sem td{padding:22px 0 8px !important;}
     .horas-table tr{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) auto; grid-template-areas:"sig sig st" "nome nome nome" "tot val del";}
     .horas-table td:nth-child(1){grid-area:sig; font-size:12.5px;}
     .horas-table td:nth-child(2){grid-area:nome; font-size:14.5px; font-weight:600;}
@@ -2444,25 +2482,38 @@
         <h2>Histórico Acadêmico</h2>
         <div style="display:flex;gap:8px;align-items:center;">
           <button class="btn btn-sm" id="btnExportCSV" style="--accent:var(--blue);" title="Exportar histórico como CSV">⭳ CSV</button>
-          <button class="btn btn-sm" id="btnToggleHistForm" style="--accent:var(--green)">+ Nova disciplina</button>
+          <button class="btn btn-sm btn-primary" id="btnToggleHistForm">+ Adicionar disciplina</button>
         </div>
       </div>
       <div class="meta-row" id="histSub" style="margin-bottom:14px;"></div>
+      <p class="hist-help">Todas as disciplinas do seu curso, separadas por semestre. Para lançar ou corrigir uma nota, toque no campo <b>Nota</b> e digite.</p>
 
       <div id="histAddPanel" style="display:none; margin-bottom:14px;">
         <div class="panel--pad panel" style="--accent:var(--green)">
-          <div class="section-label" style="margin-top:0;">Adicionar disciplina ao histórico</div>
+          <div class="section-label" style="margin-top:0;">Adicionar disciplina</div>
           <div class="hist-add-form">
-            <div class="field"><label>Sigla</label><input id="hSigla" placeholder="ex: P99"></div>
-            <div class="field"><label>Disciplina</label><input id="hNome" placeholder="Nome completo"></div>
-            <div class="field"><label>Nota</label><input id="hNota" placeholder="0-100 ou APR"></div>
+            <div class="field ha-nome"><label for="hNome">Nome da disciplina</label><input id="hNome" placeholder="Ex.: Cálculo I" autocomplete="off"></div>
+            <div class="field ha-per"><label for="hPeriodo">Semestre do curso</label><select id="hPeriodo"></select></div>
+            <div class="field ha-sit"><label id="hSitLabel">Situação</label>
+              <div class="hist-seg" role="radiogroup" aria-labelledby="hSitLabel" id="hSituacao">
+                <button type="button" role="radio" data-hsit="feita" aria-checked="true">Já passei</button>
+                <button type="button" role="radio" data-hsit="cursando" aria-checked="false">Estou cursando</button>
+                <button type="button" role="radio" data-hsit="falta" aria-checked="false">Ainda vou fazer</button>
+              </div>
+            </div>
+            <div class="field ha-nota"><label for="hNota">Nota final (se lembrar)</label><input id="hNota" inputmode="decimal" placeholder="Ex.: 75" autocomplete="off"></div>
+            <div class="field ha-cod"><label for="hSigla">Código (opcional)</label><input id="hSigla" placeholder="Ex.: M01" autocomplete="off"></div>
+          </div>
+          <p class="hist-add-msg" id="hAddMsg" role="alert"></p>
+          <div class="hist-add-foot">
+            <button class="btn" id="hAddCancel">Fechar</button>
             <button class="btn btn-primary" id="btnAddDisc">Adicionar</button>
           </div>
         </div>
       </div>
 
       <div style="display:flex;gap:8px;margin-bottom:10px;">
-        <input class="search" id="histSearch" placeholder="Buscar por sigla ou disciplina…" style="flex:1;margin-bottom:0;">
+        <input class="search" id="histSearch" placeholder="Buscar disciplina…" style="flex:1;margin-bottom:0;">
         <select id="histFiltroSit" style="background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--r);color:var(--text);padding:8px 10px;font-size:12.5px;">
           <option value="">Todas</option>
           <option value="Aprovado">Aprovado</option>
@@ -2477,8 +2528,7 @@
             <th data-sort-col="sigla" style="cursor:pointer;user-select:none;" title="Ordenar por sigla">Sigla <span class="sort-ic" data-sort-ic="sigla"></span></th>
             <th data-sort-col="disciplina" style="cursor:pointer;user-select:none;" title="Ordenar por nome">Disciplina <span class="sort-ic" data-sort-ic="disciplina"></span></th>
             <th data-sort-col="nota" style="cursor:pointer;user-select:none;" title="Ordenar por nota">Nota <span class="sort-ic" data-sort-ic="nota"></span></th>
-            <th data-sort-col="ch" style="cursor:pointer;user-select:none;" title="Carga horária — define o limite de faltas">CH <span class="sort-ic" data-sort-ic="ch"></span></th>
-            <th data-sort-col="semestre" style="cursor:pointer;user-select:none;" title="Ordenar por semestre">Semestre <span class="sort-ic" data-sort-ic="semestre"></span></th>
+            <th data-sort-col="ch" style="cursor:pointer;user-select:none;" title="Carga horária em horas: define o limite de faltas">Horas <span class="sort-ic" data-sort-ic="ch"></span></th>
             <th>Situação</th><th></th>
           </tr></thead>
           <tbody id="histBody"></tbody>
@@ -4144,15 +4194,30 @@ function renderLab(){
 function normalizeStr(s){
   return (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 }
+// "M01 C\u00e1lculo I" ou "M01 - C\u00e1lculo I": o c\u00f3digo digitado na frente do nome \u00e9 separado dele
+function separarCodigo(texto){
+  const t = String(texto || '').trim().replace(/\s+/g, ' ');
+  const m = /^([A-Za-z]{1,4}\d{1,3}[A-Za-z]?)(?:\s*[-\u2013\u2014:.]\s*|\s+)(\S.*)$/.exec(t);
+  return m ? {codigo: m[1].toUpperCase(), nome: m[2]} : {codigo: '', nome: t};
+}
+// C\u00f3digo curto para quem n\u00e3o sabe o da faculdade: "C\u00e1lculo I" vira "CAL1". O app usa o c\u00f3digo
+// por dentro (faltas, notas, hor\u00e1rio); existe(s) diz se ele j\u00e1 est\u00e1 em uso.
+function siglaNova(nome, existe){
+  const limpo = normalizeStr(nome).replace(/[^a-z0-9 ]/g, ' ');
+  const palavra = limpo.split(/\s+/).find(w => w.length >= 3) || limpo.replace(/\s+/g, '') || 'disc';
+  const base = palavra.slice(0, 3).toUpperCase();
+  for(let n = 1; ; n++){ if(!existe(base + n)) return base + n; }
+}
 let _histSort = {col: null, dir: 'asc'};
 function renderHistorico(filter){
   filter = normalizeStr(filter);
   const sitFilter = document.getElementById('histFiltroSit') ? document.getElementById('histFiltroSit').value : '';
-  let rows = STATE.historico.filter(it => {
+  const passa = it => {
     if(filter && !normalizeStr(it.sigla).includes(filter) && !normalizeStr(it.disciplina).includes(filter)) return false;
     if(sitFilter && situacao(it) !== sitFilter) return false;
     return true;
-  });
+  };
+  let rows = STATE.historico.filter(passa);
 
   if(_histSort.col){
     const col = _histSort.col;
@@ -4182,7 +4247,7 @@ function renderHistorico(filter){
     ${iraInfo.ira !== null ? `<span class="meta-chip" style="color:var(--blue);border-color:var(--blue-dim);" title="${iraInfo.ponderado?'IRA ponderado pela carga horária':'Média simples — preencha CH para IRA real'}">IRA <b>${fmtNum(iraInfo.ira, 2)}</b>${iraInfo.ponderado?' ✓':' ≈'}</span>` : ''}
   `;
 
-  document.getElementById('histBody').innerHTML = rows.map(item => {
+  const linha = item => {
     const s = situacao(item); const meta = situacaoMeta(s);
     const notaVal = item.nota === null || item.nota === undefined ? '' : item.nota;
     const isCustom = STATE.historicoCustom.some(c => c.sigla === item.sigla);
@@ -4202,13 +4267,28 @@ function renderHistorico(filter){
     return `<tr data-sigla="${sig}" style="cursor:pointer;" title="Clique para ver detalhes de ${sig}">
       <td class="mono" style="font-weight:600;">${sig}${isCustom?'<span title="Disciplina adicionada manualmente" style="color:var(--blue);margin-left:4px;font-size:10px;">★</span>':''}</td>
       <td>${esc(item.disciplina)}</td>
-      <td data-label="Nota"><input class="cell-input" data-field="nota" data-sigla="${sig}" value="${esc(notaVal)}" aria-label="Nota de ${sig}"></td>
-      <td data-label="CH"><input class="cell-input mono" data-field="ch" data-sigla="${sig}" value="${esc(chVal)}" placeholder="—" style="width:52px;" title="Carga horária (define limite de faltas)" aria-label="Carga horária de ${sig}"></td>
-      <td data-label="Semestre"><input class="cell-input mono dim" data-field="semestre" data-sigla="${sig}" value="${esc(item.semestre||'')}" placeholder="—" style="width:72px;" title="Semestre letivo" aria-label="Semestre de ${sig}"></td>
+      <td data-label="Nota"><input class="cell-input" data-field="nota" data-sigla="${sig}" value="${esc(String(notaVal).replace('.', ','))}" placeholder="—" inputmode="decimal" aria-label="Nota de ${esc(item.disciplina)}"></td>
+      <td data-label="Horas"><input class="cell-input mono" data-field="ch" data-sigla="${sig}" value="${esc(chVal)}" placeholder="—" inputmode="numeric" style="width:52px;" title="Carga horária em horas: define o limite de faltas" aria-label="Carga horária de ${esc(item.disciplina)}"></td>
       <td>${situacaoBadge}</td>
-      <td><button class="btn btn-ghost btn-sm" data-del-disc="${sig}" title="Remover disciplina" aria-label="Remover ${sig}" style="padding:4px 7px;">✕</button></td>
+      <td><button class="btn btn-ghost btn-sm" data-del-disc="${sig}" title="Remover disciplina" aria-label="Remover ${esc(item.disciplina)}" style="padding:4px 7px;">✕</button></td>
     </tr>`;
-  }).join('') || `<tr><td colspan="7"><div class="empty">Nenhuma disciplina encontrada</div></td></tr>`;
+  };
+  // separado por semestre do curso; ordenando por coluna, vira uma lista só
+  let corpo;
+  if(_histSort.col){
+    corpo = rows.map(linha).join('');
+  } else {
+    const blocos = buildSemestresCurriculares();
+    const visiveis = blocos.map(b => ({b, itens: b.disciplinas.filter(passa)})).filter(x => x.itens.length);
+    corpo = visiveis.map(({b, itens}) => {
+      const aprov = b.disciplinas.filter(d => situacao(d) === 'Aprovado').length;
+      return `<tr class="hist-sem"><td colspan="6"><span class="hist-sem__t">${tituloSemestre(b, blocos.length === 1)}</span><span class="hist-sem__n">${aprov} de ${b.disciplinas.length} ${b.disciplinas.length === 1 ? 'aprovada' : 'aprovadas'}</span></td></tr>`
+        + itens.map(linha).join('');
+    }).join('');
+  }
+  document.getElementById('histBody').innerHTML = corpo || (STATE.historico.length
+    ? `<tr><td colspan="6"><div class="empty">Nenhuma disciplina encontrada</div></td></tr>`
+    : `<tr><td colspan="6"><div class="empty">Nenhuma disciplina ainda. Toque em <b>+ Adicionar disciplina</b> para começar.</div></td></tr>`);
 
   document.querySelectorAll('#histBody input').forEach(inp => {
     inp.addEventListener('change', async () => {
@@ -4746,26 +4826,36 @@ function renderSessoesEstudo(){
 }
 
 // ---------------- render: Mapa de Sucesso ----------------
-// Agrupa STATE.historico em semestres curriculares (1º a 10º) usando os
-// marcadores "AT02".."AT10" (Atividade Complementar II..X) como fronteiras de
-// bloco — eles já demarcam os semestres oficiais do currículo, ao contrário
-// do campo `semestre` (que só existe para disciplinas já concluídas). AT01
-// não é fronteira: aparece dentro do próprio 1º semestre, não no seu início.
+// Agrupa STATE.historico em semestres do curso (1º, 2º...). Cada disciplina pode dizer o
+// seu (`periodo`, gravado pelo assistente e pelo "Adicionar disciplina"). As grades antigas,
+// sem `periodo`, são separadas pelos marcadores "AT02".."AT10" (Atividade Complementar II..X),
+// que demarcam os semestres oficiais do currículo; AT01 fica dentro do próprio 1º semestre.
+// O que não tem semestre nem marcador vai para um bloco sem número, no fim.
 function buildSemestresCurriculares(){
   const blocos = [];
-  let atual = [];
-  let vistoPrimeiroAT = false;
-  STATE.historico.forEach(item => {
-    const isAT = /^AT\d+/.test(item.sigla);
-    if(isAT){
-      if(vistoPrimeiroAT && atual.length){ blocos.push(atual); atual = []; }
-      vistoPrimeiroAT = true;
-    }
-    atual.push(item);
-  });
-  if(atual.length) blocos.push(atual);
-  return blocos.map((disciplinas, i) => ({ numero: i+1, disciplinas }));
+  const semPeriodo = STATE.historico.filter(i => !(Number(i.periodo) > 0));
+  let outras = [];
+  if(semPeriodo.some(i => /^AT\d+/.test(i.sigla))){
+    let atual = [], vistoPrimeiroAT = false, n = 0;
+    semPeriodo.forEach(item => {
+      if(/^AT\d+/.test(item.sigla)){
+        if(vistoPrimeiroAT && atual.length){ blocos[n++] = atual; atual = []; }
+        vistoPrimeiroAT = true;
+      }
+      atual.push(item);
+    });
+    if(atual.length) blocos[n] = atual;
+  } else {
+    outras = semPeriodo;
+  }
+  STATE.historico.filter(i => Number(i.periodo) > 0).forEach(i => { const k = Number(i.periodo) - 1; (blocos[k] = blocos[k] || []).push(i); });
+  const res = [];
+  blocos.forEach((disciplinas, i) => { if(disciplinas && disciplinas.length) res.push({numero: i+1, disciplinas}); });
+  if(outras.length) res.push({numero: null, disciplinas: outras});
+  return res;
 }
+// título de um bloco: "3º semestre"; sem número, "Suas disciplinas" (se for o único) ou "Sem semestre definido"
+const tituloSemestre = (bloco, unico) => bloco.numero ? `${bloco.numero}º semestre` : (unico ? 'Suas disciplinas' : 'Sem semestre definido');
 function renderMapaSucesso(){
   const el = document.getElementById('mapaTimeline');
   if(!el) return;
@@ -4784,7 +4874,7 @@ function renderMapaSucesso(){
         <div class="timeline-marker" style="--accent:${pct===100?'var(--green)':'var(--blue)'}"></div>
         <div class="timeline-content panel panel--pad">
           <div class="timeline-head">
-            <b>${bloco.numero}º Semestre</b>
+            <b>${tituloSemestre(bloco, semestres.length === 1)}</b>
             <span class="meta-chip"><b>${aprovadas}</b>/${total} aprovadas</span>
           </div>
           <div class="timeline-progress"><div class="timeline-progress-bar" style="width:${pct}%"></div></div>
@@ -5428,13 +5518,49 @@ document.getElementById('btnAddHora').addEventListener('click', async () => {
 });
 
 // ---- Histórico: adicionar disciplina ----
-document.getElementById('hNota').addEventListener('keydown', e => {
-  if(e.key === 'Enter') document.getElementById('btnAddDisc').click();
-});
+// Pensado para quem nunca mexeu num histórico: nome, semestre e situação. Nota e código são
+// opcionais (o código é criado sozinho), e o formulário fica aberto para a próxima disciplina.
+let _hSit = 'feita';
+// semestre do curso em que estão as disciplinas que a pessoa cursa agora
+function histSemestreAtual(){
+  const atuais = STATE.config.disciplinasAtuais || [];
+  const blocos = buildSemestresCurriculares().filter(b => b.numero);
+  const comAtuais = blocos.filter(b => b.disciplinas.some(d => atuais.includes(d.sigla)));
+  return comAtuais.length ? comAtuais[comAtuais.length - 1].numero : (blocos.length ? blocos[blocos.length - 1].numero : 1);
+}
+function marcarSituacao(sit){
+  _hSit = sit;
+  document.querySelectorAll('#hSituacao [data-hsit]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.hsit === sit)));
+  // nota só faz sentido para o que já foi feito
+  document.querySelector('#histAddPanel .ha-nota').style.display = sit === 'feita' ? '' : 'none';
+}
+// antes do semestre atual: já passou; no atual: cursando; depois: ainda vai fazer (a pessoa pode trocar)
+function situacaoPeloSemestre(){
+  const per = Number(document.getElementById('hPeriodo').value);
+  if(!per) return;
+  const atual = histSemestreAtual();
+  marcarSituacao(per < atual ? 'feita' : per === atual ? 'cursando' : 'falta');
+}
+function abrirAddDisciplina(){
+  const sel = document.getElementById('hPeriodo');
+  const ultimo = Math.max(10, ...buildSemestresCurriculares().map(b => (b.numero || 0) + 1));
+  sel.innerHTML = Array.from({length: ultimo}, (_, i) => `<option value="${i+1}">${i+1}º semestre</option>`).join('') + '<option value="">Não sei</option>';
+  sel.value = String(histSemestreAtual());
+  situacaoPeloSemestre();
+  document.getElementById('hAddMsg').textContent = '';
+  document.getElementById('histAddPanel').style.display = 'block';
+  document.getElementById('hNome').focus();
+}
+document.getElementById('hPeriodo').addEventListener('change', situacaoPeloSemestre);
+document.querySelectorAll('#hSituacao [data-hsit]').forEach(b => b.addEventListener('click', () => marcarSituacao(b.dataset.hsit)));
+['hNome', 'hNota', 'hSigla'].forEach(id => document.getElementById(id).addEventListener('keydown', e => {
+  if(e.key === 'Enter'){ e.preventDefault(); document.getElementById('btnAddDisc').click(); }
+}));
 document.getElementById('btnToggleHistForm').addEventListener('click', () => {
   const panel = document.getElementById('histAddPanel');
-  panel.style.display = panel.style.display==='none' ? 'block' : 'none';
+  if(panel.style.display === 'none') abrirAddDisciplina(); else panel.style.display = 'none';
 });
+document.getElementById('hAddCancel').addEventListener('click', () => { document.getElementById('histAddPanel').style.display = 'none'; });
 document.getElementById('btnExportCSV').addEventListener('click', exportHistoricoCSV);
 
 // Disc detail modal
@@ -5454,21 +5580,43 @@ document.getElementById('histBody').addEventListener('click', e => {
   showDiscDetail(row.dataset.sigla);
 });
 document.getElementById('btnAddDisc').addEventListener('click', async () => {
-  const sigla = document.getElementById('hSigla').value.trim().toUpperCase();
-  const nome = document.getElementById('hNome').value.trim();
-  const notaRaw = document.getElementById('hNota').value.trim();
-  const notaNum = Number(notaRaw.replace(',', '.'));
-  const nota = notaRaw==='' ? null : (isNaN(notaNum) ? notaRaw.toUpperCase() : notaNum);
-  if(!sigla||!nome) return;
-  if(STATE.historico.some(i=>i.sigla===sigla)){ showToast('Sigla já existe no histórico.', 'error'); return; }
-  const disc = {sigla, disciplina:nome, ch:null, nota, semestre:null, _custom:true};
+  const msg = t => { document.getElementById('hAddMsg').textContent = t; };
+  const nomeInp = document.getElementById('hNome');
+  const {codigo, nome} = separarCodigo(nomeInp.value);
+  if(!nome){ msg('Escreva o nome da disciplina.'); nomeInp.focus(); return; }
+  let sigla = (document.getElementById('hSigla').value.trim() || codigo).toUpperCase().replace(/\s+/g, '');
+  if(sigla && STATE.historico.some(i => i.sigla === sigla)){ msg(`Já existe uma disciplina com o código ${sigla}. Troque o código ou deixe o campo vazio.`); return; }
+  if(!sigla) sigla = siglaNova(nome, s => STATE.historico.some(i => i.sigla === s));
+  let nota = null;
+  const notaRaw = _hSit === 'feita' ? document.getElementById('hNota').value.trim() : '';
+  if(notaRaw){
+    if(/^apr/i.test(notaRaw)) nota = 'APR';
+    else {
+      const n = Number(notaRaw.replace(',', '.'));
+      if(isNaN(n) || n < 0 || n > 100){ msg('A nota precisa ser um número de 0 a 100.'); document.getElementById('hNota').focus(); return; }
+      nota = n;
+    }
+  }
+  const per = Number(document.getElementById('hPeriodo').value) || null;
+  const disc = {sigla, disciplina: nome, ch: null, nota, semestre: null, _custom: true};
+  if(per) disc.periodo = per;
+  if(_hSit === 'feita') disc.aprovado = true; // "já passei" vale mesmo sem nota ou com recuperação
   STATE.historicoCustom.push(disc);
   STATE.historico.push(disc);
   await storeSet('historico_custom', STATE.historicoCustom);
-  ['hSigla','hNome','hNota'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
-  document.getElementById('histAddPanel').style.display='none';
+  const cursando = _hSit === 'cursando' && !STATE.config.disciplinasAtuais.includes(sigla);
+  if(cursando){
+    STATE.config.disciplinasAtuais = [...STATE.config.disciplinasAtuais, sigla];
+    await storeSet('config', STATE.config);
+  }
+  // o formulário fica aberto, com o mesmo semestre e situação, para a próxima disciplina
+  ['hNome', 'hNota', 'hSigla'].forEach(id => { document.getElementById(id).value = ''; });
+  msg('');
+  nomeInp.focus();
+  showToast(`${nome} adicionada${per ? ` ao ${per}º semestre` : ''}`, 'success');
   renderHistorico(document.getElementById('histSearch').value);
   renderPainel(); renderMapaSucesso();
+  if(cursando){ renderFaltas(); renderConfig(); updateDiscSuggestList(); }
 });
 
 // ---- Dashboard: link "ver todas" ----
@@ -7401,7 +7549,8 @@ function showWizard(profileId){
     nome:'', curso:'', instituicao:'INATEL', semestre:'', notaMinima:60,
     grade:[], disciplinasAtuais:[], aulas:[], importMode:'file',
     importHeaders:[], importRows:[], importMapping:{},
-    catalogo:null, status:{}, notas:{}, semAtual:null
+    catalogo:null, status:{}, notas:{}, semAtual:null,
+    custom:[], // "Outro curso": [[ [código, nome], ... ] por semestre], no mesmo formato dos catálogos
   };
   const overlay = document.getElementById('wizardOverlay');
   overlay.style.display = 'flex';
@@ -7587,8 +7736,10 @@ function wizardRender(){
   body.scrollTop = 0;
 }
 
+// o título é só o passo: a pergunta de cada passo já está no corpo
+const wizTitulo = () => { document.getElementById('wizardTitle').textContent = `Passo ${WIZARD_STEP} de ${WIZARD_TOTAL}`; };
 function wizardStep1(body){
-  document.getElementById('wizardTitle').textContent = 'Passo 1 de 5: identificação';
+  wizTitulo();
   body.innerHTML = `
     <div class="wiz-restore">
       <span>Já usa o painel em outro aparelho ou tem um backup?</span>
@@ -7597,21 +7748,25 @@ function wizardStep1(body){
     <p class="wizard-step-title">Quem é você?</p>
     <p class="wizard-step-desc">Essas informações aparecerão no painel e no cabeçalho do app.</p>
     <div class="wiz-2col">
-      <div class="wiz-field"><label>Nome completo</label><input id="wNome" value="${esc(WIZARD_DATA.nome)}" placeholder="Ex: Maria Silva"></div>
-      <div class="wiz-field"><label>Nota mínima de aprovação</label><input id="wNotaMin" type="number" min="0" max="100" value="${WIZARD_DATA.notaMinima}"></div>
+      <div class="wiz-field"><label>Seu nome</label><input id="wNome" value="${esc(WIZARD_DATA.nome)}" placeholder="Ex.: Maria Silva" autocomplete="name"></div>
+      <div class="wiz-field"><label>Nota mínima para passar (quase sempre 60)</label><input id="wNotaMin" type="number" inputmode="numeric" min="0" max="100" value="${WIZARD_DATA.notaMinima}"></div>
     </div>
     <div class="wiz-2col">
-      <div class="wiz-field"><label>Curso</label><input id="wCurso" value="${esc(WIZARD_DATA.curso)}" placeholder="Ex: Engenharia de Produção"></div>
-      <div class="wiz-field"><label>Instituição</label><input id="wInst" value="${esc(WIZARD_DATA.instituicao)}" placeholder="Ex: INATEL"></div>
+      <div class="wiz-field"><label>Curso</label><input id="wCurso" value="${esc(WIZARD_DATA.curso)}" placeholder="Ex.: Engenharia de Produção"></div>
+      <div class="wiz-field"><label>Faculdade</label><input id="wInst" value="${esc(WIZARD_DATA.instituicao)}" placeholder="Ex.: INATEL"></div>
     </div>
-    <div class="wiz-field"><label>Semestre atual</label><input id="wSem" value="${esc(WIZARD_DATA.semestre)}" placeholder="Ex: 2º semestre de 2026"></div>`;
+    <div class="wiz-field"><label>Semestre atual (opcional)</label><input id="wSem" value="${esc(WIZARD_DATA.semestre)}" placeholder="Ex.: 2º semestre de 2026"></div>`;
 }
 
 function wizNorm(s){ return String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim(); }
-function wizCatalogo(){ return CURRICULOS.find(c => c.id === WIZARD_DATA.catalogo) || null; }
+// "Outro curso" vira um catálogo com a grade que a pessoa escreveu: os passos seguintes são os mesmos
+function wizCatalogo(){
+  if(WIZARD_DATA.catalogo === 'outro') return {id: 'outro', semestres: WIZARD_DATA.custom};
+  return CURRICULOS.find(c => c.id === WIZARD_DATA.catalogo) || null;
+}
 
 function wizardStep2(body){
-  document.getElementById('wizardTitle').textContent = 'Passo 2 de 5: grade curricular';
+  wizTitulo();
   // Pré-seleciona a grade quando o curso digitado no passo 1 bate com um catálogo
   if(WIZARD_DATA.catalogo === null){
     const match = CURRICULOS.find(c => wizNorm(WIZARD_DATA.curso) && wizNorm(c.curso).includes(wizNorm(WIZARD_DATA.curso)));
@@ -7621,12 +7776,14 @@ function wizardStep2(body){
     <p class="wizard-step-title">Qual é o seu curso?</p>
     <div class="wiz-choice">
       ${CURRICULOS.map(c => `<button type="button" class="wiz-choice-btn${WIZARD_DATA.catalogo===c.id?' active':''}" data-cat="${c.id}"><b>${esc(c.curso)}</b><span>${esc(c.instituicao)}</span></button>`).join('')}
-      <button type="button" class="wiz-choice-btn${WIZARD_DATA.catalogo==='outro'?' active':''}" data-cat="outro"><b>Outro curso</b><span>Importar ou digitar a grade</span></button>
+      <button type="button" class="wiz-choice-btn${WIZARD_DATA.catalogo==='outro'?' active':''}" data-cat="outro"><b>Outro curso</b><span>Você escreve as disciplinas de cada semestre</span></button>
     </div>
+    <button type="button" class="link-btn${WIZARD_DATA.catalogo==='planilha'?' active':''}" data-cat="planilha" style="margin:-10px 0 18px;">Tenho a grade numa planilha do Excel</button>
     <div id="wizGradeArea"></div>`;
   body.querySelectorAll('[data-cat]').forEach(btn => btn.addEventListener('click', () => {
     if(WIZARD_DATA.catalogo === btn.dataset.cat) return;
     WIZARD_DATA.catalogo = btn.dataset.cat;
+    // as disciplinas já escritas em "Outro curso" ficam guardadas se a pessoa trocar de opção e voltar
     WIZARD_DATA.grade = []; WIZARD_DATA.disciplinasAtuais = [];
     WIZARD_DATA.status = {}; WIZARD_DATA.notas = {}; WIZARD_DATA.semAtual = null;
     body.querySelectorAll('[data-cat]').forEach(b => b.classList.toggle('active', b === btn));
@@ -7638,7 +7795,8 @@ function wizardStep2(body){
 function renderGradeArea(){
   const area = document.getElementById('wizGradeArea');
   if(!area) return;
-  if(WIZARD_DATA.catalogo === 'outro') return renderOutroCurso(area);
+  if(WIZARD_DATA.catalogo === 'planilha') return renderOutroCurso(area);
+  if(WIZARD_DATA.catalogo === 'outro') return renderGradeManual(area);
   const cat = wizCatalogo();
   if(!cat){ area.innerHTML = ''; return; }
   const st = s => WIZARD_DATA.status[s] || 'falta';
@@ -7679,31 +7837,108 @@ function renderGradeArea(){
   }));
 }
 
-// Converte o catálogo marcado no formato do histórico (na ordem curricular,
-// que é o que o Mapa de Sucesso usa para separar os semestres).
+// "Outro curso": a pessoa escolhe o semestre em que está e escreve as disciplinas de cada um,
+// só pelo nome. O código é criado sozinho ("Cálculo I" vira "CAL1"), ou usado se vier na frente ("M01 Cálculo I").
+function renderGradeManual(area, focarSem){
+  const n = WIZARD_DATA.semAtual;
+  const custom = WIZARD_DATA.custom;
+  while(n && custom.length < n) custom.push([]);
+  const st = s => WIZARD_DATA.status[s] || 'falta';
+  area.innerHTML = `
+    <p class="wizard-step-title">Em que semestre você está?</p>
+    <div class="wiz-sem-pick">${Array.from({length: 10}, (_, i) => `<button type="button" class="${n === i+1 ? 'active' : ''}" data-sem="${i+1}">${i+1}º</button>`).join('')}</div>
+    ${!n ? '<p class="wizard-step-desc">Toque no número do semestre que você está cursando agora.</p>' : `
+      <p class="wizard-step-desc">Agora escreva as disciplinas de cada semestre, uma por vez, e toque em <b>Adicionar</b>. Só o nome já basta.
+        As dos semestres anteriores ficam como concluídas e as do atual como cursando; toque numa disciplina para mudar. Dá para corrigir tudo depois, na aba Histórico.</p>
+      ${custom.map((sem, i) => `
+        <div class="wiz-sem-block">
+          <div class="wiz-sem-head"><span>${i+1}º semestre${i+1 === n ? ' (o atual)' : ''}</span><span>${sem.length ? sem.length + (sem.length === 1 ? ' disciplina' : ' disciplinas') : ''}</span></div>
+          <div class="wiz-disc-list">${sem.map(([s, nome]) => `
+            <div class="wiz-disc-wrap">
+              <button type="button" class="wiz-disc st-${st(s)}" data-sigla="${esc(s)}"><span class="wiz-disc-nome">${esc(nome)}</span><span class="wiz-disc-st">${WIZ_STATUS[st(s)]}</span></button>
+              <button type="button" class="wiz-disc-del" data-tirar="${esc(s)}" data-semi="${i}" aria-label="Tirar ${esc(nome)}">✕</button>
+            </div>`).join('')}</div>
+          <form class="wiz-add" data-add-sem="${i}">
+            <input placeholder="${sem.length ? 'Outra disciplina' : 'Ex.: Cálculo I'}" aria-label="Nova disciplina do ${i+1}º semestre" autocomplete="off" enterkeyhint="enter">
+            <button type="submit" class="btn btn-sm">Adicionar</button>
+          </form>
+        </div>`).join('')}
+      <button type="button" class="link-btn" id="wizMaisSem">+ Mais um semestre (disciplinas que você ainda vai fazer)</button>`}`;
+
+  area.querySelectorAll('[data-sem]').forEach(btn => btn.addEventListener('click', () => {
+    WIZARD_DATA.semAtual = Number(btn.dataset.sem);
+    const novo = WIZARD_DATA.semAtual;
+    custom.forEach((sem, i) => sem.forEach(([s]) => { WIZARD_DATA.status[s] = i + 1 < novo ? 'feita' : i + 1 === novo ? 'cursando' : 'falta'; }));
+    renderGradeManual(area, 0);
+  }));
+  area.querySelectorAll('[data-add-sem]').forEach(form => form.addEventListener('submit', e => {
+    e.preventDefault();
+    const i = Number(form.dataset.addSem);
+    if(wizAddDisciplina(i, form.querySelector('input').value)) renderGradeManual(area, i);
+  }));
+  area.querySelectorAll('.wiz-disc[data-sigla]').forEach(btn => btn.addEventListener('click', () => {
+    const s = btn.dataset.sigla, next = WIZ_NEXT_STATUS[st(s)];
+    WIZARD_DATA.status[s] = next;
+    btn.className = `wiz-disc st-${next}`;
+    btn.querySelector('.wiz-disc-st').textContent = WIZ_STATUS[next];
+  }));
+  area.querySelectorAll('[data-tirar]').forEach(btn => btn.addEventListener('click', () => {
+    const i = Number(btn.dataset.semi);
+    custom[i] = custom[i].filter(([s]) => s !== btn.dataset.tirar);
+    delete WIZARD_DATA.status[btn.dataset.tirar];
+    renderGradeManual(area);
+  }));
+  const mais = document.getElementById('wizMaisSem');
+  if(mais) mais.onclick = () => { custom.push([]); renderGradeManual(area, custom.length - 1); };
+  // depois de adicionar, o cursor volta para o mesmo semestre, pronto para a próxima disciplina
+  if(focarSem != null){
+    const inp = area.querySelector(`[data-add-sem="${focarSem}"] input`);
+    if(inp){ inp.focus({preventScroll: true}); inp.scrollIntoView({block: 'nearest'}); }
+  }
+}
+// põe as disciplinas digitadas no semestre i (índice). Vírgula, ponto e vírgula ou quebra de linha
+// separam várias de uma vez ("Cálculo I, Física I"). Devolve quantas entraram.
+function wizAddDisciplina(i, texto){
+  const usadas = new Set(WIZARD_DATA.custom.flat().map(([s]) => s));
+  const n = WIZARD_DATA.semAtual;
+  let total = 0;
+  String(texto || '').split(/[,;\n]+/).forEach(parte => {
+    const {codigo, nome} = separarCodigo(parte);
+    if(!nome) return;
+    const sigla = codigo && !usadas.has(codigo) ? codigo : siglaNova(nome, s => usadas.has(s));
+    usadas.add(sigla);
+    WIZARD_DATA.custom[i].push([sigla, nome]);
+    WIZARD_DATA.status[sigla] = i + 1 < n ? 'feita' : i + 1 === n ? 'cursando' : 'falta';
+    total++;
+  });
+  return total;
+}
+
+// Converte o catálogo marcado no formato do histórico. Cada disciplina leva o semestre do curso
+// (periodo), que o Histórico e o Mapa de Sucesso usam para separar os semestres.
 function wizBuildCatalogGrade(){
   const cat = wizCatalogo();
   if(!cat) return;
   const atuais = [];
-  WIZARD_DATA.grade = cat.semestres.flat().map(([sigla, disciplina]) => {
+  WIZARD_DATA.grade = cat.semestres.flatMap((sem, i) => sem.map(([sigla, disciplina]) => {
     const st = WIZARD_DATA.status[sigla] || 'falta';
     if(st === 'cursando') atuais.push(sigla);
     const nota = st === 'feita' ? (WIZARD_DATA.notas[sigla] ?? null) : null;
-    const item = {sigla, disciplina, ch:null, nota, semestre:null};
+    const item = {sigla, disciplina, ch:null, nota, semestre:null, periodo: i + 1};
     if(st === 'feita') item.aprovado = true;
     return item;
-  });
+  }));
   WIZARD_DATA.disciplinasAtuais = atuais;
 }
 
 function renderOutroCurso(area){
-  const mode = WIZARD_DATA.importMode || 'file';
+  const mode = WIZARD_DATA.importMode === 'paste' ? 'paste' : 'file';
   area.innerHTML = `
-    <p class="wizard-step-desc">Importe um arquivo Excel/CSV, cole o conteúdo copiado do Excel ou digite as disciplinas. As colunas mínimas necessárias são: <b>Sigla</b> e <b>Disciplina</b>.</p>
+    <p class="wizard-step-desc">Escolha o arquivo do Excel (ou CSV) com a sua grade, ou copie a tabela do Excel e cole aqui. A planilha precisa ter pelo menos uma coluna com o nome das disciplinas.
+      Se preferir digitar, toque em <b>Outro curso</b> acima.</p>
     <div class="wiz-import-tabs">
-      <button class="wiz-import-tab${mode==='file'?' active':''}" data-mode="file">Excel / CSV</button>
-      <button class="wiz-import-tab${mode==='paste'?' active':''}" data-mode="paste">Colar texto</button>
-      <button class="wiz-import-tab${mode==='manual'?' active':''}" data-mode="manual">Digitar</button>
+      <button class="wiz-import-tab${mode==='file'?' active':''}" data-mode="file">Arquivo do Excel</button>
+      <button class="wiz-import-tab${mode==='paste'?' active':''}" data-mode="paste">Colar tabela</button>
     </div>
     <div id="wizImportArea"></div>`;
 
@@ -7756,47 +7991,7 @@ function renderImportArea(area, mode){
     });
     if(WIZARD_DATA.importHeaders.length) renderColMap(document.getElementById('wizColMap'));
     if(WIZARD_DATA.grade.length) renderGradePreview(document.getElementById('wizPreviewWrap'));
-
-  }else{
-    area.innerHTML = `
-      <div class="wiz-table-wrap"><table class="wiz-table" id="wizManualTable">
-        <thead><tr><th>Sigla</th><th>Disciplina</th><th>Nota</th><th>Sem. Curr.</th><th></th></tr></thead>
-        <tbody id="wizManualBody"></tbody>
-      </table></div>
-      <button class="btn" id="wizAddRow" style="margin-top:4px;">+ Adicionar disciplina</button>`;
-    renderManualTable();
-    document.getElementById('wizAddRow').addEventListener('click', () => {
-      WIZARD_DATA.grade.push({sigla:'',disciplina:'',ch:null,nota:null,semestre:null});
-      renderManualTable();
-    });
   }
-}
-
-function renderManualTable(){
-  const body = document.getElementById('wizManualBody');
-  if(!body) return;
-  body.innerHTML = WIZARD_DATA.grade.map((d,i) => `
-    <tr>
-      <td><input value="${esc(d.sigla)}" data-idx="${i}" data-field="sigla" style="width:70px;"></td>
-      <td><input value="${esc(d.disciplina)}" data-idx="${i}" data-field="disciplina"></td>
-      <td><input value="${d.nota||''}" data-idx="${i}" data-field="nota" style="width:50px;" type="number"></td>
-      <td><input value="${d.semestre||''}" data-idx="${i}" data-field="semestre" style="width:50px;" type="number" min="1" max="10"></td>
-      <td><button class="del-row" data-del="${i}">✕</button></td>
-    </tr>`).join('');
-  body.querySelectorAll('input[data-field]').forEach(inp => {
-    inp.addEventListener('change', e => {
-      const {idx, field} = e.target.dataset;
-      let v = e.target.value.trim();
-      if(['nota','semestre'].includes(field)) v = v==='' ? null : Number(v);
-      WIZARD_DATA.grade[idx][field] = v;
-    });
-  });
-  body.querySelectorAll('[data-del]').forEach(btn => {
-    btn.addEventListener('click', e => {
-      WIZARD_DATA.grade.splice(Number(e.target.dataset.del),1);
-      renderManualTable();
-    });
-  });
 }
 
 function loadSheetJS(cb){
@@ -7874,8 +8069,8 @@ function autoDetectMapping(){
 
 function renderColMap(container){
   if(!container || !WIZARD_DATA.importHeaders.length) return;
-  const fields = [{key:'sigla',label:'Sigla'},{key:'disciplina',label:'Disciplina'},{key:'nota',label:'Nota'},{key:'semestre',label:'Semestre Curricular'},{key:'situacao',label:'Situação (opcional)'}];
-  container.innerHTML = `<p style="font-size:12px;color:var(--text-dim);margin:0 0 10px;">Associe as colunas do seu arquivo aos campos do app:</p>
+  const fields = [{key:'disciplina',label:'Nome da disciplina'},{key:'sigla',label:'Código (opcional)'},{key:'nota',label:'Nota'},{key:'semestre',label:'Semestre do curso (1, 2, 3...)'},{key:'situacao',label:'Situação (opcional)'}];
+  container.innerHTML = `<p style="font-size:12px;color:var(--text-dim);margin:0 0 10px;">Confira de qual coluna da planilha vem cada informação (o app já tentou adivinhar):</p>
     <div class="col-map">` +
     fields.map(f => `
       <label>${f.label}</label>
@@ -7897,19 +8092,28 @@ function applyMapping(){
     const parsedNota = (() => {
       if(notaRaw===undefined||notaRaw===''||notaRaw===null) return null;
       if(notaIsAPR) return 'APR';
-      const n = Number(notaRaw);
+      const n = Number(String(notaRaw).replace(',', '.'));
       return isNaN(n) ? null : n;
     })();
     const item = {
-      sigla: m.sigla>=0 ? String(row[m.sigla]||'').trim() : '',
+      sigla: m.sigla>=0 ? String(row[m.sigla]||'').trim().toUpperCase() : '',
       disciplina: m.disciplina>=0 ? String(row[m.disciplina]||'').trim() : '',
       ch: null,
       nota: parsedNota,
-      semestre: m.semestre>=0 ? (Number(row[m.semestre])||null) : null,
+      semestre: null,
     };
+    // coluna de semestre da planilha = semestre do curso (1º, 2º...), que separa o histórico
+    const per = m.semestre>=0 ? parseInt(row[m.semestre], 10) : NaN;
+    if(per > 0) item.periodo = per;
     if(aprovadoImport) item.aprovado = true;
     return item;
   }).filter(d => d.sigla || d.disciplina);
+  // planilha sem coluna de código: o app cria um; sem nome, o código serve de nome
+  const usadas = new Set(WIZARD_DATA.grade.map(d => d.sigla).filter(Boolean));
+  WIZARD_DATA.grade.forEach(d => {
+    if(!d.disciplina) d.disciplina = d.sigla;
+    if(!d.sigla){ d.sigla = siglaNova(d.disciplina, s => usadas.has(s)); usadas.add(d.sigla); }
+  });
 }
 
 function renderGradePreview(container){
@@ -7918,14 +8122,14 @@ function renderGradePreview(container){
   if(!list.length){ container.innerHTML=''; return; }
   container.innerHTML = `<p style="font-size:12px;color:var(--green);margin:12px 0 6px;">✓ ${WIZARD_DATA.grade.length} disciplinas prontas para importar (mostrando as primeiras 8):</p>
     <div class="wiz-table-wrap"><table class="wiz-table">
-      <thead><tr><th>Sigla</th><th>Disciplina</th><th>Nota</th><th>Sem.</th></tr></thead>
-      <tbody>${list.map(d=>`<tr><td>${esc(d.sigla)}</td><td>${esc(d.disciplina)}</td><td>${esc(d.nota ?? '')}</td><td>${esc(d.semestre || '')}</td></tr>`).join('')}</tbody>
+      <thead><tr><th>Código</th><th>Disciplina</th><th>Nota</th><th>Semestre</th></tr></thead>
+      <tbody>${list.map(d=>`<tr><td>${esc(d.sigla)}</td><td>${esc(d.disciplina)}</td><td>${esc(d.nota ?? '')}</td><td>${d.periodo ? d.periodo + 'º' : ''}</td></tr>`).join('')}</tbody>
     </table></div>`;
 }
 
 function wizardStep3(body){
   if(wizCatalogo()) return wizardStep3Notas(body);
-  document.getElementById('wizardTitle').textContent = 'Passo 3 de 5: semestre atual';
+  wizTitulo();
   const grade = WIZARD_DATA.grade;
   // Apenas disciplinas sem nota — já cursadas não fazem sentido marcar como "cursando agora"
   const pendentes = grade.filter(d => d.nota === null || d.nota === undefined || String(d.nota).trim() === '');
@@ -7938,7 +8142,7 @@ function wizardStep3(body){
           ${pendentes.map(d => `
             <label class="wiz-check-item">
               <input type="checkbox" value="${esc(d.sigla)}" ${WIZARD_DATA.disciplinasAtuais.includes(d.sigla)?'checked':''}>
-              <span>${d.sigla ? `<b>${esc(d.sigla)}</b> — ` : ''}${esc(d.disciplina)}</span>
+              <span>${esc(d.disciplina)}</span>
             </label>`).join('')}
          </div>`
     }`;
@@ -7946,8 +8150,10 @@ function wizardStep3(body){
 
 // Com a grade do catálogo, o passo 3 vira notas opcionais das disciplinas concluídas
 function wizardStep3Notas(body){
-  document.getElementById('wizardTitle').textContent = 'Passo 3 de 5: notas';
+  wizTitulo();
   const cat = wizCatalogo();
+  // códigos criados pelo app ("CAL1") não dizem nada para a pessoa: no "Outro curso" só aparece o nome
+  const mostraCodigo = WIZARD_DATA.catalogo !== 'outro';
   const blocos = cat.semestres.map((sem,i) => ({n:i+1, itens: sem.filter(([s]) =>
     WIZARD_DATA.status[s] === 'feita' && !/^AT\d+/.test(s))})).filter(b => b.itens.length);
   body.innerHTML = `
@@ -7959,16 +8165,15 @@ function wizardStep3Notas(body){
         <div class="wiz-sem-block">
           <div class="wiz-sem-head"><span>${b.n}º semestre</span></div>
           ${b.itens.map(([s,nome]) => `<label class="wiz-nota-row">
-            <span class="wiz-disc-sig">${esc(s)}</span><span class="wiz-disc-nome">${esc(nome)}</span>
+            ${mostraCodigo ? `<span class="wiz-disc-sig">${esc(s)}</span>` : ''}<span class="wiz-disc-nome">${esc(nome)}</span>
             <input type="text" inputmode="decimal" autocomplete="off" maxlength="5" placeholder="Nota" data-nota="${esc(s)}" value="${WIZARD_DATA.notas[s] ?? ''}">
           </label>`).join('')}
         </div>`).join('')}`;
 }
 
 function wizardStep4(body){
-  document.getElementById('wizardTitle').textContent = 'Passo 4 de 5: horário de aulas';
+  wizTitulo();
   const disciplinas = WIZARD_DATA.disciplinasAtuais.length ? WIZARD_DATA.disciplinasAtuais : ['—'];
-  const opts = disciplinas.map(s => `<option>${esc(s)}</option>`).join('');
   const dias = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
   body.innerHTML = `
     <p class="wizard-step-title">Monte sua grade de aulas</p>
@@ -7987,7 +8192,9 @@ function wizardStep4(body){
 
 function wizScheduleRow(a, i, dias, disciplinas){
   const dOpts = dias.map(d => `<option${a.dia===d?' selected':''}>${d}</option>`).join('');
-  const discOpts = disciplinas.map(d => `<option${a.disciplina===d?' selected':''}>${esc(d)}</option>`).join('');
+  // a aula guarda o código; a lista mostra o nome
+  const nomeDe = s => (WIZARD_DATA.grade.find(g => g.sigla === s) || {}).disciplina || s;
+  const discOpts = disciplinas.map(d => `<option value="${esc(d)}"${a.disciplina===d?' selected':''}>${esc(nomeDe(d))}</option>`).join('');
   return `<div class="wiz-schedule-row" data-row="${i}">
     <select data-field="dia">${dOpts}</select>
     <input type="time" value="${esc(a.inicio)}" data-field="inicio" placeholder="19:00">
@@ -8017,21 +8224,22 @@ function bindScheduleRows(dias, disciplinas){
 }
 
 function wizardStep5(body){
-  document.getElementById('wizardTitle').textContent = 'Passo 5 de 5: revisão';
+  wizTitulo();
+  const nomes = WIZARD_DATA.disciplinasAtuais.map(s => (WIZARD_DATA.grade.find(g => g.sigla === s) || {}).disciplina || s);
   body.innerHTML = `
     <p class="wizard-step-title">Confira os dados antes de concluir</p>
     <div class="review-section">
       <h4>Identificação</h4>
       <div class="review-row"><span>Nome</span><span class="rv">${esc(WIZARD_DATA.nome)||'—'}</span></div>
       <div class="review-row"><span>Curso</span><span class="rv">${esc(WIZARD_DATA.curso)||'—'}</span></div>
-      <div class="review-row"><span>Instituição</span><span class="rv">${esc(WIZARD_DATA.instituicao)||'—'}</span></div>
+      <div class="review-row"><span>Faculdade</span><span class="rv">${esc(WIZARD_DATA.instituicao)||'—'}</span></div>
       <div class="review-row"><span>Semestre</span><span class="rv">${esc(WIZARD_DATA.semestre)||'—'}</span></div>
       <div class="review-row"><span>Nota mínima</span><span class="rv">${WIZARD_DATA.notaMinima}</span></div>
     </div>
     <div class="review-section">
       <h4>Grade Curricular</h4>
-      <div class="review-row"><span>Disciplinas importadas</span><span class="rv" style="color:var(--green)">${WIZARD_DATA.grade.length}</span></div>
-      <div class="review-row"><span>Cursando agora</span><span class="rv">${esc(WIZARD_DATA.disciplinasAtuais.join(', '))||'—'}</span></div>
+      <div class="review-row"><span>Disciplinas</span><span class="rv" style="color:var(--green)">${WIZARD_DATA.grade.length}</span></div>
+      <div class="review-row"><span>Cursando agora</span><span class="rv">${esc(nomes.join(', '))||'—'}</span></div>
     </div>
     <div class="review-section">
       <h4>Horário</h4>
@@ -8048,8 +8256,16 @@ function wizardCollectStep(){
     WIZARD_DATA.notaMinima = Number(document.getElementById('wNotaMin')?.value||60);
     if(!WIZARD_DATA.nome){ alert('Por favor, insira seu nome.'); return false; }
   }
+  if(WIZARD_STEP === 2 && !WIZARD_DATA.catalogo){ alert('Escolha o seu curso, ou "Outro curso".'); return false; }
   if(WIZARD_STEP === 2 && wizCatalogo()){
     if(!WIZARD_DATA.semAtual){ alert('Escolha em que semestre você está.'); return false; }
+    if(WIZARD_DATA.catalogo === 'outro'){
+      // o que ficou escrito sem tocar em "Adicionar" também entra
+      document.querySelectorAll('#wizardBody [data-add-sem]').forEach(f => wizAddDisciplina(Number(f.dataset.addSem), f.querySelector('input').value));
+      if(!WIZARD_DATA.custom.flat().length && !confirm('Você ainda não escreveu nenhuma disciplina. Dá para adicionar depois, na aba Histórico. Continuar assim mesmo?')){
+        renderGradeArea(); return false;
+      }
+    }
     wizBuildCatalogGrade();
     return true;
   }
@@ -8673,16 +8889,9 @@ document.getElementById('authForm').addEventListener('submit', async e => {
   btn.disabled = true;
   setAuthMessage(_authMode === 'signup' ? 'Criando conta…' : 'Entrando…');
   try{
-    if(_authMode === 'signup'){
-      const res = await Sync.signUp(email, pass);
-      if(res.needsConfirmation){
-        setAuthMessage(`Enviamos um link de confirmação para ${email}. Confirme e depois entre aqui.`, 'ok');
-        showAuthScreenModeOnly('login');
-        return;
-      }
-    } else {
-      await Sync.signIn(email, pass);
-    }
+    // criar conta já entra direto, sem e-mail de confirmação
+    if(_authMode === 'signup') await Sync.signUp(email, pass);
+    else await Sync.signIn(email, pass);
     try{ localStorage.removeItem(LS_PREFIX + 'cloud_skip'); }catch(err){}
     document.getElementById('authScreen').style.display = 'none';
     document.getElementById('loading').style.display = 'flex';
@@ -8695,11 +8904,6 @@ document.getElementById('authForm').addEventListener('submit', async e => {
     btn.disabled = false;
   }
 });
-function showAuthScreenModeOnly(mode){
-  _authMode = mode;
-  document.getElementById('authSubmit').textContent = mode === 'signup' ? 'Criar conta' : 'Entrar';
-  document.getElementById('authSwitch').textContent = mode === 'signup' ? 'Já tem conta? Entrar' : 'Não tem conta? Criar conta';
-}
 
 // Data arrived from another device: reload state, without disturbing what the user is doing.
 let _refreshTimer = null;

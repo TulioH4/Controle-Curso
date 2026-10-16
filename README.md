@@ -44,7 +44,7 @@ Atualizações chegam sozinhas: a cada nova versão publicada, o app instalado s
 **Acompanhamento acadêmico**
 - **Notas:** notas parciais com peso, meta por disciplina, calculadora de quanto falta na prova final, simulador de IRA e gráficos de desempenho; a nota de uma prova realizada pode ser lançada direto nela, e vai para a aba Notas
 - **Faltas:** contador com limite editável por disciplina, aviso quando chega perto do limite, ranking de risco e um botão **Faltei** nas aulas de hoje do painel
-- **Histórico** do curso inteiro, com busca, filtros e edição
+- **Histórico** do curso inteiro, separado por semestre, com busca e filtros; para adicionar uma disciplina basta o nome, o semestre e se já passou, está cursando ou ainda vai fazer
 - **Mapa de Sucesso:** o currículo organizado semestre a semestre
 - **Horas complementares** e **Laboratório** (turmas e entrega de relatórios)
 
@@ -62,7 +62,8 @@ Atualizações chegam sozinhas: a cada nova versão publicada, o app instalado s
 - Atalhos no ícone (clique direito no Windows, toque longo no Android): nova tarefa, provas, tarefas
 - Notificações de provas e prazos do dia e do dia seguinte e, no domingo à noite, o resumo da semana
 - Tema claro e escuro, no estilo *Liquid Glass*
-- Assistente de configuração para novos usuários: a grade de Engenharia de Produção do INATEL é montada com toques (escolha o semestre e ajuste as disciplinas); outros cursos importam via Excel ou texto
+- Assistente de configuração para novos usuários: a grade de Engenharia de Produção do INATEL é montada com toques (escolha o semestre e ajuste as disciplinas); nos outros cursos a pessoa escreve o nome das disciplinas de cada semestre (o código é criado sozinho), ou importa uma planilha do Excel
+- Criar conta já entra direto, sem e-mail de confirmação
 - Backup em arquivo e, sem conta, vários perfis no mesmo aparelho
 
 ## Seus dados

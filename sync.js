@@ -172,7 +172,7 @@
   // ---- auth ------------------------------------------------------------------
   const AUTH_MESSAGES = [
     [/invalid login credentials/i, 'E-mail ou senha incorretos.'],
-    [/email not confirmed/i, 'Confirme seu e-mail pelo link que enviamos antes de entrar.'],
+    [/email not confirmed/i, 'Essa conta ainda não foi ativada no servidor. Tente de novo mais tarde.'],
     [/already registered|already been registered|user already exists/i, 'Já existe uma conta com esse e-mail. Use "Entrar".'],
     [/at least 6|password should be/i, 'A senha precisa ter pelo menos 6 caracteres.'],
     [/rate limit|too many/i, 'Muitas tentativas seguidas. Aguarde um minuto e tente de novo.'],
@@ -198,11 +198,14 @@
     state.user = data.user;
     return data.user;
   }
+  // No e-mail confirmation: the account is ready to use as soon as it is created.
+  // (Supabase → Authentication → Email → "Confirm email" must be off; with it on, the
+  // sign-in below fails and the person sees why instead of waiting for an e-mail.)
   async function signUp(email, password){
-    const { data, error } = await client.auth.signUp({ email, password, options: { emailRedirectTo: location.origin + location.pathname } });
+    const { data, error } = await client.auth.signUp({ email, password });
     if (error) throw new Error(friendly(error));
-    if (data.session) state.user = data.user;
-    return { user: data.user, needsConfirmation: !data.session };
+    if (data.session) { state.user = data.user; return data.user; }
+    return signIn(email, password);
   }
   async function signOut(){
     await push();
