@@ -1634,10 +1634,33 @@
   .day-overview b{color:var(--text); font-weight:600;}
   .day-overview__hi{color:var(--text); font-weight:600;}
   .day-overview__nota{display:block; margin-top:8px;}
-  .notif-list{list-style:none; margin:14px 0 0; padding:0; display:flex; flex-direction:column; gap:8px;}
-  .notif-list li{display:flex; gap:12px; font-size:13px; line-height:1.45; color:var(--text-dim);}
-  .notif-list b{flex:0 0 64px; color:var(--text); font-weight:600;}
-  .notif-note{margin:10px 0 0; font-size:12px; color:var(--text-faint);}
+  /* notificações: estado no topo, "quando" em cartões, atalho da agenda */
+  .notif-top{display:flex; align-items:center; gap:14px; flex-wrap:wrap;}
+  .notif-top__ic{width:42px; height:42px; border-radius:12px; display:grid; place-items:center; flex-shrink:0; color:var(--c); background:var(--c-dim);}
+  .notif-top__ic .i{width:21px; height:21px;}
+  .notif-top__txt{flex:1; min-width:200px;}
+  .notif-top__txt .t{font-weight:650; font-size:15px; color:var(--text);}
+  .notif-top__txt .s{font-size:13px; color:var(--text-dim); margin-top:2px; line-height:1.45;}
+  .notif-top__btns{display:flex; gap:8px; flex-wrap:wrap;}
+  .notif-quando-t{margin:22px 0 10px; font-size:12px; font-weight:600; letter-spacing:.02em; color:var(--text-faint);}
+  .notif-quando{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px;}
+  .notif-q{display:flex; flex-direction:column; gap:6px; padding:14px; border-radius:16px; background:var(--lg-fill-hover, var(--panel-2)); box-shadow:inset 0 0 0 1px var(--line-soft);}
+  .notif-q__ic{width:30px; height:30px; border-radius:9px; display:grid; place-items:center; margin-bottom:4px; color:var(--c); background:var(--c-dim);}
+  .notif-q b{font-size:13.5px; font-weight:650; color:var(--text);}
+  .notif-q span:last-child{font-size:12.5px; line-height:1.45; color:var(--text-dim);}
+  .notif-note{margin:12px 2px 0; font-size:12px; line-height:1.5; color:var(--text-faint);}
+  .notif-agenda{display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:16px; padding:14px 16px; border-radius:16px;
+    background:var(--blue-dim); box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--blue) 22%, transparent);}
+  .notif-agenda__ic{width:34px; height:34px; border-radius:10px; display:grid; place-items:center; flex-shrink:0; color:#fff; background:var(--blue);}
+  .notif-agenda__txt{flex:1; min-width:200px; display:flex; flex-direction:column; gap:2px;}
+  .notif-agenda__txt b{font-size:13.5px; font-weight:650; color:var(--text);}
+  .notif-agenda__txt span{font-size:12.5px; color:var(--text-dim); line-height:1.45;}
+  @media (max-width:1100px){ .notif-quando{grid-template-columns:repeat(2, minmax(0,1fr));} }
+  @media (max-width:560px){
+    .notif-q{padding:12px;}
+    .notif-agenda .btn{width:100%;}
+    .notif-top__btns{width:100%;} .notif-top__btns .btn{flex:1;}
+  }
   .stat__sub{display:block; margin-top:3px; font-size:12.5px; font-weight:500; color:var(--text-faint);}
 
   /* ---------- Estudos (recurso em teste) ---------- */
@@ -1802,14 +1825,6 @@
   .sync-line.is-offline::before{background:var(--text-faint);}
   .sync-line.is-error::before{background:var(--red);}
   .sync-line.is-error{color:var(--red);}
-  .sync-row{display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
-  .sync-info{flex:1; min-width:200px;}
-  .sync-info .t{font-weight:600; font-size:14px;}
-  .sync-info .s{font-size:12.5px; color:var(--text-dim); margin-top:2px;}
-  .sync-dot{width:10px; height:10px; border-radius:50%; background:var(--green); flex-shrink:0;}
-  .sync-dot.is-syncing{background:var(--blue);}
-  .sync-dot.is-offline, .sync-dot.is-local{background:var(--text-faint);}
-  .sync-dot.is-error{background:var(--red);}
   .wiz-restore{
     display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
     padding:12px 14px; margin-bottom:20px; border-radius:12px; background:var(--lg-fill-hover);
@@ -3276,6 +3291,7 @@ const ICONS = {
   board:'<rect x="3.5" y="4" width="17" height="16" rx="3"/><path d="M9.2 4v16M14.8 4v16"/>',
   keyboard:'<rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6.5 10h.01M10 10h.01M14 10h.01M17.5 10h.01M7.5 14h9"/>',
   calendar:'<rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+  cloud:'<path d="M7.2 18.5h10.3a4 4 0 0 0 .5-7.97A6 6 0 0 0 6.4 9.2a4.7 4.7 0 0 0 .8 9.3z"/>',
 };
 function ico(name, cls){
   return `<svg class="i${cls?' '+cls:''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]||''}</svg>`;
@@ -6785,17 +6801,43 @@ async function disablePush(){
   if(sub){ await Sync.deletePush(sub.endpoint); await sub.unsubscribe(); }
   _pushSub = null;
 }
+// Linha de estado das Configurações (notificações, conta): ícone colorido, título, texto e botões.
+// estado: '' ou 'is-synced' ok (verde), 'is-syncing' (azul), 'is-local'/'is-offline' desligado (cinza), 'is-error' (vermelho)
+function statusRow(estado, titulo, texto, botoes, icone = 'bell'){
+  const cor = {'is-error':'red', 'is-local':'gray', 'is-offline':'gray', 'is-syncing':'blue'}[estado] || 'green';
+  return `<div class="notif-top">
+    <span class="notif-top__ic" style="--c:var(--${cor}); --c-dim:var(--${cor}-dim)">${ico(estado === 'is-error' ? 'alert' : icone)}</span>
+    <div class="notif-top__txt"><div class="t">${titulo}</div><div class="s">${texto}</div></div>
+    ${botoes ? `<div class="notif-top__btns">${botoes}</div>` : ''}
+  </div>`;
+}
+// Painel de notificações: o estado no topo, os momentos dos avisos em cartões
+// e, por último, o atalho para levar provas e prazos à agenda do celular.
+// momentos: [ícone, cor, título, texto]
+function notifQuando(momentos, nota){
+  return `<div class="notif-quando-t">Quando os avisos chegam</div>
+    <div class="notif-quando">${momentos.map(([icone, cor, titulo, texto]) => `
+      <div class="notif-q" style="--c:var(--${cor}); --c-dim:var(--${cor}-dim)">
+        <span class="notif-q__ic">${ico(icone)}</span><b>${titulo}</b><span>${texto}</span>
+      </div>`).join('')}</div>
+    <p class="notif-note">${nota}</p>
+    <div class="notif-agenda">
+      <span class="notif-agenda__ic">${ico('calendar')}</span>
+      <div class="notif-agenda__txt"><b>Avisos mesmo com o app fechado</b><span>Leve provas e prazos para a agenda do celular: ela avisa sozinha na véspera.</span></div>
+      <button type="button" class="btn btn-sm" data-abrir-agenda>Levar para a agenda</button>
+    </div>`;
+}
 async function renderNotifPanel(){
   if(!PUSH_SERVER_READY) return renderLocalNotifPanel();
   const p = document.getElementById('notifPanel');
   if(!p) return;
-  const quando = `<ul class="notif-list">
-      <li><b>7h</b><span>o resumo do dia: provas, tarefas que vencem, entregas do laboratório e o que estiver atrasado</span></li>
-      <li><b>20h</b><span>o que vem amanhã, para dar tempo de se preparar</span></li>
-      <li><b>Domingo</b><span>às 20h, o resumo da semana que vem no lugar do aviso de amanhã</span></li>
-      <li><b>2h antes</b><span>de cada prova, com horário e sala</span></li>
-    </ul><p class="notif-note">Dias sem nada para lembrar não geram notificação.</p>${AGENDA_NOTA}`;
-  const row = (dot, t, s, btns) => `<div class="sync-row"><span class="sync-dot ${dot}"></span><div class="sync-info"><div class="t">${t}</div><div class="s">${s}</div></div>${btns || ''}</div>`;
+  const quando = notifQuando([
+    ['sun', 'amber', 'Às 7h', 'O resumo do dia: provas, tarefas que vencem, entregas e o que estiver atrasado.'],
+    ['moon', 'purple', 'Às 20h', 'O que vem amanhã, para dar tempo de se preparar.'],
+    ['calendar', 'green', 'Domingo, 20h', 'O resumo da semana que vem, no lugar do aviso de amanhã.'],
+    ['timer', 'red', '2h antes da prova', 'Com o horário e a sala.'],
+  ], 'Dias sem nada para lembrar não geram notificação.');
+  const row = statusRow;
   if(!pushSupported()){
     p.innerHTML = row('is-local', 'Este navegador não recebe notificações', isIOS()
       ? 'No iPhone, instale o app na tela de início (Compartilhar, depois Adicionar à Tela de Início) e ative por lá.'
@@ -6839,19 +6881,16 @@ async function renderNotifPanel(){
     renderNotifPanel();
   };
 }
-// com a agenda do celular os avisos chegam mesmo com o app fechado, sem servidor
-const AGENDA_NOTA = `<p class="notif-note">Quer avisos mesmo com o app fechado? <button type="button" class="link-btn" data-abrir-agenda>Leve provas e prazos para a agenda do celular</button>.</p>`;
 function renderLocalNotifPanel(){
   const p = document.getElementById('notifPanel');
   if(!p) return;
-  const quando = `<ul class="notif-list">
-      <li><b>No dia</b><span>provas, tarefas que vencem, entregas do laboratório e o que estiver atrasado</span></li>
-      <li><b>Na véspera</b><span>a partir das 17h, o que vem amanhã</span></li>
-      <li><b>Domingo</b><span>a partir das 17h, o resumo da semana que vem no lugar do aviso de véspera</span></li>
-      <li><b>2h antes</b><span>de cada prova, com horário e sala</span></li>
-    </ul>
-    <p class="notif-note">Os avisos aparecem quando você abre o app e enquanto ele estiver aberto. No Android, com o app instalado, o celular também confere sozinho de tempos em tempos. Cada aviso aparece uma vez só, e dias sem nada não geram notificação.</p>${AGENDA_NOTA}`;
-  const row = (dot, t, s, btns) => `<div class="sync-row"><span class="sync-dot ${dot}"></span><div class="sync-info"><div class="t">${t}</div><div class="s">${s}</div></div>${btns || ''}</div>`;
+  const quando = notifQuando([
+    ['sun', 'amber', 'No dia', 'Provas, tarefas que vencem, entregas do laboratório e o que estiver atrasado.'],
+    ['moon', 'purple', 'Na véspera', 'A partir das 17h, o que vem amanhã.'],
+    ['calendar', 'green', 'Domingo', 'A partir das 17h, o resumo da semana que vem.'],
+    ['timer', 'red', '2h antes da prova', 'Com o horário e a sala.'],
+  ], 'Os avisos chegam com o app aberto; no Android, com o app instalado, o celular também confere sozinho de tempos em tempos. Cada aviso aparece uma vez só, e dias sem nada não geram notificação.');
+  const row = statusRow;
   if(!('Notification' in window)){
     p.innerHTML = row('is-local', 'Este navegador não mostra notificações', isIOS() ? 'No iPhone, instale o app na tela de início (Compartilhar, depois Adicionar à Tela de Início) e ative por lá.' : 'Tente pelo Chrome ou pelo app instalado.') + quando;
     return;
@@ -8988,28 +9027,22 @@ function renderSyncUI(s){
   updateProfileControls();
   const panel = document.getElementById('syncPanel');
   if(!panel) return;
+  // mesmo desenho do painel de notificações: ícone de nuvem na cor do estado
   if(!(window.Sync && Sync.enabled)){
-    panel.innerHTML = `<div class="sync-row"><span class="sync-dot is-local"></span><div class="sync-info"><div class="t">Sincronização indisponível</div><div class="s">Não foi possível carregar o serviço de nuvem. Seus dados continuam salvos neste aparelho.</div></div></div>`;
+    panel.innerHTML = statusRow('is-local', 'Sincronização indisponível', 'Não foi possível carregar o serviço de nuvem. Seus dados continuam salvos neste aparelho.', '', 'cloud');
     return;
   }
   if(!s.user){
-    panel.innerHTML = `<div class="sync-row">
-      <span class="sync-dot is-local"></span>
-      <div class="sync-info"><div class="t">Sem conta</div><div class="s">Seus dados estão salvos só neste aparelho.</div></div>
-      <button class="btn btn-primary btn-sm" id="btnSyncLogin">Entrar ou criar conta</button>
-    </div>`;
+    panel.innerHTML = statusRow('is-local', 'Sem conta', 'Seus dados estão salvos só neste aparelho.',
+      `<button class="btn btn-primary btn-sm" id="btnSyncLogin">Entrar ou criar conta</button>`, 'cloud');
     document.getElementById('btnSyncLogin').onclick = () => showAuthScreen('login');
     return;
   }
   const detail = s.status === 'error' ? `Último erro: ${esc(s.error || '')}` :
                  s.status === 'offline' ? 'As alterações serão enviadas quando a internet voltar.' :
                  s.lastSync ? `Última sincronização às ${hhmm(s.lastSync)}.` : 'Seus dados são salvos na nuvem automaticamente.';
-  panel.innerHTML = `<div class="sync-row">
-    <span class="sync-dot is-${s.status}"></span>
-    <div class="sync-info"><div class="t">${esc(s.user.email)}</div><div class="s">${SYNC_LABEL[s.status] || 'Conectado'}. ${detail}</div></div>
-    <button class="btn btn-sm" id="btnSyncNow">Sincronizar agora</button>
-    <button class="btn btn-sm btn-ghost" id="btnSyncLogout">Sair</button>
-  </div>`;
+  panel.innerHTML = statusRow('is-' + s.status, esc(s.user.email), `${SYNC_LABEL[s.status] || 'Conectado'}. ${detail}`,
+    `<button class="btn btn-sm" id="btnSyncNow">Sincronizar agora</button><button class="btn btn-sm btn-ghost" id="btnSyncLogout">Sair</button>`, 'cloud');
   document.getElementById('btnSyncNow').onclick = async () => { await Sync.push(); if(await Sync.pull()) refreshFromSync(); };
   document.getElementById('btnSyncLogout').onclick = async () => {
     if(!confirm('Sair da conta? Os dados ficam salvos na nuvem e serão removidos deste aparelho.')) return;
