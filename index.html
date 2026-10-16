@@ -506,48 +506,92 @@
   .rail-btn-primary{background:rgba(59,130,246,.13);color:var(--blue);border-radius:6px;margin-bottom:3px;}
 
   /* ===== FALTAS ===== */
-  .faltas-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:12px;}
-  .falta-card{padding:14px 16px;}
-  .falta-card .disc{font-weight:600; font-size:13px; margin-bottom:4px;}
-  .counter-row{display:flex; align-items:center; gap:8px; margin:10px 0 6px;}
-  .falta-card .disc{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .falta-main{display:flex; align-items:center; justify-content:space-between; gap:12px; margin:12px 0 12px;}
-  .falta-main .counter-row{margin:0;}
-  .falta-pres{display:flex; flex-direction:column; align-items:flex-end; line-height:1.15;}
-  .falta-pres b{font-size:17px; font-weight:600; color:var(--text); font-variant-numeric:tabular-nums;}
-  .falta-pres span{font-size:11px; color:var(--text-faint); white-space:nowrap;}
-  .faltas-grid{align-items:start;}
-  .falta-main .counter-val{display:flex; align-items:baseline; justify-content:center; min-width:64px;}
-  .falta-lim-btn{
-    background:none; border:none; padding:0 0 0 2px; font:inherit; font-size:13px; font-weight:500;
-    color:var(--text-faint); cursor:pointer; border-radius:4px;
-  }
-  .falta-lim-btn:hover{color:var(--text); text-decoration:underline; text-underline-offset:3px;}
-  .falta-lim-input{
-    width:48px; margin-left:4px; font-family:var(--mono); font-size:13px; background:var(--bg-alt);
-    border:1px solid var(--blue); border-radius:6px; padding:1px 4px; color:var(--text);
-  }
-  .falta-aviso{margin-top:8px; font-size:12px; font-weight:600;}
-  .counter-btn{
-    width:28px; height:28px; border-radius:4px; border:1px solid var(--line);
-    background:var(--panel-2); color:var(--text); cursor:pointer; font-size:14px; font-weight:700;
-    display:flex; align-items:center; justify-content:center; flex-shrink:0;
-    font-family:var(--mono); transition:all .15s;
-  }
-  .counter-btn:hover{border-color:var(--blue); color:var(--blue);}
-  .counter-btn.sub:hover{border-color:var(--red); color:var(--red);}
-  .counter-val{font-family:var(--mono); font-size:20px; font-weight:700; min-width:40px; text-align:center; transition:transform .1s;}
+  /* cada cartão: nome e situação, um anel com as faltas no centro, quanto ainda pode faltar, e os botões.
+     A cor (--c) vem da situação: verde tranquilo, âmbar perto do limite, vermelho no limite. */
+  .faltas-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(250px, 1fr)); gap:12px; align-items:start;}
+  .falta-card{padding:16px; display:flex; flex-direction:column; gap:14px;}
+  .fc-head{display:flex; align-items:flex-start; justify-content:space-between; gap:10px;}
+  /* sempre o espaço de duas linhas: os cartões ficam da mesma altura, com nomes curtos ou longos */
+  .falta-card .disc{font-weight:650; font-size:14px; line-height:1.3; min-height:2.6em; color:var(--text); min-width:0;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+  .fc-chip{flex-shrink:0; padding:3px 9px; border-radius:999px; font-size:11.5px; font-weight:600; color:var(--c); background:var(--c-dim); white-space:nowrap;}
+  .fc-body{display:flex; align-items:center; gap:16px;}
+  .fc-ring{position:relative; width:84px; height:84px; flex-shrink:0;}
+  .fc-ring svg{width:100%; height:100%; transform:rotate(-90deg);}
+  .fc-ring circle{fill:none; stroke-width:7;}
+  .fc-ring__track{stroke:var(--line);}
+  .fc-ring__val{stroke:var(--c); stroke-linecap:round; transition:stroke-dasharray .35s ease;}
+  .fc-ring__txt{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1;}
+  .fc-ring .counter-val{font-size:26px; font-weight:700; color:var(--text); font-variant-numeric:tabular-nums; transition:transform .1s;}
   .counter-val.bump{animation:counterBump .2s ease;}
-  @keyframes counterBump{0%,100%{transform:scale(1);}45%{transform:scale(1.28);}}
-  .falta-bar{height:5px; background:var(--line-soft); border-radius:3px; overflow:hidden; margin-top:4px;}
-  .falta-bar-fill{height:100%; border-radius:3px; transition:width .3s, background .3s;}
+  @keyframes counterBump{0%,100%{transform:scale(1);}45%{transform:scale(1.22);}}
+  .falta-lim-btn{margin-top:3px; background:none; border:none; padding:0; font:inherit; font-size:11.5px; color:var(--text-faint); cursor:pointer;
+    text-decoration:underline dotted; text-underline-offset:3px;}
+  .falta-lim-btn:hover{color:var(--text);}
+  .falta-lim-input{width:46px; margin-top:3px; font-size:12px; text-align:center; background:var(--bg-alt);
+    border:1px solid var(--blue); border-radius:6px; padding:1px 4px; color:var(--text);}
+  .fc-info{display:flex; flex-direction:column; gap:3px; min-width:0;}
+  .fc-info b{font-size:16px; font-weight:650; color:var(--text);}
+  .fc-info .fc-sub{font-size:12.5px; color:var(--text-dim);}
+  .fc-info .fc-pres{margin-top:6px; font-size:12px; color:var(--text-faint); font-variant-numeric:tabular-nums;}
+  .falta-card.is-warn .fc-info b, .falta-card.is-over .fc-info b{color:var(--c);}
+  .fc-actions{display:grid; grid-template-columns:44px 1fr; gap:8px;}
+  .fc-btn{height:38px; border-radius:12px; border:none; font:inherit; font-size:13.5px; font-weight:600; cursor:pointer; transition:filter .15s, transform .1s;}
+  .fc-btn:active{transform:scale(.97);}
+  .fc-btn--sub{background:var(--lg-fill-hover, var(--panel-2)); color:var(--text-dim); box-shadow:inset 0 0 0 1px var(--line-soft); font-size:18px;}
+  .fc-btn--add{background:var(--blue-dim); color:var(--blue);}
+  .fc-btn:hover{filter:brightness(1.06);}
+  .faltas-conta{display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:16px;}
+  .faltas-conta__txt{flex:1; min-width:220px; display:flex; flex-direction:column; gap:2px;}
+  .faltas-conta__txt b{font-size:14px; font-weight:650; color:var(--text);}
+  .faltas-conta__txt span{font-size:12.5px; color:var(--text-dim);}
+  /* ranking: a barra é a fração do limite de cada disciplina */
+  .rank-row{display:grid; grid-template-columns:22px minmax(0,1fr) minmax(80px,180px) 64px; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid var(--line-soft); font-size:13px;}
+  .rank-row:last-child{border-bottom:none;}
+  .rank-pos{font-size:12px; font-weight:600; color:var(--text-faint); text-align:center;}
+  .rank-nome{color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .rank-bar{height:8px; border-radius:999px; background:var(--line); overflow:hidden;}
+  .rank-bar i{display:block; height:100%; border-radius:999px; background:var(--c);}
+  .rank-val{text-align:right; font-size:12.5px; color:var(--text-dim); font-variant-numeric:tabular-nums; white-space:nowrap;}
 
   /* ===== HORAS COMPLEMENTARES ===== */
-  .horas-resumo{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:18px;}
-  .horas-form{display:grid; grid-template-columns:90px 1fr 90px 100px auto; gap:10px; align-items:end; margin-bottom:18px;}
-  .horas-legend{display:flex; gap:14px; align-items:center; flex-wrap:wrap; margin-bottom:12px;}
-  .horas-legend-item{display:flex; align-items:center; gap:5px; font-size:11.5px; color:var(--text-dim);}
-  .horas-dot{width:10px; height:10px; border-radius:50%;}
+  .horas-hero{display:flex; flex-direction:column; gap:12px; margin-bottom:12px;}
+  .hh-top{display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap;}
+  .hh-num{font-size:15px; color:var(--text-dim);}
+  .hh-num b{font-size:34px; font-weight:700; color:var(--text); letter-spacing:-.02em; font-variant-numeric:tabular-nums; margin-right:4px;}
+  .hh-sub{margin-top:2px; font-size:13px; color:var(--text-dim);}
+  .hh-pct{font-size:22px; font-weight:700; color:var(--green); font-variant-numeric:tabular-nums;}
+  .hh-bar{height:12px; border-radius:999px; background:var(--line); overflow:hidden;}
+  .hh-bar i{display:block; height:100%; border-radius:999px; background:linear-gradient(90deg, color-mix(in srgb, var(--green) 75%, var(--blue)), var(--green)); transition:width .4s ease;}
+  .horas-resumo{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:12px; margin-bottom:18px;}
+  .hg-tile{display:flex; flex-direction:column; gap:8px; cursor:text;}
+  .hg-field{display:flex; align-items:center; gap:6px; padding:6px 10px; border-radius:12px; background:var(--lg-fill-hover, var(--panel-2)); box-shadow:inset 0 0 0 1px var(--line-soft); transition:box-shadow .15s;}
+  .hg-field:focus-within{box-shadow:inset 0 0 0 1.5px var(--blue), 0 0 0 4px var(--blue-dim);}
+  .hg-field input{flex:1; min-width:0; width:100%; border:none; background:none; outline:none; padding:0; color:var(--text);
+    font:inherit; font-size:24px; font-weight:650; font-variant-numeric:tabular-nums; box-shadow:none !important;}
+  .hg-field .hg-unit{font-size:13px; color:var(--text-faint);}
+  .hg-field .i{color:var(--text-faint); width:15px; height:15px;}
+  .hc-head{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:6px;}
+  .hc-head__t{font-size:12.5px; color:var(--text-dim);}
+  .horas-form{display:grid; grid-template-columns:minmax(0,2fr) repeat(3, minmax(0,1fr)); gap:12px; align-items:end;
+    padding:14px; margin:8px 0 6px; border-radius:16px; background:var(--lg-fill-hover, var(--panel-2)); box-shadow:inset 0 0 0 1px var(--line-soft);}
+  .horas-form[hidden]{display:none;}
+  .horas-form .hf-foot{grid-column:1 / -1; display:flex; align-items:center; justify-content:flex-end; gap:8px; flex-wrap:wrap;}
+  .horas-form .hf-msg{margin-right:auto; font-size:12.5px; color:var(--red);}
+  .hc-row{display:grid; grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) auto 36px; align-items:center; gap:16px; padding:14px 2px; border-bottom:1px solid var(--line-soft);}
+  .hc-row:last-child{border-bottom:none;}
+  .hc-main{display:flex; flex-direction:column; gap:2px; min-width:0;}
+  .hc-main b{font-size:14px; font-weight:650; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .hc-main span{font-size:12px; color:var(--text-faint);}
+  .hc-prog{display:flex; flex-direction:column; gap:7px; min-width:0;}
+  .hc-bar{height:7px; border-radius:999px; background:var(--line); overflow:hidden;}
+  .hc-bar i{display:block; height:100%; border-radius:999px; background:var(--c);}
+  .hc-val{display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--text-dim); white-space:nowrap;}
+  .hc-val input{width:58px; padding:4px 8px; border-radius:8px; border:none; background:var(--lg-fill-hover, var(--panel-2)); box-shadow:inset 0 0 0 1px var(--line-soft);
+    color:var(--text); font:inherit; font-size:13px; font-weight:600; text-align:center;}
+  .hc-val input:focus{outline:none; box-shadow:inset 0 0 0 1.5px var(--blue);}
+  .hc-del{width:32px; height:32px; border-radius:10px; border:none; background:none; color:var(--text-faint); cursor:pointer; font-size:14px;}
+  .hc-del:hover{background:var(--red-dim); color:var(--red);}
 
   /* ===== MODAL ===== */
   .modal-overlay{
@@ -622,7 +666,10 @@
 
   @media(max-width:880px){
     .horas-form{grid-template-columns:repeat(2, minmax(0,1fr));}
-    .horas-resumo{grid-template-columns:repeat(2,1fr);}
+    .horas-form .hf-nome{grid-column:1 / -1;}
+    .horas-resumo{grid-template-columns:repeat(2, minmax(0,1fr));}
+    .hc-row{grid-template-columns:minmax(0,1fr) auto 32px; grid-template-areas:"main st del" "prog prog prog"; gap:10px 12px;}
+    .hc-row .hc-main{grid-area:main;} .hc-row .hc-prog{grid-area:prog;} .hc-row .badge{grid-area:st;} .hc-row .hc-del{grid-area:del;}
     .faltas-grid{grid-template-columns:repeat(2, minmax(0, 1fr));}
     .modal-row{grid-template-columns:1fr 1fr 1fr;}
     .hist-add-form{grid-template-columns:repeat(2, minmax(0,1fr)); grid-template-areas:"nome nome" "sit sit" "per nota" "cod .";}
@@ -630,6 +677,8 @@
   }
   @media(max-width:560px){
     .faltas-grid{grid-template-columns:minmax(0, 1fr);}
+    .falta-card .disc{min-height:0;} /* uma coluna só: não precisa igualar a altura com o vizinho */
+    #faltasSub.stat-grid{grid-template-columns:repeat(3, minmax(0, 1fr));}
   }
 
   #loading{
@@ -1966,8 +2015,7 @@
   .agenda-link__t{flex:1; min-width:0; display:flex; flex-direction:column; font-size:13.5px;}
   .agenda-link__t span{font-size:12px; color:var(--text-faint);}
   .agenda-link__add{font-size:12.5px; font-weight:600; color:var(--blue); flex-shrink:0;}
-  .faltas-conta{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:16px; font-size:12.5px; color:var(--text-dim);}
-  .faltas-conta select{background:var(--bg-alt); border:1px solid var(--line); border-radius:var(--r); color:var(--text); padding:6px 9px; font-size:12.5px;}
+  .faltas-conta select{background:var(--bg-alt); border:1px solid var(--line); border-radius:10px; color:var(--text); padding:8px 10px; font:inherit; font-size:13px;}
   .navday:not(.out){cursor:pointer;}
 
   .mtabbar, .mfab, .msheet, .msheet-backdrop, .agenda-list{display:none;}
@@ -2212,17 +2260,17 @@
     #turmasGrid > :nth-child(n+10){border-bottom:none !important;}
 
     /* other wide tables scroll sideways inside their panel instead of being cut off */
-    .panel:has(> table:not(.rel-table):not(.hist-table):not(.horas-table)), .panel:has(> div > table){overflow-x:auto; -webkit-overflow-scrolling:touch;}
+    .panel:has(> table:not(.rel-table):not(.hist-table)), .panel:has(> div > table){overflow-x:auto; -webkit-overflow-scrolling:touch;}
 
-    /* histórico and horas complementares: each row becomes a card */
-    .hist-table thead, .horas-table thead{display:none;}
-    .hist-table, .hist-table tbody, .horas-table, .horas-table tbody{display:block; width:100%;}
-    .hist-table tr, .horas-table tr{display:grid; gap:6px 10px; align-items:center; padding:13px 0; border-bottom:1px solid var(--line-soft);}
-    .hist-table tr:last-child, .horas-table tr:last-child{border-bottom:none;}
-    .hist-table td, .horas-table td{display:block; min-width:0; padding:0 !important; border:none !important; background:none !important;}
-    .hist-table td[colspan], .horas-table td[colspan]{grid-column:1 / -1;}
-    .hist-table td[data-label]::before, .horas-table td[data-label]::before{content:attr(data-label); display:block; margin-bottom:3px; font-size:11px; color:var(--text-faint);}
-    .hist-table .cell-input, .horas-table .cell-input{width:100% !important;}
+    /* histórico: each row becomes a card */
+    .hist-table thead{display:none;}
+    .hist-table, .hist-table tbody{display:block; width:100%;}
+    .hist-table tr{display:grid; gap:6px 10px; align-items:center; padding:13px 0; border-bottom:1px solid var(--line-soft);}
+    .hist-table tr:last-child{border-bottom:none;}
+    .hist-table td{display:block; min-width:0; padding:0 !important; border:none !important; background:none !important;}
+    .hist-table td[colspan]{grid-column:1 / -1;}
+    .hist-table td[data-label]::before{content:attr(data-label); display:block; margin-bottom:3px; font-size:11px; color:var(--text-faint);}
+    .hist-table .cell-input{width:100% !important;}
     .hist-table tr{grid-template-columns:repeat(2, minmax(0,88px)) minmax(0,1fr) auto; grid-template-areas:"sig sig . sit" "disc disc disc disc" "nota ch . del";}
     .hist-table td:nth-child(1){grid-area:sig; font-size:12px; color:var(--text-dim);}
     .hist-table td:nth-child(2){grid-area:disc; font-size:14.5px; font-weight:600;}
@@ -2232,14 +2280,8 @@
     .hist-table td:nth-child(6){grid-area:del; justify-self:end; align-self:end;}
     .hist-table tr.hist-sem{display:block; padding:0; border-bottom:1px solid var(--line-soft);}
     .hist-table tr.hist-sem td{padding:22px 0 8px !important;}
-    .horas-table tr{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) auto; grid-template-areas:"sig sig st" "nome nome nome" "tot val del";}
-    .horas-table td:nth-child(1){grid-area:sig; font-size:12.5px;}
-    .horas-table td:nth-child(2){grid-area:nome; font-size:14.5px; font-weight:600;}
-    .horas-table td:nth-child(3){grid-area:tot;}
-    .horas-table td:nth-child(4){grid-area:val;}
-    .horas-table td:nth-child(5){grid-area:st; justify-self:end; white-space:nowrap;}
-    .horas-table td:nth-child(6){grid-area:del; justify-self:end; align-self:end;}
-    .horas-table td:nth-child(4) .cell-input{width:80px !important;}
+    .hh-num b{font-size:30px;}
+    .rank-row{grid-template-columns:18px minmax(0,1fr) 70px 54px; gap:10px;}
 
     /* horário: one day at a time instead of a grid wider than the screen */
     #weekGrid{display:none !important;}
@@ -2266,7 +2308,6 @@
 
     /* the side rail does not exist on phones */
     #railSettings{display:none;}
-    .section-label__note{display:none;}
     .horas-form input, .hist-add-form input{min-width:0; width:100%;}
   }
 
@@ -2561,7 +2602,8 @@
       <div class="section-label" style="margin-bottom:14px;">Histórico do curso</div>
       <div class="charts-grid">
         <div class="panel chart-wrap" style="--accent:var(--green)"><canvas id="chartSituacao"></canvas></div>
-        <div class="panel chart-wrap" style="--accent:var(--blue)"><canvas id="chartNotas"></canvas></div>      </div>
+        <div class="panel chart-wrap" style="--accent:var(--blue)"><canvas id="chartNotas"></canvas></div>
+      </div>
       <div class="section-label" style="margin:22px 0 12px;">Simulador de IRA</div>
       <div id="simuladorPanel" class="panel panel--pad" style="--accent:var(--blue)"></div>
       <div class="section-label" style="margin:22px 0 12px;">Sessões de estudo nos últimos 7 dias</div>
@@ -2587,13 +2629,16 @@
       <div class="screen__header">
         <h2>Controle de Faltas</h2>
       </div>
-      <div class="meta-row" id="faltasSub" style="margin-bottom:18px;"></div>
+      <div class="stat-grid" id="faltasSub"></div>
       <div class="section-label">Faltas por disciplina</div>
       <div class="faltas-grid" id="faltasGrid"></div>
-      <div class="section-label" style="margin-top:22px;">Ranking de risco</div>
+      <div class="section-label">Quem está mais perto do limite</div>
       <div id="faltasRanking" class="panel panel--pad" style="--accent:var(--red)"></div>
-      <div class="faltas-conta">
-        <label for="cFaltasPorAula">O botão Faltei, nas aulas de hoje do painel, conta</label>
+      <div class="panel panel--pad faltas-conta" style="--accent:var(--gray)">
+        <div class="faltas-conta__txt">
+          <b>Botão "Faltei" do Painel</b>
+          <label for="cFaltasPorAula">Quantas faltas cada aula de hoje vale quando você toca nele</label>
+        </div>
         <select id="cFaltasPorAula">
           <option value="hora-aula">1 falta por hora-aula (50 min)</option>
           <option value="aula">1 falta por aula</option>
@@ -2607,37 +2652,28 @@
         <h2>Horas Complementares</h2>
       </div>
 
-      <div class="section-label" style="justify-content:space-between;">
-        Resumo de horas
-        <span class="section-label__note" style="font-size:10.5px; color:var(--text-faint); font-family:var(--mono); font-weight:400; text-transform:none; letter-spacing:0;">
-          Valores do sistema acadêmico — edite diretamente nos campos
-        </span>
-      </div>
+      <div class="panel panel--pad horas-hero" id="horasHero" style="--accent:var(--green)"></div>
+      <p class="help-text" style="margin:4px 2px 12px;">Copie os números do sistema da faculdade. Toque num valor para editar.</p>
       <div class="horas-resumo" id="horasResumo"></div>
 
-      <div class="section-label">Grade curricular de atividades</div>
+      <div class="section-label">Atividades</div>
       <div class="panel panel--pad" style="--accent:var(--amber); margin-bottom:18px;">
-        <div class="horas-legend">
-          <span style="font-family:var(--mono); font-size:10.5px; color:var(--text-faint); letter-spacing:.05em;">LEGENDA:</span>
-          <span class="horas-legend-item"><span class="horas-dot" style="background:var(--green);"></span>Aprovado</span>
-          <span class="horas-legend-item"><span class="horas-dot" style="background:var(--amber);"></span>Em Curso</span>
-          <span class="horas-legend-item"><span class="horas-dot" style="background:var(--gray);"></span>Pendente</span>
+        <div class="hc-head">
+          <span class="hc-head__t" id="horasContagem"></span>
+          <button class="btn btn-sm btn-primary" id="btnNovaHora">+ Adicionar atividade</button>
         </div>
-        <div class="horas-form">
-          <div class="field"><label>Sigla</label><input id="hcSigla" placeholder="ex: CP01"></div>
-          <div class="field"><label>Disciplina / Atividade</label><input id="hcNome" placeholder="Comportamento Profissional I"></div>
-          <div class="field"><label>Total de horas</label><input id="hcTotal" type="number" placeholder="40" min="0"></div>
-          <div class="field"><label>Horas validadas</label><input id="hcValidadas" type="number" placeholder="0" min="0"></div>
-          <button class="btn btn-primary" id="btnAddHora">+ Adicionar</button>
+        <div class="horas-form" id="horasAddPanel" hidden>
+          <div class="field hf-nome"><label for="hcNome">Nome da atividade</label><input id="hcNome" placeholder="Ex.: Comportamento Profissional I" autocomplete="off"></div>
+          <div class="field"><label for="hcSigla">Código (opcional)</label><input id="hcSigla" placeholder="Ex.: CP01" autocomplete="off"></div>
+          <div class="field"><label for="hcTotal">Total de horas</label><input id="hcTotal" type="number" inputmode="numeric" placeholder="40" min="0"></div>
+          <div class="field"><label for="hcValidadas">Já validadas</label><input id="hcValidadas" type="number" inputmode="numeric" placeholder="0" min="0"></div>
+          <div class="hf-foot">
+            <span class="hf-msg" id="hcMsg" role="alert"></span>
+            <button class="btn" id="hcCancel">Fechar</button>
+            <button class="btn btn-primary" id="btnAddHora">Adicionar</button>
+          </div>
         </div>
-        <table class="horas-table">
-          <thead>
-            <tr>
-              <th>Sigla</th><th>Atividade</th><th>Total (h)</th><th>Validadas (h)</th><th>Status</th><th></th>
-            </tr>
-          </thead>
-          <tbody id="horasBody"></tbody>
-        </table>
+        <div id="horasBody"></div>
       </div>
     </section>
 
@@ -4976,55 +5012,65 @@ function renderFaltas(){
     return {sigla, nome: item ? item.disciplina : sigla, ch: item ? (item.ch||60) : 60};
   });
 
-  const total = disc.reduce((s,d) => s + faltaLimite(d.sigla, d.ch), 0);
   const totalFaltas = disc.reduce((s,d) => s + ((STATE.faltas[d.sigla]||{}).faltas||0), 0);
   const emRisco = countDisciplinasEmRisco();
 
   updateNavBadges();
 
   const sub = document.getElementById('faltasSub');
-  if(sub) sub.innerHTML = `
-    <span class="meta-chip"><b>${disc.length}</b> disciplinas monitoradas</span>
-    <span class="meta-chip">Total de faltas: <b>${totalFaltas}</b></span>
-    ${emRisco>0?`<span class="meta-chip" style="color:var(--red);border-color:var(--red-dim);"><b>${emRisco}</b> em risco</span>`:''}
-  `;
+  if(sub){
+    sub.innerHTML = `
+      ${statCard('Faltas no semestre', totalFaltas, 'blue')}
+      ${statCard('Disciplinas', disc.length, 'gray')}
+      ${emRisco ? statCard('Perto do limite', emRisco, 'red') : statCard('Perto do limite', 'Nenhuma', 'green', true)}`;
+    sub.querySelectorAll('[data-count]').forEach(el => animateCount(el, Number(el.dataset.count)));
+  }
 
   const grid = document.getElementById('faltasGrid');
   if(!grid) return;
   if(!disc.length){
-    grid.innerHTML = `<div class="empty">Defina disciplinas cursando em Configurações</div>`;
+    grid.innerHTML = `<div class="empty">Marque as disciplinas que você está cursando em <b>Configurações</b>.</div>`;
     return;
   }
 
+  // anel: r = 27 no viewBox 64, perímetro 2πr
+  const ANEL = 2 * Math.PI * 27;
   grid.innerHTML = disc.map(d => {
     const limite = faltaLimite(d.sigla, d.ch);
     const temCustom = STATE.faltasLimites && STATE.faltasLimites[d.sigla] != null;
     const faltas = (STATE.faltas[d.sigla]||{}).faltas||0;
     const pct = Math.min(100, Math.round(faltas/limite*100));
-    const barColor = pct>=100 ? 'var(--red)' : (pct>=75 ? 'var(--amber)' : 'var(--green)');
-    let badgeCls='green', badgeLabel='OK';
-    if(pct>=100){ badgeCls='red'; badgeLabel='Reprovado por falta!'; }
-    else if(pct>=75){ badgeCls='amber'; badgeLabel='Atenção: quase no limite'; }
-    // Presence % estimate: presença% ≈ 1 - faltas/(limite*4)
+    const [nivel, cor, rotulo] = pct >= 100 ? ['is-over', 'red', 'Reprovado por falta'] : pct >= 75 ? ['is-warn', 'amber', 'Atenção'] : ['is-ok', 'green', 'Tranquilo'];
+    // presença estimada pela carga horária
     const chEst = d.ch || limite * 4;
     const presencaPct = chEst > 0 ? Math.max(0, Math.round((chEst - faltas) / chEst * 100)) : null;
     const restam = Math.max(0, limite - faltas);
-    // Só fala quando importa: perto do limite ou estourado
-    const aviso = pct >= 100 ? 'Limite atingido' :
-      restam === 1 ? 'Mais 1 falta reprova' :
-      restam <= 3 ? `Restam ${restam} faltas` : '';
-    return `<div class="panel falta-card" style="--accent:var(--${badgeCls})">
-      <div class="disc" title="${esc(d.sigla)}">${esc(d.nome)}</div>
-      <div class="falta-main">
-        <div class="counter-row">
-          <button class="counter-btn sub" data-f-dec="${esc(d.sigla)}" title="Remover falta" aria-label="Remover falta de ${esc(d.nome)}">−</button>
-          <div class="counter-val">${faltas}<button class="falta-lim-btn" data-limite-edit="${esc(d.sigla)}" data-limite-atual="${limite}" title="Limite de ${limite} faltas${temCustom?' (ajustado por você)':''}. Clique para editar">/${limite}</button></div>
-          <button class="counter-btn" data-f-inc="${esc(d.sigla)}" title="Adicionar falta" aria-label="Adicionar falta em ${esc(d.nome)}">+</button>
-        </div>
-        ${presencaPct!==null?`<div class="falta-pres"><b>${presencaPct}%</b><span>de presença</span></div>`:''}
+    const [titulo, sub] = pct >= 100 ? ['Limite atingido', `${limite} faltas permitidas`]
+      : restam === 1 ? ['Mais 1 falta reprova', `limite de ${limite} faltas`]
+      : [`Restam ${restam} faltas`, 'até o limite'];
+    return `<div class="panel falta-card ${nivel}" style="--accent:var(--${cor}); --c:var(--${cor}); --c-dim:var(--${cor}-dim)">
+      <div class="fc-head">
+        <div class="disc" title="${esc(d.nome)} (${esc(d.sigla)})">${esc(d.nome)}</div>
+        <span class="fc-chip">${rotulo}</span>
       </div>
-      <div class="falta-bar"><div class="falta-bar-fill" style="width:${pct}%; background:${barColor};"></div></div>
-      ${aviso ? `<div class="falta-aviso" style="color:var(--${pct>=100 || restam===1 ? 'red' : 'amber'})">${aviso}</div>` : ''}
+      <div class="fc-body">
+        <div class="fc-ring">
+          <svg viewBox="0 0 64 64" aria-hidden="true"><circle class="fc-ring__track" cx="32" cy="32" r="27"/>${faltas ? `<circle class="fc-ring__val" cx="32" cy="32" r="27" stroke-dasharray="${(pct / 100 * ANEL).toFixed(1)} ${ANEL.toFixed(1)}"/>` : ''}</svg>
+          <div class="fc-ring__txt">
+            <span class="counter-val" aria-label="${faltas} ${faltas === 1 ? 'falta' : 'faltas'}">${faltas}</span>
+            <button class="falta-lim-btn" data-limite-edit="${esc(d.sigla)}" data-limite-atual="${limite}" title="Limite de ${limite} faltas${temCustom ? ' (ajustado por você)' : ''}. Toque para mudar">de ${limite}</button>
+          </div>
+        </div>
+        <div class="fc-info">
+          <b${restam === 1 && pct < 100 ? ' style="color:var(--red)"' : ''}>${titulo}</b>
+          <span class="fc-sub">${sub}</span>
+          ${presencaPct !== null ? `<span class="fc-pres">${presencaPct}% de presença</span>` : ''}
+        </div>
+      </div>
+      <div class="fc-actions">
+        <button class="fc-btn fc-btn--sub" data-f-dec="${esc(d.sigla)}" title="Tirar uma falta" aria-label="Tirar uma falta de ${esc(d.nome)}">−</button>
+        <button class="fc-btn fc-btn--add" data-f-inc="${esc(d.sigla)}" aria-label="Adicionar uma falta em ${esc(d.nome)}">+ 1 falta</button>
+      </div>
     </div>`;
   }).join('');
 
@@ -5102,14 +5148,14 @@ function renderFaltasRanking(){
     return {sigla, nome, faltas, limite, pct};
   }).sort((a,b) => b.pct - a.pct);
 
-  const maxPct = ranked[0]?.pct || 1;
-  panel.innerHTML = ranked.map(d => {
-    const cls = d.pct >= 100 ? 'red' : d.pct >= 75 ? 'amber' : d.pct >= 50 ? 'blue' : 'green';
-    return `<div class="risco-row">
-      <span class="risco-sigla" style="color:var(--${cls})">${esc(d.sigla)}</span>
-      <span class="risco-nome">${esc(d.nome)}</span>
-      <div class="risco-bar-wrap"><div class="risco-bar-fill" style="width:${maxPct>0?Math.round(d.pct/maxPct*100):0}%;background:var(--${cls});"></div></div>
-      <span style="font-family:var(--mono);font-size:11px;color:var(--${cls});flex-shrink:0;width:38px;text-align:right;">${d.faltas}/${d.limite}</span>
+  // a barra mostra quanto do limite já foi usado (as mesmas cores dos cartões)
+  panel.innerHTML = ranked.map((d, i) => {
+    const cor = d.pct >= 100 ? 'red' : d.pct >= 75 ? 'amber' : 'green';
+    return `<div class="rank-row" style="--c:var(--${cor})">
+      <span class="rank-pos">${i + 1}</span>
+      <span class="rank-nome" title="${esc(d.nome)}">${esc(d.nome)}</span>
+      <div class="rank-bar"><i style="width:${Math.max(d.pct, d.faltas ? 3 : 0)}%"></i></div>
+      <span class="rank-val">${d.faltas} de ${d.limite}</span>
     </div>`;
   }).join('');
 }
@@ -5455,63 +5501,85 @@ function renderMetaNotas(){
 function horasStatus(hc){
   const pct = hc.total ? hc.validadas/hc.total : 0;
   if(pct>=1) return {label:'Aprovado', cls:'green'};
-  if(hc.validadas>0) return {label:'Em Curso', cls:'amber'};
+  if(hc.validadas>0) return {label:'Em curso', cls:'amber'};
   return {label:'Pendente', cls:'gray'};
 }
-function horasEditCard(fieldKey, label, accent, unidade = 'horas'){
+// valor do sistema da faculdade, editável: o cartão inteiro leva ao campo
+function horasEditCard(fieldKey, label, accent, unidade = 'h'){
   const val = STATE.horasGlobal[fieldKey] ?? 0;
-  return `<div class="panel stat" style="--accent:var(--${accent})">
-    <div class="stat__label">${label}</div>
-    <input
-      class="horas-global-input"
-      data-hg="${fieldKey}"
-      type="number" min="0" inputmode="numeric" aria-label="${label}"
-      value="${val}"
-      style="
-        font-family:var(--mono); font-size:24px; font-weight:600; margin-top:8px;
-        color:var(--text); background:transparent; border:none; border-bottom:1px solid var(--line-soft);
-        width:100%; padding:0 0 2px; outline:none; line-height:1;
-      "
-    >
-    <div style="font-size:10px; color:var(--text-faint); margin-top:5px;">${unidade}, toque para editar</div>
-  </div>`;
+  return `<label class="panel stat hg-tile" style="--accent:var(--${accent})">
+    <span class="stat__label">${label}</span>
+    <span class="hg-field">
+      <input class="horas-global-input" data-hg="${fieldKey}" type="number" min="0" inputmode="numeric" value="${val}" aria-label="${label}">
+      ${unidade ? `<span class="hg-unit">${unidade}</span>` : ''}${ico('edit')}
+    </span>
+  </label>`;
+}
+// destaque: horas confirmadas contra as previstas pelo curso
+function renderHorasHero(){
+  const el = document.getElementById('horasHero');
+  if(!el) return;
+  const conf = Number(STATE.horasGlobal.confirmadas) || 0, prev = Number(STATE.horasGlobal.previstas) || 0;
+  if(!prev){
+    el.innerHTML = `<div class="hh-top"><div><div class="hh-num"><b>${conf}</b>horas confirmadas</div>
+      <div class="hh-sub">Preencha as horas previstas do curso, logo abaixo, para ver quanto falta.</div></div></div>`;
+    return;
+  }
+  const pct = Math.min(100, Math.round(conf / prev * 100));
+  const faltam = Math.max(0, prev - conf);
+  el.innerHTML = `<div class="hh-top">
+      <div><div class="hh-num"><b>${conf}</b>de ${prev} horas confirmadas</div>
+        <div class="hh-sub">${faltam ? `Faltam ${faltam} ${faltam === 1 ? 'hora' : 'horas'} para completar` : 'Você já completou as horas do curso!'}</div></div>
+      <span class="hh-pct">${pct}%</span>
+    </div>
+    <div class="hh-bar" role="progressbar" aria-label="Horas confirmadas" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><i style="width:${pct}%"></i></div>`;
 }
 function renderHorasComp(){
+  renderHorasHero();
   const resumo = document.getElementById('horasResumo');
   if(resumo){
     resumo.innerHTML = `
-      ${horasEditCard('confirmadas', 'Nº de horas confirmadas', 'green')}
-      ${horasEditCard('consumidas',  'Nº de horas consumidas',  'blue')}
-      ${horasEditCard('previstas',   'Nº de horas previstas',   'amber')}
-      ${horasEditCard('creditos',    'Nº de créditos',          'gray', 'créditos')}
+      ${horasEditCard('confirmadas', 'Horas confirmadas', 'green')}
+      ${horasEditCard('consumidas',  'Horas consumidas',  'blue')}
+      ${horasEditCard('previstas',   'Horas previstas',   'amber')}
+      ${horasEditCard('creditos',    'Créditos',          'gray', '')}
     `;
     resumo.querySelectorAll('.horas-global-input').forEach(inp => {
-      inp.addEventListener('focus', () => { inp.style.borderBottomColor = 'var(--blue)'; });
+      let timer = null;
       const saveHorasGlobal = async () => {
-        inp.style.borderBottomColor = 'var(--line-soft)';
-        STATE.horasGlobal[inp.dataset.hg] = Number(inp.value) || 0;
+        clearTimeout(timer);
+        STATE.horasGlobal[inp.dataset.hg] = Math.max(0, Number(inp.value) || 0);
         await storeSet('horas_global', STATE.horasGlobal);
+        renderHorasHero();
       };
+      // salva enquanto digita (quem fecha o app com o campo aberto não perde o valor) e ao sair do campo
+      inp.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(saveHorasGlobal, 500); });
       inp.addEventListener('blur', saveHorasGlobal);
       inp.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); inp.blur(); } });
     });
   }
 
-  const tbody = document.getElementById('horasBody');
-  if(!tbody) return;
+  const lista = document.getElementById('horasBody');
+  if(!lista) return;
   const list = STATE.horasComp;
-  tbody.innerHTML = list.length ? list.map(hc => {
+  const somaTotal = list.reduce((s, hc) => s + (Number(hc.total) || 0), 0);
+  const somaVal = list.reduce((s, hc) => s + Math.min(Number(hc.validadas) || 0, Number(hc.total) || Infinity), 0);
+  const cont = document.getElementById('horasContagem');
+  if(cont) cont.textContent = list.length ? `${list.length} ${list.length === 1 ? 'atividade' : 'atividades'}, ${somaVal} de ${somaTotal} h validadas` : '';
+  lista.innerHTML = list.length ? list.map(hc => {
     const st = horasStatus(hc);
-    const pct = hc.total ? Math.min(100, Math.round(hc.validadas/hc.total*100)) : 0;
-    return `<tr>
-      <td class="mono" style="font-weight:600;">${esc(hc.sigla)}</td>
-      <td>${esc(hc.nome)}</td>
-      <td class="mono" data-label="Total">${Number(hc.total) || 0}h</td>
-      <td data-label="Validadas"><input class="cell-input" data-hc-val="${esc(hc.id)}" type="number" min="0" inputmode="numeric" value="${Number(hc.validadas) || 0}" style="width:70px;" aria-label="Horas validadas de ${esc(hc.nome)}"> <span style="font-size:11px;color:var(--text-faint);">(${pct}%)</span></td>
-      <td><span class="led led-${st.cls}"></span> <span class="badge badge-${st.cls}">${st.label}</span></td>
-      <td><button class="btn btn-ghost btn-sm" data-del-hc="${esc(hc.id)}" title="Remover" aria-label="Remover ${esc(hc.nome)}">✕</button></td>
-    </tr>`;
-  }).join('') : `<tr><td colspan="6"><div class="empty">Nenhuma atividade cadastrada</div></td></tr>`;
+    const total = Number(hc.total) || 0, val = Number(hc.validadas) || 0;
+    const pct = total ? Math.min(100, Math.round(val / total * 100)) : 0;
+    return `<div class="hc-row" style="--c:var(--${st.cls})">
+      <div class="hc-main"><b title="${esc(hc.nome)}">${esc(hc.nome)}</b><span>${esc(hc.sigla)}</span></div>
+      <div class="hc-prog">
+        <div class="hc-bar"><i style="width:${pct}%"></i></div>
+        <span class="hc-val"><input data-hc-val="${esc(hc.id)}" type="number" min="0" inputmode="numeric" value="${val}" aria-label="Horas validadas de ${esc(hc.nome)}"> de ${total} h validadas</span>
+      </div>
+      <span class="badge badge-${st.cls}">${st.label}</span>
+      <button class="hc-del" data-del-hc="${esc(hc.id)}" title="Remover" aria-label="Remover ${esc(hc.nome)}">✕</button>
+    </div>`;
+  }).join('') : `<div class="empty">Nenhuma atividade ainda. Toque em <b>+ Adicionar atividade</b>.</div>`;
 
   document.querySelectorAll('[data-hc-val]').forEach(inp => {
     inp.addEventListener('change', async () => {
@@ -5525,18 +5593,33 @@ function renderHorasComp(){
 }
 
 // ---- Horas: adicionar atividade ----
-document.getElementById('hcValidadas').addEventListener('keydown', e => {
-  if(e.key === 'Enter') document.getElementById('btnAddHora').click();
+// o formulário só aparece no "+ Adicionar atividade"; o código é opcional, como no Histórico
+document.getElementById('btnNovaHora').addEventListener('click', () => {
+  const p = document.getElementById('horasAddPanel');
+  p.hidden = !p.hidden;
+  document.getElementById('hcMsg').textContent = '';
+  if(!p.hidden) document.getElementById('hcNome').focus();
 });
+document.getElementById('hcCancel').addEventListener('click', () => { document.getElementById('horasAddPanel').hidden = true; });
+['hcNome', 'hcSigla', 'hcTotal', 'hcValidadas'].forEach(id => document.getElementById(id).addEventListener('keydown', e => {
+  if(e.key === 'Enter'){ e.preventDefault(); document.getElementById('btnAddHora').click(); }
+}));
 document.getElementById('btnAddHora').addEventListener('click', async () => {
-  const sigla = document.getElementById('hcSigla').value.trim().toUpperCase();
-  const nome = document.getElementById('hcNome').value.trim();
-  const total = Math.max(0, Number(document.getElementById('hcTotal').value)||0);
-  const validadas = Math.max(0, Number(document.getElementById('hcValidadas').value)||0);
-  if(!sigla||!nome) return;
+  const msg = t => { document.getElementById('hcMsg').textContent = t; };
+  const nomeInp = document.getElementById('hcNome');
+  const {codigo, nome} = separarCodigo(nomeInp.value);
+  if(!nome){ msg('Escreva o nome da atividade.'); nomeInp.focus(); return; }
+  const total = Math.max(0, Number(document.getElementById('hcTotal').value) || 0);
+  if(!total){ msg('Informe o total de horas da atividade.'); document.getElementById('hcTotal').focus(); return; }
+  const validadas = Math.max(0, Number(document.getElementById('hcValidadas').value) || 0);
+  const sigla = (document.getElementById('hcSigla').value.trim() || codigo).toUpperCase().replace(/\s+/g, '')
+    || siglaNova(nome, s => STATE.horasComp.some(h => h.sigla === s));
   STATE.horasComp.push({id:'hc-'+Date.now(), sigla, nome, total, validadas});
   await storeSet('horas_comp', STATE.horasComp);
-  ['hcSigla','hcNome','hcTotal','hcValidadas'].forEach(id=>document.getElementById(id).value='');
+  ['hcSigla','hcNome','hcTotal','hcValidadas'].forEach(id => { document.getElementById(id).value = ''; });
+  msg('');
+  nomeInp.focus();
+  showToast(`${nome} adicionada`, 'success');
   renderHorasComp();
 });
 
