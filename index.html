@@ -6333,12 +6333,13 @@ function abrirFimSemestre(){
     const nota = mp ? Math.round(mp.media * 10) / 10 : (typeof item.nota === 'number' ? item.nota : null);
     finais[s] = {nota, res: nota === null || nota >= min ? 'passei' : 'nao', manual: false};
   });
+  // disciplina nova criada no passo 2 vai para o semestre seguinte do curso, se ele existir
   const prox = histSemestreAtual() + 1;
-  const bloco = buildSemestresCurriculares().find(b => b.numero === prox);
+  const temProx = buildSemestresCurriculares().some(b => b.numero === prox);
   SEM = {
-    passo: 1, finais, novas: [], periodoNovo: prox,
-    // as disciplinas do semestre seguinte do curso já vêm marcadas
-    proximas: bloco ? bloco.disciplinas.filter(d => situacao(d) !== 'Aprovado' && !atuais.includes(d.sigla)).map(d => d.sigla) : [],
+    passo: 1, finais, novas: [], periodoNovo: temProx ? prox : null,
+    // nada vem marcado: quem tem a grade irregular cursa disciplinas de vários semestres, então a pessoa escolhe
+    proximas: [],
     rotulo: proximoRotulo(STATE.config.semestre),
     limpar: {faltas: true, provas: true, tarefas: true, horario: true, lab: true},
   };
@@ -6395,7 +6396,7 @@ function renderFimSemestre(){
     const item = (s, nome) => `<label class="wiz-check-item"><input type="checkbox" data-prox="${esc(s)}"${SEM.proximas.includes(s) ? ' checked' : ''}><span>${esc(nome)}</span></label>`;
     body.innerHTML = passos(2) + `<p class="wizard-step-title">E o próximo semestre?</p>
       <div class="wiz-field"><label for="semRotulo">Nome do novo semestre</label><input id="semRotulo" value="${esc(SEM.rotulo)}" placeholder="Ex.: 1º semestre de 2027" autocomplete="off"></div>
-      <p class="help-text" style="margin:4px 0 12px;">Marque as disciplinas que você vai cursar.${SEM.proximas.length ? ` As do ${SEM.periodoNovo}º semestre já vêm marcadas.` : ''}</p>
+      <p class="help-text" style="margin:4px 0 12px;">Marque as disciplinas que você vai cursar no próximo semestre. A lista mostra só o que você ainda não fez, separado por semestre do curso.</p>
       ${blocos.map(({b, itens}) => `<div class="wiz-sem-block"><div class="wiz-sem-head"><span>${tituloSemestre(b, blocos.length === 1)}</span></div>
         <div class="wiz-check-grid">${itens.map(d => item(d.sigla, d.disciplina)).join('')}</div></div>`).join('')}
       ${SEM.novas.length ? `<div class="wiz-sem-block"><div class="wiz-sem-head"><span>Novas</span></div><div class="wiz-check-grid">${SEM.novas.map(n => item(n.sigla, n.disciplina)).join('')}</div></div>` : ''}
@@ -6469,7 +6470,8 @@ async function encerrarSemestre(){
     delete STATE.metasNotas[s];
   });
   // 2. disciplinas novas, no semestre seguinte do curso
-  SEM.novas.forEach(n => STATE.historicoCustom.push({sigla: n.sigla, disciplina: n.disciplina, ch: null, nota: null, semestre: null, periodo: SEM.periodoNovo, _custom: true}));
+  SEM.novas.forEach(n => STATE.historicoCustom.push(Object.assign({sigla: n.sigla, disciplina: n.disciplina, ch: null, nota: null, semestre: null, _custom: true},
+    SEM.periodoNovo ? {periodo: SEM.periodoNovo} : {})));
   STATE.historico = montarHistorico();
   // 3. o próximo semestre, na ordem do curso
   const ordem = STATE.historico.map(d => d.sigla);
