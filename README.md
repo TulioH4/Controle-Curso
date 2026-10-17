@@ -53,6 +53,7 @@ Atualizações chegam sozinhas: a cada nova versão publicada, o app instalado s
 - Calendário de provas: tocar num dia já abre o formulário com a data
 - Provas, tarefas e entregas exportadas para a agenda do celular (arquivo .ics, com aviso na véspera), ou uma prova por vez no Google Agenda
 - Grade de horário semanal (no celular, um dia por vez, começando por hoje)
+- **Montar a grade do semestre** pelo PDF de horários da faculdade (no formato do Inatel), lido no próprio aparelho: o app mostra as turmas de cada disciplina, avisa dos choques e monta as combinações sem choque, da que usa menos dias no campus para a que usa mais. Ou monta a melhor grade sozinho: o máximo de disciplinas que faltam nos horários em que você pode ter aula, começando pelas dos primeiros períodos
 - Timer Pomodoro de 25 ou 50 minutos, com pausa longa a cada 4 rodadas e registro das sessões por disciplina; segue contando com a tela bloqueada ou o app fechado
 
 **Do jeito de um app**

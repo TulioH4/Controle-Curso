@@ -2018,6 +2018,105 @@
   .provas-semnota{font-size:11px; font-weight:600; color:var(--amber); text-transform:none; letter-spacing:0;}
   .provas-semnota:empty{display:none;}
   .link-btn{border:none; background:none; padding:0; font:inherit; color:var(--blue); font-weight:600; cursor:pointer; text-decoration:underline; text-underline-offset:3px;}
+
+  /* ===== MONTAR A GRADE (PDF de horários) ===== */
+  :root{--gc1:#0A84FF; --gc2:#BF5AF2; --gc3:#40C8E0; --gc4:#FF9F0A; --gc5:#9BE15D; --gc6:#7D7AFF; --gc7:#30D158; --gc8:#C69C6D; --gc9:#64D2FF; --gc10:#FFD60A;}
+  html[data-theme="light"]{--gc1:#007AFF; --gc2:#AF52DE; --gc3:#0E9F8F; --gc4:#E8590C; --gc5:#5C940D; --gc6:#5856D6; --gc7:#2F9E44; --gc8:#8F5B2E; --gc9:#1C7ED6; --gc10:#B08900;}
+  .gm-modal{max-width:1080px; max-height:92vh;}
+  .gm-modal [hidden]{display:none !important;}
+  .gm-fonte{display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:12px 14px; border-radius:16px; background:var(--panel-2); border:1px solid var(--line-soft);}
+  .gm-fonte__ic{width:40px; height:40px; border-radius:11px; display:grid; place-items:center; flex-shrink:0; font-size:10.5px; font-weight:700; letter-spacing:.04em; color:var(--red); background:var(--red-dim);}
+  .gm-fonte__txt{flex:1; min-width:200px; display:flex; flex-direction:column; gap:2px;}
+  .gm-fonte__txt b{font-size:14px; font-weight:650; color:var(--text);}
+  .gm-fonte__txt span{font-size:12.5px; color:var(--text-dim);}
+  .gm-msg{flex-basis:100%; margin:0; font-size:12.5px; color:var(--text-dim);}
+  .gm-msg.is-erro{color:var(--red);}
+  .gm-vazio{display:flex; flex-direction:column; align-items:center; text-align:center; gap:8px; padding:36px 20px; border-radius:18px; border:1.5px dashed var(--line);}
+  .gm-vazio > b{font-size:15px; color:var(--text);}
+  .gm-vazio > span:not(.gm-fonte__ic){max-width:48ch; font-size:13px; color:var(--text-dim); line-height:1.5;}
+  .gm-vazio .btn{margin-top:6px; display:inline-flex; align-items:center; gap:6px;}
+  .gm-vazio .btn .i{width:16px; height:16px;}
+  .gm-turnos{display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:16px;}
+  .gm-turnos > span{font-size:13px; color:var(--text-dim); margin-right:4px;}
+  .gm-turno{min-height:34px; padding:0 13px; border-radius:999px; border:1px solid var(--line); background:var(--panel-2); color:var(--text-dim); font:inherit; font-size:13px; cursor:pointer;}
+  .gm-turno[aria-pressed="true"]{background:var(--blue-dim); border-color:var(--blue); color:var(--blue); font-weight:600;}
+  .gm-auto{margin-top:14px;}
+  .gm-limite{display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--text-dim);}
+  .gm-limite select{background:var(--panel-2); border:1px solid var(--line); border-radius:10px; color:var(--text); padding:6px 8px; font:inherit; font-size:12.5px;}
+  .gm-sec{flex-wrap:wrap;}
+  .gm-sec::after{order:1;}
+  .gm-sec__fim{order:2; display:flex; align-items:center; gap:8px; flex-wrap:wrap; text-transform:none; letter-spacing:0; font-family:var(--sans); font-size:12px; color:var(--text-dim);}
+  .gm-disc-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:8px;}
+  .gm-disc{display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--r); background:var(--panel-2); border:1px solid var(--line); cursor:pointer; min-width:0;}
+  .gm-disc input{accent-color:var(--blue); width:17px; height:17px; flex-shrink:0; margin:0;}
+  .gm-disc__n{flex:1; min-width:0; display:flex; flex-direction:column; gap:1px;}
+  .gm-disc__n b{font-size:13px; font-weight:600; color:var(--text); line-height:1.3; overflow:hidden; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2;}
+  .gm-disc__n small{font-size:11.5px; color:var(--text-faint);}
+  .gm-disc .badge{flex-shrink:0;}
+  .gm-disc.st-falta .badge{background:var(--blue-dim); color:var(--blue);}
+  .gm-disc.st-cursando .badge{background:var(--amber-dim); color:var(--amber);}
+  .gm-disc.st-feita .badge{background:var(--green-dim); color:var(--green);}
+  .gm-disc.st-feita, .gm-disc.st-fora{opacity:.75;}
+  .gm-mais{margin-top:12px;}
+  .gm-mais summary{cursor:pointer; font-size:12.5px; font-weight:600; color:var(--text-dim); padding:4px 0;}
+  .gm-mais[open] summary{margin-bottom:8px;}
+  .gm-pager{display:flex; align-items:center; gap:6px; font-variant-numeric:tabular-nums;}
+  .gm-pager button{width:30px; height:30px; border-radius:50%; border:1px solid var(--line); background:var(--panel-2); color:var(--text); font-size:16px; line-height:1; cursor:pointer;}
+  .gm-aviso{display:flex; gap:10px; align-items:flex-start; padding:11px 14px; border-radius:14px; font-size:13px; line-height:1.5; color:var(--text); margin-bottom:12px;}
+  .gm-aviso::before{font-weight:800; flex-shrink:0;}
+  .gm-aviso.is-ok{background:var(--green-dim);}
+  .gm-aviso.is-ok::before{content:"✓"; color:var(--green);}
+  .gm-aviso.is-erro{background:var(--red-dim);}
+  .gm-aviso.is-erro::before{content:"!"; color:var(--red);}
+  .gm-aviso.is-info{background:var(--blue-dim);}
+  .gm-aviso.is-info::before{content:"i"; color:var(--blue); font-style:italic;}
+  .gm-montar{display:grid; grid-template-columns:minmax(0, 330px) minmax(0, 1fr); gap:12px; align-items:start;}
+  .gm-turmas{display:flex; flex-direction:column; gap:14px;}
+  .gm-tdisc{display:flex; flex-direction:column; gap:7px;}
+  .gm-tdisc + .gm-tdisc{padding-top:13px; border-top:1px solid var(--line-soft);}
+  .gm-tdisc__h{display:flex; align-items:center; gap:8px; min-width:0;}
+  .gm-dot{width:10px; height:10px; border-radius:3px; background:var(--c); flex-shrink:0;}
+  .gm-tdisc__h b{font-size:13px; font-weight:650; color:var(--text); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .gm-tdisc__h small{font-size:11.5px; color:var(--text-faint); flex-shrink:0;}
+  .gm-opts{display:flex; flex-wrap:wrap; gap:6px;}
+  .gm-opts > span{width:100%; font-size:11px; color:var(--text-faint);}
+  .gm-op{display:inline-flex; align-items:baseline; gap:6px; padding:6px 10px; border-radius:10px; border:1px solid var(--line-soft); background:var(--panel-2); color:var(--text-dim); font:inherit; font-size:12px; cursor:pointer; text-align:left;}
+  .gm-op b{color:var(--text); font-size:12.5px;}
+  .gm-op.is-on{background:color-mix(in srgb, var(--c) 18%, transparent); border-color:var(--c); color:var(--text);}
+  .gm-op.is-choque{border-color:color-mix(in srgb, var(--red) 60%, transparent);}
+  .gm-op.is-choque::after{content:"choca"; font-size:10.5px; font-weight:700; color:var(--red);}
+  .gm-op.is-fora{opacity:.45;}
+  .gm-nota{margin:0; font-size:11.5px; color:var(--text-faint); line-height:1.45;}
+  .gm-nota.is-erro{color:var(--red);}
+  .gm-semana{padding:10px; overflow-x:auto;}
+  .gm-semana .empty{padding:40px 16px;}
+  .gm-grade{display:grid; gap:3px; min-width:440px;}
+  .gm-gh{font-size:11.5px; font-weight:600; color:var(--text-dim); text-align:center; padding:2px 0 5px;}
+  .gm-gt{font-family:var(--mono); font-size:10.5px; color:var(--text-faint); text-align:right; padding:7px 5px 0 0;}
+  .gm-gt.is-pausa{border-top:1px dashed var(--line);}
+  .gm-cel{min-height:42px; border-radius:8px; background:var(--panel-2); display:flex; flex-direction:column; gap:2px; padding:2px;}
+  .gm-cel.is-pausa{margin-top:6px;}
+  .gm-cel.is-choque{background:var(--red-dim); box-shadow:inset 0 0 0 1.5px var(--red);}
+  .gm-bl{flex:1; min-width:0; border-radius:6px; padding:4px 6px; background:color-mix(in srgb, var(--c) 22%, transparent); box-shadow:inset 3px 0 0 var(--c); font-size:11px; line-height:1.25;}
+  .gm-bl b{display:block; font-weight:700; color:var(--text);}
+  .gm-bl span{display:block; color:var(--text-dim); font-size:10.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .gm-res{width:100%; border-collapse:collapse; font-size:13px;}
+  .gm-res th{font-family:var(--mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--text-faint); font-weight:500; text-align:left; padding:0 10px 8px 0;}
+  .gm-res td{padding:9px 10px 9px 0; border-top:1px solid var(--line-soft); vertical-align:top; color:var(--text);}
+  .gm-res .mono{font-family:var(--mono); font-size:12px; white-space:nowrap;}
+  .gm-dim{color:var(--text-dim);}
+  @media (max-width:880px){ .gm-montar{grid-template-columns:minmax(0,1fr);} }
+  @media (max-width:640px){
+    .gm-auto .btn{width:100%;}
+    .gm-res, .gm-res tbody{display:block;}
+    .gm-res thead{display:none;}
+    .gm-res tr{display:flex; flex-wrap:wrap; column-gap:14px; row-gap:2px; padding:9px 0; border-top:1px solid var(--line-soft);}
+    .gm-res tr:first-child{border-top:none; padding-top:0;}
+    .gm-res td{border:none; padding:0; order:2;}
+    .gm-res td:first-child{flex-basis:100%; order:0;}
+    .gm-res .mono{white-space:normal; flex-basis:100%; order:1;}
+    .gm-res td[data-l]::before{content:attr(data-l) " "; color:var(--text-faint); font-size:11.5px;}
+  }
   /* aulas de hoje: a aula que passou fica apagada, mas o botão Faltei continua legível */
   .row-item.past{opacity:1;}
   .row-item.past > .time, .row-item.past > .info{opacity:.45;}
@@ -2523,8 +2622,12 @@
     <section class="tab" id="tab-horario">
       <div class="screen__header">
         <h2>Horário</h2>
-        <button class="btn btn-sm" id="btnEditarHorario">Editar grade</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-sm btn-primary" id="btnMontarGrade">Montar pelo PDF</button>
+          <button class="btn btn-sm" id="btnEditarHorario">Editar grade</button>
+        </div>
       </div>
+      <div id="horarioVazio"></div>
       <div class="section-label">Grade de aulas</div>
       <div class="week-grid" id="weekGrid"></div>
       <div class="hday" id="horarioDia"></div>
@@ -2972,6 +3075,57 @@
   </div>
 </div>
 
+<!-- MODAL: montar a grade do semestre pelo PDF de horários -->
+<div class="modal-overlay" id="modalGrade">
+  <div class="modal gm-modal" role="dialog" aria-modal="true" aria-labelledby="gmTitulo">
+    <div class="modal-head">
+      <h3 id="gmTitulo">Montar a grade do semestre</h3>
+      <button class="btn btn-ghost" id="gmFechar" style="padding:4px 8px; font-size:16px;" aria-label="Fechar">✕</button>
+    </div>
+    <div class="modal-body" id="gmBody">
+      <input type="file" id="gmPdf" accept="application/pdf,.pdf" hidden>
+      <div id="gmFonte"></div>
+      <div id="gmConteudo" hidden>
+        <div class="gm-turnos" role="group" aria-label="Horários em que você pode ter aula">
+          <span>Posso ter aula</span>
+          <button type="button" class="gm-turno" data-gturno="manha" aria-pressed="false">de manhã</button>
+          <button type="button" class="gm-turno" data-gturno="tarde" aria-pressed="false">à tarde</button>
+          <button type="button" class="gm-turno" data-gturno="noite" aria-pressed="true">à noite</button>
+          <button type="button" class="gm-turno" data-gturno="sabado" aria-pressed="true">no sábado</button>
+        </div>
+        <div class="notif-agenda gm-auto">
+          <span class="notif-agenda__ic" data-ico="magic"></span>
+          <div class="notif-agenda__txt"><b>Deixe o app escolher</b><span>Ele marca o máximo de disciplinas que faltam, sem choque, nos horários acima, começando pelas dos primeiros períodos, e escolhe as turmas.</span></div>
+          <label class="gm-limite"><span>Até</span><select id="gmLimite" aria-label="Quantas disciplinas no máximo">
+            <option value="0">o máximo</option><option value="3">3 disciplinas</option><option value="4">4 disciplinas</option><option value="5">5 disciplinas</option>
+            <option value="6">6 disciplinas</option><option value="7">7 disciplinas</option><option value="8">8 disciplinas</option>
+          </select></label>
+          <button type="button" class="btn btn-sm btn-primary" id="gmMelhor">Montar a melhor grade</button>
+        </div>
+        <div class="section-label gm-sec"><span>1. O que você quer cursar</span><span class="gm-sec__fim" id="gmConta"></span></div>
+        <div id="gmLista"></div>
+        <div class="section-label gm-sec" id="gmPasso2"><span>2. Turmas</span>
+          <span class="gm-sec__fim">
+            <span class="gm-pager" id="gmPager" hidden><button type="button" id="gmOpAnt" aria-label="Opção anterior">‹</button><span id="gmOpLabel"></span><button type="button" id="gmOpProx" aria-label="Próxima opção">›</button></span>
+            <button type="button" class="btn btn-sm" id="gmSozinho">Montar sozinho</button>
+          </span>
+        </div>
+        <div class="gm-aviso" id="gmAviso" role="status" hidden></div>
+        <div class="gm-montar">
+          <div class="panel panel--pad gm-turmas" id="gmTurmas"></div>
+          <div class="panel gm-semana" id="gmSemana" aria-label="A semana"></div>
+        </div>
+        <div class="section-label gm-sec"><span>3. Resumo</span><span class="gm-sec__fim"><button type="button" class="link-btn" id="gmCopiar" hidden>Copiar</button></span></div>
+        <div class="panel panel--pad" id="gmResumo"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" id="gmFechar2">Fechar</button>
+      <button class="btn btn-primary" id="gmUsar" hidden>Usar este horário</button>
+    </div>
+  </div>
+</div>
+
 <!-- Datalist para autocomplete de disciplinas -->
 <datalist id="discSuggestList"></datalist>
 
@@ -3113,6 +3267,8 @@ let STATE = {
   horasGlobal: {confirmadas:0, consumidas:0, previstas:0, creditos:0},
   aulasCustom: null,   // null = usa DATA.aulas; array = override do usuário
   turmasCustom: null,  // null = usa DATA.turmas; obj = override do usuário
+  gradeOferta: null,   // o PDF de horários lido (ver "Montar a grade")
+  gradePlano: null,    // o que a pessoa marcou no montador
   tema: 'dark',
   lembretes: [],       // [{id, text, createdAt}]
   notasParciais: {},   // {sigla: [{label, valor, peso}]}
@@ -3257,6 +3413,8 @@ async function init(opts = {}){
   STATE.labs = await storeGet('labs', {});
   STATE.estudos = await storeGet('estudos_materiais', []);
   STATE.semestres = await storeGet('semestres', []); // semestres encerrados (ver "Fim de semestre")
+  STATE.gradeOferta = await storeGet('grade_oferta', null);
+  STATE.gradePlano = await storeGet('grade_plano', null);
   STATE.geminiKey = await storeGet('gemini_key', '');
   STATE.geminiModel = await storeGet('gemini_model', '');
   applyTheme(STATE.tema);
@@ -3371,6 +3529,7 @@ const ICONS = {
   keyboard:'<rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6.5 10h.01M10 10h.01M14 10h.01M17.5 10h.01M7.5 14h9"/>',
   calendar:'<rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
   cloud:'<path d="M7.2 18.5h10.3a4 4 0 0 0 .5-7.97A6 6 0 0 0 6.4 9.2a4.7 4.7 0 0 0 .8 9.3z"/>',
+  magic:'<path d="m4 20 10-10"/><path d="m12.5 8.5 3 3"/><path d="M17 3.5v3M15.5 5h3M19.5 10v2.5M18.25 11.25h2.5M9 3.5v2M8 4.5h2"/>',
 };
 function ico(name, cls){
   return `<svg class="i${cls?' '+cls:''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]||''}</svg>`;
@@ -3567,6 +3726,7 @@ function closeMoreSheet(){
     horas_comp:'horasComp', horas_global:'horasGlobal', aulas_custom:'aulasCustom', turmas_custom:'turmasCustom',
     notas_parciais:'notasParciais', metas_notas:'metasNotas', lembretes:'lembretes', pom_sessions:'pomSessions',
     disc_notes:'discNotes', estudos_materiais:'estudos', semestres:'semestres',
+    grade_oferta:'gradeOferta', grade_plano:'gradePlano',
   };
   const SYNC_KEYS = new Set([...Object.keys(CAMPOS), 'config', 'tema', 'labs']);
   // várias chaves mudam juntas (o "Faltei" grava faltas e o registro; a nuvem traz várias de uma vez):
@@ -4138,6 +4298,13 @@ function renderHorario(){
   });
   document.getElementById('weekGrid').innerHTML = html;
   renderHorarioDia(real, nowHM);
+  document.getElementById('horarioVazio').innerHTML = real.length ? '' : `<div class="notif-agenda" style="margin:0 0 18px;">
+      <span class="notif-agenda__ic">${ico('calendar')}</span>
+      <div class="notif-agenda__txt"><b>Monte o horário pelo PDF da faculdade</b><span>Envie o PDF de horários do semestre, marque as disciplinas e o app mostra as turmas que não chocam. Ou digite as aulas em "Editar grade".</span></div>
+      <button type="button" class="btn btn-sm btn-primary" id="btnMontarGradeVazio">Montar pelo PDF</button>
+    </div>`;
+  const vazio = document.getElementById('btnMontarGradeVazio');
+  if(vazio) vazio.onclick = abrirGrade;
 
   const asyncSubjects = getAulas().filter(a => !a.inicio || a.inicio === '—');
   document.getElementById('asyncWrap').style.display = asyncSubjects.length ? '' : 'none';
@@ -5925,6 +6092,7 @@ document.addEventListener('keydown', e => {
   if(document.getElementById('modalHorario').classList.contains('open')) closeModalHorario();
   else if(document.getElementById('modalTurmas').classList.contains('open')) closeModalTurmas();
   else if(document.getElementById('modalAgenda').classList.contains('open')) fecharModalAgenda();
+  else if(document.getElementById('modalGrade').classList.contains('open')) fecharGrade();
   else if(document.getElementById('modalSemestre').classList.contains('open') && SEM && SEM.passo !== 3) fecharFimSemestre();
 });
 
@@ -6394,14 +6562,23 @@ function renderFimSemestre(){
       .map(b => ({b, itens: b.disciplinas.filter(d => !passou(d.sigla) && (situacao(d) !== 'Aprovado' || atuais.includes(d.sigla)))}))
       .filter(x => x.itens.length);
     const item = (s, nome) => `<label class="wiz-check-item"><input type="checkbox" data-prox="${esc(s)}"${SEM.proximas.includes(s) ? ' checked' : ''}><span>${esc(nome)}</span></label>`;
+    // a grade montada pelo PDF (as que estão nesta lista e ainda não foram marcadas)
+    const plano = ((STATE.gradePlano || {}).escolhidas || []).filter(s => !SEM.proximas.includes(s) && blocos.some(x => x.itens.some(d => d.sigla === s)));
     body.innerHTML = passos(2) + `<p class="wizard-step-title">E o próximo semestre?</p>
       <div class="wiz-field"><label for="semRotulo">Nome do novo semestre</label><input id="semRotulo" value="${esc(SEM.rotulo)}" placeholder="Ex.: 1º semestre de 2027" autocomplete="off"></div>
       <p class="help-text" style="margin:4px 0 12px;">Marque as disciplinas que você vai cursar no próximo semestre. A lista mostra só o que você ainda não fez, separado por semestre do curso.</p>
+      ${plano.length ? `<div class="notif-agenda" style="margin:0 0 14px;">
+        <span class="notif-agenda__ic">${ico('calendar')}</span>
+        <div class="notif-agenda__txt"><b>Você montou uma grade com ${plano.length} ${plano.length === 1 ? 'disciplina' : 'disciplinas'}</b><span>${esc(plano.map(nomeDaDisciplina).join(', '))}</span></div>
+        <button type="button" class="btn btn-sm" id="semUsarPlano">Marcar essas</button>
+      </div>` : ''}
       ${blocos.map(({b, itens}) => `<div class="wiz-sem-block"><div class="wiz-sem-head"><span>${tituloSemestre(b, blocos.length === 1)}</span></div>
         <div class="wiz-check-grid">${itens.map(d => item(d.sigla, d.disciplina)).join('')}</div></div>`).join('')}
       ${SEM.novas.length ? `<div class="wiz-sem-block"><div class="wiz-sem-head"><span>Novas</span></div><div class="wiz-check-grid">${SEM.novas.map(n => item(n.sigla, n.disciplina)).join('')}</div></div>` : ''}
       <form class="sem-add" id="semAddForm"><input id="semAddNome" placeholder="Outra disciplina que não está na lista" autocomplete="off" aria-label="Nome da disciplina nova"><button type="submit" class="btn btn-sm">Adicionar</button></form>`;
     document.getElementById('semRotulo').addEventListener('input', e => { SEM.rotulo = e.target.value; });
+    const usarPlano = document.getElementById('semUsarPlano');
+    if(usarPlano) usarPlano.onclick = () => { SEM.proximas = [...new Set([...SEM.proximas, ...plano])]; renderFimSemestre(); };
     body.querySelectorAll('[data-prox]').forEach(cb => cb.addEventListener('change', () => {
       SEM.proximas = SEM.proximas.filter(s => s !== cb.dataset.prox);
       if(cb.checked) SEM.proximas.push(cb.dataset.prox);
@@ -6444,9 +6621,13 @@ function renderFimSemestre(){
   const n = (STATE.config.disciplinasAtuais || []).length;
   body.innerHTML = `<p class="wizard-step-title">Pronto, semestre encerrado!</p>
     <p class="help-text" style="margin:0 0 14px;">As notas finais foram para o Histórico${STATE.config.semestre ? ` e o ${esc(STATE.config.semestre)} começou` : ' e o novo semestre começou'} com ${n} ${n === 1 ? 'disciplina' : 'disciplinas'}.
-      Agora monte o horário de aulas para o Painel e o botão "Faltei" funcionarem.</p>
-    <button type="button" class="btn btn-primary" id="semHorario">Montar o horário agora</button>`;
-  document.getElementById('semHorario').onclick = () => { fecharFimSemestre(); switchTab('horario'); openModalHorario(); };
+      Agora monte o horário de aulas para o Painel e o botão "Faltei" funcionarem: pelo PDF de horários da faculdade ou digitando as aulas.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button type="button" class="btn btn-primary" id="semHorario">Montar pelo PDF de horários</button>
+      <button type="button" class="btn" id="semHorarioMao">Digitar as aulas</button>
+    </div>`;
+  document.getElementById('semHorario').onclick = () => { fecharFimSemestre(); switchTab('horario'); abrirGrade(); };
+  document.getElementById('semHorarioMao').onclick = () => { fecharFimSemestre(); switchTab('horario'); openModalHorario(); };
 }
 async function encerrarSemestre(){
   const atuais = [...(STATE.config.disciplinasAtuais || [])];
@@ -6552,6 +6733,531 @@ document.getElementById('semAvancar').addEventListener('click', async e => {
   SEM.passo++;
   renderFimSemestre();
   document.getElementById('semBody').scrollTop = 0;
+});
+
+// ---------------- montar a grade do semestre (PDF de horários) ----------------
+// A pessoa envia o PDF de horários da faculdade (o do Inatel: dias da semana no topo, horários à
+// esquerda, uma página por período). O PDF é lido aqui no aparelho com o pdf.js e vira a oferta do
+// semestre (grade_oferta). Com ela, o app mostra as turmas de cada disciplina, avisa dos choques e
+// monta combinações sem choque; "Usar este horário" passa as aulas para o Horário e as disciplinas
+// para "cursando". O plano (o que está marcado e as turmas) fica salvo em grade_plano.
+
+// Lê a grade a partir dos textos e posições de cada página: [{itens:[{str,x,top,w}]}] →
+// [{periodo, sigla, turma, dia, hora, semHorario, prof, sala}]
+const lerGradePdf = (function(){
+  const DIAS = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+  const RE_DIA = /^(Segunda|Ter[cç]a|Quarta|Quinta|Sexta|S[aá]bado)/i;
+  const RE_HORA = /^(\d{1,2})h(\d{2})?$/;
+  const RE_COD = /^([A-Z]{1,3}\d{2})(?:\s*-\s*(L\d+|[A-Z]))?(?=\s|$|\/)/;
+  function lerPagina(itens){
+    const txt = itens.map(i => Object.assign({}, i, {str: i.str.trim()})).filter(i => i.str);
+    // colunas: o cabeçalho de cada dia da semana
+    const dias = txt.filter(i => RE_DIA.test(i.str)).sort((a, b) => a.x - b.x).slice(0, 6);
+    if(dias.length < 5) return [];
+    const cx = dias.map(d => d.x + d.w / 2);
+    const passo = (cx[cx.length - 1] - cx[0]) / (cx.length - 1);
+    const coluna = x => { let melhor = -1, dist = Infinity; cx.forEach((c, k) => { const d = Math.abs(x - c); if(d < dist){ dist = d; melhor = k; } }); return dist <= passo * 0.62 ? melhor : -1; };
+    const esquerda = cx[0] - passo / 2;
+    const topoGrade = Math.min(...dias.map(d => d.top));
+    // linhas: os horários à esquerda da grade (o rótulo fica no meio da linha)
+    const horas = txt.filter(i => RE_HORA.test(i.str) && i.x + i.w <= esquerda + 4 && i.top > topoGrade).sort((a, b) => a.top - b.top);
+    if(!horas.length) return [];
+    const periodo = (txt.find(i => /^P\d{1,2}$/.test(i.str) && i.x < esquerda && i.top <= topoGrade + 6) || {}).str || '';
+    // entradas: as linhas que começam com "SIGLA" ou "SIGLA - TURMA" dentro de uma coluna
+    const cods = txt.map(i => ({i, m: RE_COD.exec(i.str)})).filter(o => o.m && o.i.top > topoGrade + 4)
+      .map(o => ({sigla: o.m[1], turma: o.m[2] || '', col: coluna(o.i.x + Math.min(o.i.w, 40) / 2), top: o.i.top}))
+      .filter(c => c.col >= 0);
+    // distância entre duas entradas empilhadas (código + professor), medida na própria página
+    const gaps = [];
+    for(let k = 0; k < 6; k++){
+      const ys = cods.filter(c => c.col === k).map(c => c.top).sort((a, b) => a - b);
+      for(let j = 1; j < ys.length; j++){ const g = ys[j] - ys[j - 1]; if(g > 8 && g < 40) gaps.push(g); }
+    }
+    gaps.sort((a, b) => a - b);
+    const pitch = gaps.length ? gaps[Math.floor(gaps.length / 4)] : 19;
+    const centro = c => c.top + pitch / 4; // meio da entrada (o código é a 1ª das duas linhas)
+    // 1ª passada: o horário mais próximo; 2ª: considerando a altura de cada linha (nº de entradas empilhadas)
+    const maisPerto = (y, peso) => { let melhor = 0, dist = Infinity; horas.forEach((h, k) => { const d = Math.abs(y - h.top) / peso(k); if(d < dist){ dist = d; melhor = k; } }); return melhor; };
+    cods.forEach(c => { c.linha = maisPerto(centro(c), () => 1); });
+    const empilhadas = horas.map((h, k) => Math.max(1, ...[0, 1, 2, 3, 4, 5].map(col => cods.filter(c => c.linha === k && c.col === col).length)));
+    cods.forEach(c => { c.linha = maisPerto(centro(c), k => empilhadas[k] * pitch / 2); });
+    // a linha logo abaixo do código: "Prof. Fulano - SALA" (ou "Cronograma" nos laboratórios)
+    const detalhe = c => {
+      const linha = txt.filter(i => i.top > c.top + 3 && i.top < c.top + pitch * 0.8 && !RE_COD.test(i.str)
+          && Math.abs(i.x + i.w / 2 - cx[c.col]) <= passo / 2)
+        .sort((a, b) => a.x - b.x).map(i => i.str).join(' ').replace(/\s+/g, ' ').trim();
+      // só " - " com espaços separa: a sala também pode ter hífen ("I-6")
+      const partes = linha.split(/\s+-\s+/);
+      if(partes.length < 2) return {prof: '', sala: ''};
+      const sala = partes.pop().replace(/Prof.*$/, '').trim();
+      return {prof: partes.join(' - ').replace(/^Prof\S*\s*(\(s\))?\s*\.?\s*/i, '').trim(), sala: /hor[aá]rio fixo/i.test(sala) ? '' : sala};
+    };
+    return cods.map(c => {
+      const hora = horas[c.linha].str;
+      return Object.assign({periodo, sigla: c.sigla, turma: c.turma, dia: DIAS[c.col], hora, semHorario: c.linha === 0 && hora === '7h'}, detalhe(c));
+    });
+  }
+  return paginas => {
+    const vistos = new Set(), saida = [];
+    paginas.forEach(p => lerPagina(p.itens).forEach(r => {
+      const k = [r.periodo, r.sigla, r.turma, r.dia, r.hora].join('|');
+      if(!vistos.has(k)){ vistos.add(k); saida.push(r); }
+    }));
+    return saida;
+  };
+})();
+
+const GRADE_SLOTS = ['8h','8h50','10h','10h50','13h30','14h20','15h30','16h20','17h30','18h20','19h30','20h20','21h30','22h20'];
+const GRADE_DIA = {Segunda:'Seg', 'Terça':'Ter', Quarta:'Qua', Quinta:'Qui', Sexta:'Sex', 'Sábado':'Sáb'};
+const GRADE_TURNOS = {manha: 'de manhã', tarde: 'à tarde', noite: 'à noite', sabado: 'no sábado'};
+const gMin = h => { const m = /^(\d{1,2})h(\d{2})?$/.exec(h); return m ? Number(m[1]) * 60 + Number(m[2] || 0) : 0; };
+const gHM = min => `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;
+// 17h30 conta como tarde
+const gTurno = (dia, hora) => { const m = gMin(hora); return dia === 'Sábado' ? 'sabado' : m < 12 * 60 ? 'manha' : m < 19 * 60 ? 'tarde' : 'noite'; };
+// registros do PDF → disciplinas com as turmas de teoria e de laboratório
+function gModelo(registros){
+  const disc = new Map();
+  registros.forEach(r => {
+    if(!disc.has(r.sigla)) disc.set(r.sigla, {sigla: r.sigla, periodo: r.periodo, turmas: new Map()});
+    const d = disc.get(r.sigla), id = r.turma || 'única';
+    if(!d.turmas.has(id)) d.turmas.set(id, {id, tipo: /^L\d+$/.test(r.turma) ? 'lab' : 'teoria', slots: [], prof: '', sala: ''});
+    const t = d.turmas.get(id);
+    if(!r.semHorario && !t.slots.some(s => s.dia === r.dia && s.hora === r.hora)) t.slots.push({dia: r.dia, hora: r.hora});
+    if(!t.prof && r.prof) t.prof = r.prof;
+    if(!t.sala && r.sala) t.sala = r.sala;
+  });
+  const porId = (a, b) => a.id.localeCompare(b.id, undefined, {numeric: true});
+  disc.forEach(d => {
+    const ts = [...d.turmas.values()];
+    d.teoria = ts.filter(t => t.tipo === 'teoria' && t.slots.length).sort(porId);
+    d.lab = ts.filter(t => t.tipo === 'lab' && t.slots.length).sort(porId);
+    // laboratório por cronograma: escolhido na matrícula, fora da conta de choque
+    d.labLivre = ts.filter(t => t.tipo === 'lab' && !t.slots.length).sort(porId).map(t => t.id);
+  });
+  return disc;
+}
+const gPermitida = (t, turno) => t.slots.every(s => turno[gTurno(s.dia, s.hora)]);
+// combinações teoria + laboratório de uma disciplina nos horários aceitos
+function gOpcoes(d, turno){
+  const teorias = d.teoria.length ? d.teoria.filter(t => gPermitida(t, turno)) : [null];
+  const labs = d.lab.length ? d.lab.filter(t => gPermitida(t, turno)) : [null];
+  const out = [];
+  teorias.forEach(t => labs.forEach(l => {
+    const chaves = [...(t ? t.slots : []), ...(l ? l.slots : [])].map(x => x.dia + '|' + x.hora);
+    if(new Set(chaves).size === chaves.length) out.push({teoria: t && t.id, lab: l && l.id, chaves});
+  }));
+  return out;
+}
+// dias no campus e janelas (aulas vagas entre duas aulas do mesmo dia)
+function gAvaliar(ops){
+  const porDia = {};
+  ops.forEach(o => o.chaves.forEach(k => { const [dia, hora] = k.split('|'); (porDia[dia] = porDia[dia] || []).push(GRADE_SLOTS.indexOf(hora)); }));
+  let janelas = 0;
+  Object.values(porDia).forEach(ix => { ix.sort((a, b) => a - b); janelas += (ix[ix.length - 1] - ix[0] + 1) - ix.length; });
+  return {dias: Object.keys(porDia).length, janelas};
+}
+// Busca com poda. Cada disciplina tem um valor (w): vence a combinação de maior soma, então mais
+// disciplinas primeiro; na "melhor grade" o valor é 1000 menos o período, e no empate ganham as de
+// períodos anteriores. Entre as de mesma soma: menos dias no campus, depois menos janelas.
+function gBuscar(itens, turno, limite){
+  const ds = itens.map(x => ({s: x.s, w: x.w, ops: gOpcoes(x.d, turno)})).sort((a, b) => b.w - a.w || a.ops.length - b.ops.length);
+  const max = limite || Infinity, LIMITE = 250000;
+  const usados = new Set(), atual = [];
+  const cabe = o => o.chaves.every(k => !usados.has(k));
+  const ordem = (a, b) => b.W - a.W || a.nota.dias - b.nota.dias || a.nota.janelas - b.nota.janelas;
+  let melhor = -1, achadas = [], passos = 0;
+  // teto: o que ainda dá para somar com as que têm alguma turma livre (ds vem do maior valor para o menor)
+  const teto = (i, n) => {
+    if(n >= max) return 0;
+    let soma = 0, k = 0;
+    for(let j = i; j < ds.length && k < max - n; j++) if(ds[j].ops.some(cabe)){ soma += ds[j].w; k++; }
+    return soma;
+  };
+  (function busca(i, n, W){
+    if(++passos > LIMITE) return;
+    if(W + teto(i, n) < melhor) return;
+    if(i === ds.length || n >= max){
+      if(W > melhor){ melhor = W; achadas = []; }
+      if(W === melhor){
+        achadas.push({W, esc: atual.slice(), nota: gAvaliar(atual.map(x => x.o))});
+        if(achadas.length > 2000) achadas = achadas.sort(ordem).slice(0, 200);
+      }
+      return;
+    }
+    const {s, w, ops} = ds[i];
+    ops.forEach(o => {
+      if(!cabe(o)) return;
+      o.chaves.forEach(k => usados.add(k)); atual.push({s, o});
+      busca(i + 1, n + 1, W + w);
+      atual.pop(); o.chaves.forEach(k => usados.delete(k));
+    });
+    busca(i + 1, n, W); // deixar esta de fora
+  })(0, 0, 0);
+  return achadas.sort(ordem).slice(0, 200);
+}
+// aulas seguidas viram um bloco: [{dia, ini, fim}] em minutos
+function gBlocos(t){
+  const out = [];
+  WEEK_DAYS.forEach(dia => {
+    const hs = t.slots.filter(s => s.dia === dia).map(s => gMin(s.hora)).sort((a, b) => a - b);
+    let ini = null, fim = null;
+    hs.forEach(m => { if(ini !== null && m === fim) fim = m + 50; else { if(ini !== null) out.push({dia, ini, fim}); ini = m; fim = m + 50; } });
+    if(ini !== null) out.push({dia, ini, fim});
+  });
+  return out;
+}
+const gTextoTurma = t => gBlocos(t).map(b => `${GRADE_DIA[b.dia]} ${gHM(b.ini)}`).join(' · ');
+
+let GM = null; // o montador aberto: {disc, opcoes, opIdx, modo ('auto' | 'marcadas' | null), msg, erro}
+const gPlano = () => STATE.gradePlano;
+function gPlanoNovo(){ return {escolhidas: [], sel: {}, turno: {manha: false, tarde: false, noite: true, sabado: true}, limite: 0}; }
+let _gSalvar = null;
+function gSalvarPlano(){ clearTimeout(_gSalvar); _gSalvar = setTimeout(() => storeSet('grade_plano', STATE.gradePlano), 500); }
+function gRegistros(of){
+  return (of && of.registros || []).map(([periodo, sigla, turma, dia, hora, semHorario, prof, sala]) => ({periodo, sigla, turma, dia, hora, semHorario: !!semHorario, prof, sala}));
+}
+// situação no histórico: feita, cursando, falta, ou fora (não está no histórico)
+function gStatus(s){
+  const item = STATE.historico.find(i => i.sigla === s);
+  if(!item) return (STATE.config.disciplinasAtuais || []).includes(s) ? 'cursando' : 'fora';
+  const st = situacao(item);
+  return st === 'Aprovado' ? 'feita' : st === 'Cursando' ? 'cursando' : 'falta';
+}
+const gNome = s => { const item = STATE.historico.find(i => i.sigla === s); return item ? item.disciplina : s; };
+const gPeriodo = d => Number(String(d.periodo).replace(/\D/g, '')) || Number((STATE.historico.find(i => i.sigla === d.sigla) || {}).periodo) || 9;
+const gCor = s => `var(--gc${(gPlano().escolhidas.indexOf(s) % 10) + 1})`;
+const gRotTurma = t => t.id === 'única' ? 'Turma única' : t.id;
+const gCod = (s, t) => t.id === 'única' ? s : `${s}-${t.id}`;
+
+function abrirGrade(){
+  GM = {disc: gModelo(gRegistros(STATE.gradeOferta)), opcoes: [], opIdx: 0, modo: null, msg: '', erro: false};
+  if(!STATE.gradePlano) STATE.gradePlano = gPlanoNovo();
+  gPreMarcar();
+  document.querySelectorAll('[data-gturno]').forEach(b => b.setAttribute('aria-pressed', String(!!gPlano().turno[b.dataset.gturno])));
+  document.getElementById('gmLimite').value = String(gPlano().limite || 0);
+  renderGradeTudo();
+  document.getElementById('modalGrade').classList.add('open');
+  document.getElementById('gmBody').scrollTop = 0;
+}
+function fecharGrade(){ document.getElementById('modalGrade').classList.remove('open'); GM = null; }
+// começo de semestre, ainda sem horário: já vêm marcadas as disciplinas cursando que estão no PDF
+function gPreMarcar(){
+  const p = gPlano();
+  if(p.escolhidas.length || getAulas().some(a => a.inicio && a.inicio !== '—')) return;
+  p.escolhidas = (STATE.config.disciplinasAtuais || []).filter(s => GM.disc.has(s));
+}
+// turmas escolhidas agora: [{sigla, tipo, t}]
+function gEscolhidas(){
+  const lista = [];
+  gPlano().escolhidas.forEach(s => {
+    const d = GM.disc.get(s), sel = gPlano().sel[s] || {};
+    if(!d) return;
+    ['teoria', 'lab'].forEach(tipo => { const t = d[tipo].find(x => x.id === sel[tipo]); if(t) lista.push({sigla: s, tipo, t}); });
+  });
+  return lista;
+}
+function gOcupado(lista){
+  const mapa = {};
+  lista.forEach(e => e.t.slots.forEach(sl => { (mapa[sl.dia + '|' + sl.hora] = mapa[sl.dia + '|' + sl.hora] || []).push(e); }));
+  return mapa;
+}
+// com quem a turma t (da disciplina s) choca, entre as turmas escolhidas das outras disciplinas
+function gChoca(s, tipo, t){
+  const mapa = gOcupado(gEscolhidas().filter(e => !(e.sigla === s && e.tipo === tipo)));
+  const quem = new Set();
+  t.slots.forEach(sl => (mapa[sl.dia + '|' + sl.hora] || []).forEach(e => quem.add(gCod(e.sigla, e.t))));
+  return [...quem];
+}
+// "Montar a melhor grade": o app escolhe as disciplinas (entre as que faltam) e as turmas
+function gMelhorGrade(){
+  const p = gPlano();
+  // as cursando entram só no começo do semestre, ainda sem horário (são as que a pessoa vai fazer agora)
+  const semHorario = !getAulas().some(a => a.inicio && a.inicio !== '—');
+  const cands = [...GM.disc.values()].filter(d => (gStatus(d.sigla) === 'falta' || (semHorario && gStatus(d.sigla) === 'cursando')) && (d.teoria.length || d.lab.length));
+  GM.modo = 'auto';
+  GM.opcoes = cands.length ? gBuscar(cands.map(d => ({s: d.sigla, d, w: 1000 - gPeriodo(d)})), p.turno, p.limite).filter(o => o.esc.length) : [];
+  GM.opIdx = 0;
+  gAplicarOpcao();
+}
+// "Montar sozinho": só as turmas das disciplinas marcadas
+function gMontarMarcadas(){
+  const p = gPlano();
+  GM.modo = 'marcadas';
+  GM.opcoes = gBuscar(p.escolhidas.filter(s => GM.disc.has(s)).map(s => ({s, d: GM.disc.get(s), w: 1})), p.turno, 0);
+  GM.opIdx = 0;
+  gAplicarOpcao();
+}
+function gAplicarOpcao(){
+  const p = gPlano(), op = GM.opcoes[GM.opIdx];
+  if(!op){ renderGradeTudo(); return; } // nada coube: o que estava marcado continua
+  if(GM.modo === 'auto'){
+    // na ordem do curso: as cores e a lista seguem o período
+    const ordem = [...GM.disc.values()].sort((a, b) => gPeriodo(a) - gPeriodo(b)).map(d => d.sigla);
+    p.escolhidas = op.esc.map(x => x.s).sort((a, b) => ordem.indexOf(a) - ordem.indexOf(b));
+  }
+  p.sel = {};
+  op.esc.forEach(({s, o}) => { p.sel[s] = {teoria: o.teoria, lab: o.lab}; });
+  gSalvarPlano();
+  renderGradeTudo();
+}
+// mexeu à mão: as combinações deixam de valer
+function gMexeu(){ GM.opcoes = []; GM.modo = null; gSalvarPlano(); }
+
+function renderGradeTudo(){ renderGradeFonte(); renderGradeLista(); renderGradeMontagem(); }
+function renderGradeFonte(){
+  const of = STATE.gradeOferta, el = document.getElementById('gmFonte');
+  const n = [...GM.disc.values()].reduce((s, d) => s + [...d.turmas.values()].reduce((m, t) => m + t.slots.length, 0), 0);
+  const msg = GM.msg ? `<p class="gm-msg${GM.erro ? ' is-erro' : ''}" role="status">${esc(GM.msg)}</p>` : '';
+  el.innerHTML = of ? `<div class="gm-fonte">
+      <span class="gm-fonte__ic" aria-hidden="true">PDF</span>
+      <div class="gm-fonte__txt"><b>${esc(of.titulo || 'Horários do semestre')}</b><span>${GM.disc.size} disciplinas, ${n} aulas na semana. Lido em ${fmtDate(localISO(new Date(of.lidoEm)))}.</span></div>
+      <label class="btn btn-sm" for="gmPdf">Trocar PDF</label>${msg}
+    </div>`
+    : `<div class="gm-vazio">
+      <span class="gm-fonte__ic" aria-hidden="true">PDF</span>
+      <b>Envie o PDF de horários do semestre</b>
+      <span>O que a faculdade publica com as turmas de cada disciplina (no Inatel: os dias da semana no topo e os horários à esquerda). Ele é lido aqui no aparelho e não sai dele.</span>
+      <label class="btn btn-primary" for="gmPdf">${ico('upload')} Escolher o PDF</label>${msg}
+    </div>`;
+  document.getElementById('gmConteudo').hidden = !of;
+  document.getElementById('gmUsar').hidden = !of;
+}
+function renderGradeLista(){
+  const el = document.getElementById('gmLista'), p = gPlano();
+  const todas = [...GM.disc.values()].sort((a, b) => gPeriodo(a) - gPeriodo(b) || a.sigla.localeCompare(b.sigla));
+  const ROT = {falta: 'Falta', cursando: 'Cursando', feita: 'Já fez'};
+  const item = d => {
+    const st = gStatus(d.sigla), nT = d.teoria.length;
+    const sub = [d.sigla, nT ? `${nT} ${nT === 1 ? 'turma' : 'turmas'}` : 'sem horário fixo', d.lab.length ? `${d.lab.length} lab` : ''].filter(Boolean).join(' · ');
+    return `<label class="gm-disc st-${st}"><input type="checkbox" data-gdisc="${esc(d.sigla)}"${p.escolhidas.includes(d.sigla) ? ' checked' : ''}>
+      <span class="gm-disc__n"><b>${esc(gNome(d.sigla))}</b><small>${esc(sub)}</small></span>${ROT[st] ? `<span class="badge">${ROT[st]}</span>` : ''}</label>`;
+  };
+  const grupos = new Map();
+  todas.filter(d => ['falta', 'cursando'].includes(gStatus(d.sigla)) || p.escolhidas.includes(d.sigla)).forEach(d => {
+    const k = gPeriodo(d); if(!grupos.has(k)) grupos.set(k, []); grupos.get(k).push(d);
+  });
+  const resto = st => todas.filter(d => gStatus(d.sigla) === st && !p.escolhidas.includes(d.sigla));
+  const feitas = resto('feita'), fora = resto('fora');
+  el.innerHTML = [...grupos].map(([k, ds]) => `<div class="wiz-sem-block"><div class="wiz-sem-head"><span>${k < 9 ? k + 'º período' : 'Outras'}</span></div><div class="gm-disc-grid">${ds.map(item).join('')}</div></div>`).join('')
+    + (feitas.length ? `<details class="gm-mais"><summary>Já feitas (${feitas.length})</summary><div class="gm-disc-grid">${feitas.map(item).join('')}</div></details>` : '')
+    + (fora.length ? `<details class="gm-mais"><summary>Fora do seu histórico (${fora.length})</summary><div class="gm-disc-grid">${fora.map(item).join('')}</div></details>` : '')
+    || '<div class="empty">Nenhuma disciplina neste PDF.</div>';
+  // marcar não redesenha a lista (ela não pula sob o dedo); só a montagem embaixo
+  el.querySelectorAll('[data-gdisc]').forEach(cb => cb.addEventListener('change', () => {
+    const s = cb.dataset.gdisc;
+    p.escolhidas = p.escolhidas.filter(x => x !== s);
+    if(cb.checked) p.escolhidas.push(s); else delete p.sel[s];
+    gMexeu(); renderGradeMontagem();
+  }));
+  gContagem();
+}
+function gContagem(){
+  const n = gPlano().escolhidas.filter(s => GM.disc.has(s)).length;
+  document.getElementById('gmConta').textContent = n ? `${n} ${n === 1 ? 'marcada' : 'marcadas'}` : '';
+}
+function renderGradeMontagem(){
+  gContagem();
+  renderGradeTurmas(); renderGradeSemana(); renderGradeAviso(); renderGradeResumo();
+}
+function renderGradeTurmas(){
+  const el = document.getElementById('gmTurmas'), p = gPlano();
+  const marcadas = p.escolhidas.filter(s => GM.disc.has(s));
+  if(!marcadas.length){ el.innerHTML = '<div class="empty">Marque as disciplinas acima, ou toque em <b>Montar a melhor grade</b>.</div>'; return; }
+  el.innerHTML = marcadas.map(s => {
+    const d = GM.disc.get(s), sel = p.sel[s] || {};
+    const chips = tipo => d[tipo].map(t => {
+      const on = sel[tipo] === t.id, quem = gChoca(s, tipo, t), fora = !gPermitida(t, p.turno);
+      const dica = [gTextoTurma(t), t.sala && `sala ${t.sala}`, t.prof && `prof. ${t.prof}`, quem.length && `choca com ${quem.join(', ')}`, fora && 'fora dos horários marcados'].filter(Boolean).join(' · ');
+      return `<button type="button" class="gm-op${on ? ' is-on' : ''}${quem.length ? ' is-choque' : ''}${fora ? ' is-fora' : ''}" data-gop="${esc(s)}|${tipo}|${esc(t.id)}" aria-pressed="${on}" title="${esc(dica)}"><b>${esc(gRotTurma(t))}</b>${esc(gTextoTurma(t))}</button>`;
+    }).join('');
+    const nenhuma = (d.teoria.length || d.lab.length) && !gOpcoes(d, p.turno).length;
+    return `<div class="gm-tdisc" style="--c:${gCor(s)}">
+      <div class="gm-tdisc__h"><span class="gm-dot"></span><b>${esc(gNome(s))}</b><small>${esc(s)}</small></div>
+      ${d.teoria.length ? `<div class="gm-opts"><span>Turma</span>${chips('teoria')}</div>` : ''}
+      ${d.lab.length ? `<div class="gm-opts"><span>Laboratório</span>${chips('lab')}</div>` : ''}
+      ${d.labLivre.length ? `<p class="gm-nota">Laboratório por cronograma (${esc(d.labLivre.join(', '))}): escolhido na matrícula, não entra na conta de choque.</p>` : ''}
+      ${!d.teoria.length && !d.lab.length ? '<p class="gm-nota">Sem horário fixo neste PDF.</p>' : ''}
+      ${nenhuma ? '<p class="gm-nota is-erro">Nenhuma turma nos horários marcados.</p>' : ''}
+    </div>`;
+  }).join('');
+  el.querySelectorAll('[data-gop]').forEach(b => b.addEventListener('click', () => {
+    const [s, tipo, id] = b.dataset.gop.split('|');
+    p.sel[s] = Object.assign({}, p.sel[s]);
+    p.sel[s][tipo] = p.sel[s][tipo] === id ? null : id;
+    gMexeu(); renderGradeMontagem();
+  }));
+}
+function renderGradeSemana(){
+  const el = document.getElementById('gmSemana');
+  const mapa = gOcupado(gEscolhidas());
+  const ix = Object.keys(mapa).map(k => GRADE_SLOTS.indexOf(k.split('|')[1])).filter(i => i >= 0);
+  if(!ix.length){ el.innerHTML = '<div class="empty">A semana aparece aqui quando você escolher as turmas.</div>'; return; }
+  const linhas = GRADE_SLOTS.slice(Math.min(...ix), Math.max(...ix) + 1);
+  const dias = WEEK_DAYS.filter(d => d !== 'Sábado' || Object.keys(mapa).some(k => k.startsWith('Sábado|')));
+  let html = '<div></div>' + dias.map(d => `<div class="gm-gh">${GRADE_DIA[d]}</div>`).join('');
+  linhas.forEach((h, k) => {
+    // intervalo: o horário não continua o anterior (20h20 → 21h30)
+    const pausa = k > 0 && gMin(h) !== gMin(linhas[k - 1]) + 50;
+    html += `<div class="gm-gt${pausa ? ' is-pausa' : ''}">${gHM(gMin(h))}</div>`;
+    dias.forEach(dia => {
+      const es = mapa[dia + '|' + h] || [];
+      html += `<div class="gm-cel${es.length > 1 ? ' is-choque' : ''}${pausa ? ' is-pausa' : ''}">${es.map(e => `<div class="gm-bl" style="--c:${gCor(e.sigla)}"><b>${esc(gCod(e.sigla, e.t))}</b><span>${esc(e.t.sala || '')}</span></div>`).join('')}</div>`;
+    });
+  });
+  el.innerHTML = `<div class="gm-grade" style="grid-template-columns:44px repeat(${dias.length}, minmax(64px, 1fr))">${html}</div>`;
+}
+function renderGradeAviso(){
+  const el = document.getElementById('gmAviso'), p = gPlano();
+  const marcadas = p.escolhidas.filter(s => GM.disc.has(s));
+  const lista = gEscolhidas(), mapa = gOcupado(lista);
+  const pager = document.getElementById('gmPager');
+  pager.hidden = GM.opcoes.length < 2;
+  document.getElementById('gmOpLabel').textContent = GM.opcoes.length ? `Opção ${GM.opIdx + 1} de ${GM.opcoes.length}` : '';
+  const aviso = (tipo, html) => { el.className = 'gm-aviso is-' + tipo; el.innerHTML = html; el.hidden = false; };
+  const dias = new Set(lista.flatMap(e => e.t.slots.map(s => s.dia)));
+  const noCampus = `${dias.size} ${dias.size === 1 ? 'dia' : 'dias'} no campus${dias.size ? ` (${WEEK_DAYS.filter(d => dias.has(d)).map(d => GRADE_DIA[d]).join(', ')})` : ''}`;
+  if(GM.modo === 'auto' && !GM.opcoes.length){ aviso('erro', '<span>Nenhuma disciplina que falta cabe nos horários marcados. Marque mais horários acima.</span>'); return; }
+  if(!marcadas.length){ el.hidden = true; return; }
+  const choques = Object.entries(mapa).filter(([, es]) => es.length > 1);
+  if(choques.length){
+    // um aviso por par de turmas e dia (as duas aulas seguidas contam como um choque)
+    const pares = {};
+    choques.forEach(([k, es]) => { const [dia, hora] = k.split('|'), quem = es.map(e => gCod(e.sigla, e.t)).join(' e '), c = quem + '|' + dia;
+      pares[c] = pares[c] || {quem, dia, ini: Infinity}; pares[c].ini = Math.min(pares[c].ini, gMin(hora)); });
+    const txt = Object.values(pares).map(x => `${x.quem} (${GRADE_DIA[x.dia]} ${gHM(x.ini)})`);
+    aviso('erro', `<span><b>${txt.length === 1 ? 'Choque' : txt.length + ' choques'}:</b> ${esc(txt.join('; '))}. Troque uma das turmas.</span>`);
+    return;
+  }
+  if(GM.modo === 'auto'){
+    aviso('ok', `<span><b>${marcadas.length} ${marcadas.length === 1 ? 'disciplina' : 'disciplinas'} sem choque</b>, ${noCampus}. O app escolheu o máximo que cabe nos horários marcados, começando pelas dos primeiros períodos. Ele não conhece os pré-requisitos: confira antes da matrícula.</span>`);
+    return;
+  }
+  const fora = GM.modo === 'marcadas' && GM.opcoes.length ? marcadas.filter(s => !GM.opcoes[GM.opIdx].esc.some(x => x.s === s)) : [];
+  if(fora.length){
+    const nome = s => { const d = GM.disc.get(s), t = [...d.teoria, ...d.lab].find(x => !gPermitida(x, p.turno));
+      return gNome(s) + (t ? ` (tem turma ${gTextoTurma(t)}, ${GRADE_TURNOS[gTurno(t.slots[0].dia, t.slots[0].hora)]}, horário que está desmarcado)` : ''); };
+    aviso('erro', `<span><b>Não dá para cursar as ${marcadas.length} juntas sem choque.</b> O melhor encaixe tem ${marcadas.length - fora.length}; fica de fora: ${esc(fora.map(nome).join('; '))}.</span>`);
+    return;
+  }
+  const faltam = marcadas.filter(s => { const d = GM.disc.get(s), sel = p.sel[s] || {}; return (d.teoria.length && !sel.teoria) || (d.lab.length && !sel.lab); });
+  if(faltam.length){ aviso('info', `<span>Falta escolher a turma de ${esc(faltam.map(gNome).join(', '))}. Ou toque em <b>Montar sozinho</b>.</span>`); return; }
+  aviso('ok', `<span><b>Sem choques.</b> ${marcadas.length} ${marcadas.length === 1 ? 'disciplina' : 'disciplinas'}, ${noCampus}.</span>`);
+}
+function gLinhasResumo(){
+  return gEscolhidas().map(e => ({sigla: e.sigla, nome: gNome(e.sigla), turma: e.t.id === 'única' ? 'única' : e.t.id, lab: e.tipo === 'lab',
+    horarios: gBlocos(e.t).map(b => `${GRADE_DIA[b.dia]} ${gHM(b.ini)}–${gHM(b.fim)}`).join(', '), sala: e.t.sala, prof: e.t.prof}));
+}
+function renderGradeResumo(){
+  const rs = gLinhasResumo();
+  document.getElementById('gmResumo').innerHTML = rs.length ? `<table class="gm-res"><thead><tr><th>Disciplina</th><th>Turma</th><th>Horários</th><th>Sala</th><th>Professor</th></tr></thead><tbody>
+    ${rs.map(r => `<tr><td><b>${esc(r.nome)}</b> <span class="gm-dim">${esc(r.sigla)}</span></td><td data-l="Turma">${esc(r.turma)}${r.lab ? ' <span class="gm-dim">(lab)</span>' : ''}</td><td class="mono">${esc(r.horarios)}</td><td data-l="Sala">${esc(r.sala || '—')}</td><td class="gm-dim" data-l="Prof.">${esc(r.prof || '—')}</td></tr>`).join('')}
+  </tbody></table>` : '<div class="empty">As turmas que você escolher aparecem aqui.</div>';
+  document.getElementById('gmCopiar').hidden = !rs.length;
+}
+
+// lê o PDF no aparelho com o pdf.js (carregado só aqui; o service worker guarda para a próxima vez)
+const PDFJS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+let _pdfjs = null;
+function carregarPdfjs(){
+  const tag = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => no(new Error('rede')); document.head.appendChild(s); });
+  // o worker vai como script comum, antes: o pdf.js então lê na própria página, sem Worker de outro site
+  if(!_pdfjs) _pdfjs = tag(PDFJS_URL + 'pdf.worker.min.js').then(() => tag(PDFJS_URL + 'pdf.min.js'))
+    .then(() => { const lib = window.pdfjsLib || window['pdfjs-dist/build/pdf']; lib.GlobalWorkerOptions.workerSrc = PDFJS_URL + 'pdf.worker.min.js'; return lib; })
+    .catch(err => { _pdfjs = null; throw err; });
+  return _pdfjs;
+}
+async function lerPdfDeGrade(arquivo){
+  GM.msg = `Lendo ${arquivo.name}…`; GM.erro = false; renderGradeFonte();
+  try{
+    const lib = await carregarPdfjs();
+    const doc = await lib.getDocument({data: new Uint8Array(await arquivo.arrayBuffer())}).promise;
+    const paginas = [];
+    for(let n = 1; n <= doc.numPages; n++){
+      const pag = await doc.getPage(n), alt = pag.view[3], tc = await pag.getTextContent();
+      paginas.push({itens: tc.items.map(it => ({str: it.str, x: it.transform[4], top: alt - it.transform[5] - (it.height || Math.abs(it.transform[3])), w: it.width}))});
+    }
+    const regs = lerGradePdf(paginas);
+    if(!regs.length) throw new Error('vazio');
+    STATE.gradeOferta = {titulo: arquivo.name.replace(/\.pdf$/i, ''), lidoEm: Date.now(),
+      registros: regs.map(r => [r.periodo, r.sigla, r.turma, r.dia, r.hora, r.semHorario ? 1 : 0, r.prof || '', r.sala || ''])};
+    await storeSet('grade_oferta', STATE.gradeOferta);
+    GM.disc = gModelo(regs);
+    const p = gPlano();
+    p.escolhidas = p.escolhidas.filter(s => GM.disc.has(s));
+    p.sel = {};
+    gPreMarcar(); gMexeu();
+    GM.msg = `Pronto: ${GM.disc.size} disciplinas lidas de ${doc.numPages} ${doc.numPages === 1 ? 'página' : 'páginas'}.`;
+  }catch(err){
+    GM.erro = true;
+    GM.msg = err.message === 'vazio' ? 'Não encontrei uma grade de horários nesse PDF. Ele precisa ter os dias da semana no topo e os horários à esquerda, como o do Inatel.'
+      : err.message === 'rede' ? 'Não deu para baixar o leitor de PDF. Confira a internet e tente de novo.'
+      : 'Não deu para ler esse PDF. Confira se é o arquivo certo.';
+  }
+  if(GM) renderGradeTudo();
+}
+// passa o horário montado para a aba Horário e as disciplinas para "cursando"
+async function usarGradeMontada(){
+  const p = gPlano(), lista = gEscolhidas();
+  const marcadas = p.escolhidas.filter(s => GM.disc.has(s));
+  if(!marcadas.length){ showToast('Marque as disciplinas primeiro', 'info'); return; }
+  if(Object.values(gOcupado(lista)).some(es => es.length > 1)){ showToast('Ainda tem choque de horário: troque uma das turmas', 'error'); return; }
+  const faltam = marcadas.filter(s => { const d = GM.disc.get(s), sel = p.sel[s] || {}; return (d.teoria.length && !sel.teoria) || (d.lab.length && !sel.lab); });
+  if(faltam.length){ showToast(`Falta escolher a turma de ${faltam.map(gNome).join(', ')}`, 'info', 4000); return; }
+  const atuais = STATE.config.disciplinasAtuais || [];
+  const saem = atuais.filter(s => !marcadas.includes(s));
+  const temHorario = getAulas().some(a => a.inicio && a.inicio !== '—');
+  if(temHorario || saem.length){
+    const partes = [temHorario ? 'O horário de aulas de agora será trocado por este.' : '',
+      saem.length ? `As disciplinas cursando passam a ser estas ${marcadas.length}; saem ${saem.map(nomeDaDisciplina).join(', ')}. Se o semestre de agora ainda não acabou, encerre-o antes em Configurações, para as notas irem para o Histórico.` : ''];
+    if(!confirm(partes.filter(Boolean).join('\n\n') + '\n\nUsar este horário?')) return;
+  }
+  const aulas = lista.flatMap(e => gBlocos(e.t).map(b => ({dia: b.dia, inicio: gHM(b.ini), fim: gHM(b.fim), disciplina: gCod(e.sigla, e.t),
+    local: e.t.sala || '', tipo: e.tipo === 'lab' ? 'Laboratório' : 'Presencial'})));
+  const semFixo = marcadas.filter(s => !lista.some(e => e.sigla === s))
+    .map(s => ({dia: '—', inicio: '—', fim: '—', disciplina: s, local: 'Sem horário fixo', tipo: 'Assíncrona'}));
+  STATE.aulasCustom = [...aulas.sort((a, b) => WEEK_DAYS.indexOf(a.dia) - WEEK_DAYS.indexOf(b.dia) || a.inicio.localeCompare(b.inicio)), ...semFixo];
+  const ordem = STATE.historico.map(d => d.sigla);
+  const pos = x => { const i = ordem.indexOf(x); return i < 0 ? Infinity : i; };
+  STATE.config.disciplinasAtuais = [...marcadas].sort((a, b) => pos(a) - pos(b));
+  await storeSet('aulas_custom', STATE.aulasCustom);
+  await storeSet('config', STATE.config);
+  fecharGrade();
+  renderAll();
+  switchTab('horario');
+  showToast(`Horário montado: ${marcadas.length} ${marcadas.length === 1 ? 'disciplina' : 'disciplinas'}, ${aulas.length} ${aulas.length === 1 ? 'aula' : 'aulas'} na semana`, 'success', 3500);
+}
+
+document.getElementById('btnMontarGrade').addEventListener('click', abrirGrade);
+document.getElementById('gmFechar').addEventListener('click', fecharGrade);
+document.getElementById('gmFechar2').addEventListener('click', fecharGrade);
+document.getElementById('modalGrade').addEventListener('click', e => { if(e.target === e.currentTarget) fecharGrade(); });
+document.getElementById('gmPdf').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if(f && GM) lerPdfDeGrade(f); });
+document.querySelectorAll('[data-gturno]').forEach(b => b.addEventListener('click', () => {
+  const t = gPlano().turno, k = b.dataset.gturno;
+  t[k] = !t[k];
+  b.setAttribute('aria-pressed', String(t[k]));
+  // com uma combinação montada, monta de novo com os horários novos
+  if(GM.modo === 'auto') gMelhorGrade();
+  else if(GM.modo === 'marcadas') gMontarMarcadas();
+  else { gSalvarPlano(); renderGradeMontagem(); }
+}));
+document.getElementById('gmLimite').addEventListener('change', e => {
+  gPlano().limite = Number(e.target.value) || 0;
+  if(GM.modo === 'auto') gMelhorGrade(); else gSalvarPlano();
+});
+document.getElementById('gmMelhor').addEventListener('click', () => { gMelhorGrade(); document.getElementById('gmPasso2').scrollIntoView({behavior: 'smooth', block: 'start'}); });
+document.getElementById('gmSozinho').addEventListener('click', () => {
+  if(!gPlano().escolhidas.some(s => GM.disc.has(s))){ showToast('Marque as disciplinas primeiro', 'info'); return; }
+  gMontarMarcadas();
+});
+document.getElementById('gmOpAnt').addEventListener('click', () => { if(!GM.opcoes.length) return; GM.opIdx = (GM.opIdx - 1 + GM.opcoes.length) % GM.opcoes.length; gAplicarOpcao(); });
+document.getElementById('gmOpProx').addEventListener('click', () => { if(!GM.opcoes.length) return; GM.opIdx = (GM.opIdx + 1) % GM.opcoes.length; gAplicarOpcao(); });
+document.getElementById('gmUsar').addEventListener('click', usarGradeMontada);
+document.getElementById('gmCopiar').addEventListener('click', async e => {
+  const b = e.currentTarget;
+  const texto = gLinhasResumo().map(r => `${r.nome} (${r.sigla}), turma ${r.turma}${r.lab ? ' (lab)' : ''}: ${r.horarios}${r.sala ? ', sala ' + r.sala : ''}`).join('\n');
+  try{ await navigator.clipboard.writeText(texto); showToast('Resumo copiado', 'success', 1800); }
+  catch(err){ showToast('Não deu para copiar', 'error'); }
 });
 
 document.getElementById('btnSaveConfig').addEventListener('click', async () => {
@@ -7040,6 +7746,8 @@ document.getElementById('btnExport').addEventListener('click', async () => {
     disc_notes: STATE.discNotes,
     estudos_materiais: STATE.estudos,
     semestres: STATE.semestres,
+    grade_oferta: STATE.gradeOferta,
+    grade_plano: STATE.gradePlano,
     labs: STATE.labs,
     base_data: currentBaseData(),
   };
@@ -7093,7 +7801,7 @@ document.getElementById('fileImport').addEventListener('change', (e) => {
       const BACKUP_KEYS = ['config','historico_overrides','historico_custom','historico_removidos','tarefas',
         'lab_concluido','provas','faltas','faltas_limites','faltas_registro','relatorios_ocultos','relatorios_overrides','horas_comp',
         'horas_global','aulas_custom','turmas_custom','notas_parciais','metas_notas','tema','lembretes',
-        'pom_sessions','disc_notes','estudos_materiais','semestres','labs'];
+        'pom_sessions','disc_notes','estudos_materiais','semestres','grade_oferta','grade_plano','labs'];
       for(const k of BACKUP_KEYS){ if(k in backup) await storeSet(k, backup[k]); }
       const msg = document.getElementById('importMsg'); msg.classList.add('show');
       setTimeout(()=>msg.classList.remove('show'), 1800);
