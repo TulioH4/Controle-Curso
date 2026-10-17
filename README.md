@@ -57,6 +57,7 @@ Atualizações chegam sozinhas: a cada nova versão publicada, o app instalado s
 
 **Do jeito de um app**
 - Funciona offline e sincroniza quando a internet volta
+- **Fim de semestre** em 3 passos: a nota final de cada disciplina (já calculada das parciais) vai para o Histórico, você escolhe as disciplinas do próximo semestre e o que zerar (faltas, provas passadas, tarefas concluídas, horário, laboratório). Cada semestre encerrado fica registrado, e o último encerramento pode ser desfeito
 - Excluiu sem querer? O aviso traz **Desfazer** por alguns segundos (tarefas, provas, lembretes, relatórios e horas)
 - `Ctrl K` adiciona tarefa ou prova de qualquer tela; teclas `1` a `9` trocam de aba; `?` mostra os atalhos
 - Atalhos no ícone (clique direito no Windows, toque longo no Android): nova tarefa, provas, tarefas

@@ -1705,6 +1705,39 @@
   .notif-agenda__txt b{font-size:13.5px; font-weight:650; color:var(--text);}
   .notif-agenda__txt span{font-size:12.5px; color:var(--text-dim); line-height:1.45;}
   @media (max-width:1100px){ .notif-quando{grid-template-columns:repeat(2, minmax(0,1fr));} }
+  /* fim de semestre: notas finais, próximo semestre, limpeza */
+  .sem-passos{display:flex; gap:6px; margin-bottom:16px;}
+  .sem-passos span{flex:1; height:4px; border-radius:999px; background:var(--line);}
+  .sem-passos span.on{background:var(--blue);}
+  .sem-row{display:grid; grid-template-columns:minmax(0,1fr) 84px auto; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--line-soft);}
+  .sem-row:last-child{border-bottom:none;}
+  .sem-row b{display:block; font-size:14px; font-weight:650; color:var(--text);}
+  .sem-row small{display:block; margin-top:2px; font-size:12px; color:var(--text-faint);}
+  .sem-row input{width:100%; padding:8px 10px; border-radius:10px; border:none; background:var(--lg-fill-hover, var(--panel-2)); box-shadow:inset 0 0 0 1px var(--line-soft);
+    color:var(--text); font:inherit; font-size:15px; font-weight:600; text-align:center;}
+  .sem-row input:focus{outline:none; box-shadow:inset 0 0 0 1.5px var(--blue);}
+  .sem-row .hist-seg button{min-height:34px; padding:0 12px;}
+  .sem-row .hist-seg button[data-res="nao"][aria-checked="true"]{background:var(--red); border-color:var(--red);}
+  .sem-opc{display:flex; align-items:flex-start; gap:12px; padding:12px 0; border-bottom:1px solid var(--line-soft); cursor:pointer;}
+  .sem-opc:last-of-type{border-bottom:none;}
+  .sem-opc input{margin-top:3px; accent-color:var(--blue); width:18px; height:18px; flex-shrink:0;}
+  .sem-opc b{display:block; font-size:14px; font-weight:600; color:var(--text);}
+  .sem-opc span span{display:block; margin-top:2px; font-size:12.5px; color:var(--text-dim);}
+  .sem-add{display:flex; gap:8px; margin-top:12px;}
+  .sem-add input{flex:1; min-width:0; padding:9px 12px; border-radius:10px; border:1px dashed var(--line); background:var(--panel-2); color:var(--text); font:inherit; font-size:13px;}
+  .sem-arq{margin-top:16px; border-top:1px solid var(--line-soft); padding-top:12px;}
+  .sem-arq details{padding:8px 0; border-bottom:1px solid var(--line-soft);}
+  .sem-arq details:last-child{border-bottom:none;}
+  .sem-arq summary{cursor:pointer; display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:13.5px; color:var(--text); list-style:none;}
+  .sem-arq summary::-webkit-details-marker{display:none;}
+  .sem-arq summary small{font-size:12px; color:var(--text-faint);}
+  .sem-arq summary .link-btn{margin-left:auto; font-size:12.5px;}
+  .sem-arq ul{margin:8px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:4px;}
+  .sem-arq li{display:flex; justify-content:space-between; gap:12px; font-size:12.5px; color:var(--text-dim);}
+  @media (max-width:560px){
+    .sem-row{grid-template-columns:minmax(0,1fr) 76px;}
+    .sem-row .hist-seg{grid-column:1 / -1;}
+  }
   @media (max-width:560px){
     .notif-q{padding:12px;}
     .notif-agenda .btn{width:100%;}
@@ -2819,6 +2852,9 @@
         <div id="cAtuaisLista"></div>
       </div>
 
+      <div class="section-label">Fim de semestre</div>
+      <div class="panel panel--pad" id="semPanel" style="--accent:var(--purple)"></div>
+
       <div class="section-label">Backup dos dados</div>
       <div class="panel panel--pad" style="--accent:var(--purple)">
         <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
@@ -2917,6 +2953,21 @@
     <div class="modal-foot">
       <button class="btn" id="cancelModalAgenda">Fechar</button>
       <button class="btn btn-primary" id="baixarAgenda">Baixar arquivo da agenda</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: encerrar o semestre e começar o próximo -->
+<div class="modal-overlay" id="modalSemestre">
+  <div class="modal" style="max-width:640px;" role="dialog" aria-modal="true" aria-labelledby="semTitulo">
+    <div class="modal-head">
+      <h3 id="semTitulo">Encerrar semestre</h3>
+      <button class="btn btn-ghost" id="semFechar" style="padding:4px 8px; font-size:16px;" aria-label="Fechar">✕</button>
+    </div>
+    <div class="modal-body" id="semBody"></div>
+    <div class="modal-foot">
+      <button class="btn" id="semVoltar">Voltar</button>
+      <button class="btn btn-primary" id="semAvancar">Próximo</button>
     </div>
   </div>
 </div>
@@ -3176,18 +3227,9 @@ async function init(opts = {}){
   }
 
   STATE.historicoOverrides = await storeGet('historico_overrides', {});
-  const overrides = STATE.historicoOverrides;
   STATE.historicoCustom = await storeGet('historico_custom', []);
   STATE.historicoRemovidos = await storeGet('historico_removidos', []);
-  STATE.historico = [
-    ...DATA.historico
-      .filter(item => !STATE.historicoRemovidos.includes(item.sigla))
-      .map(item => {
-        const ov = overrides[item.sigla];
-        return ov ? Object.assign({}, item, ov) : Object.assign({}, item);
-      }),
-    ...STATE.historicoCustom,
-  ];
+  STATE.historico = montarHistorico();
 
   let tarefas = await storeGet('tarefas', null);
   if(!tarefas){
@@ -3214,6 +3256,7 @@ async function init(opts = {}){
   STATE.lembretes = await storeGet('lembretes', []);
   STATE.labs = await storeGet('labs', {});
   STATE.estudos = await storeGet('estudos_materiais', []);
+  STATE.semestres = await storeGet('semestres', []); // semestres encerrados (ver "Fim de semestre")
   STATE.geminiKey = await storeGet('gemini_key', '');
   STATE.geminiModel = await storeGet('gemini_model', '');
   applyTheme(STATE.tema);
@@ -3523,7 +3566,7 @@ function closeMoreSheet(){
     lab_concluido:'labConcluido', relatorios_ocultos:'relatoriosOcultos', relatorios_overrides:'relatoriosOverrides',
     horas_comp:'horasComp', horas_global:'horasGlobal', aulas_custom:'aulasCustom', turmas_custom:'turmasCustom',
     notas_parciais:'notasParciais', metas_notas:'metasNotas', lembretes:'lembretes', pom_sessions:'pomSessions',
-    disc_notes:'discNotes', estudos_materiais:'estudos',
+    disc_notes:'discNotes', estudos_materiais:'estudos', semestres:'semestres',
   };
   const SYNC_KEYS = new Set([...Object.keys(CAMPOS), 'config', 'tema', 'labs']);
   // várias chaves mudam juntas (o "Faltei" grava faltas e o registro; a nuvem traz várias de uma vez):
@@ -3559,11 +3602,7 @@ function closeMoreSheet(){
       mudou = true;
     });
     if(!mudou) return;
-    if(keys.some(k => k.startsWith('historico_'))){
-      const base = DATA.historico.filter(d => !STATE.historicoRemovidos.includes(d.sigla))
-        .map(d => { const ov = STATE.historicoOverrides[d.sigla]||{}; return Object.assign({}, d, ov); });
-      STATE.historico = [...base, ...STATE.historicoCustom];
-    }
+    if(keys.some(k => k.startsWith('historico_'))) STATE.historico = montarHistorico();
     renderAll();
   }
 })();
@@ -3584,6 +3623,16 @@ function startClock(){
 }
 
 // ---------------- domain logic ----------------
+// Histórico = currículo base (sem os removidos) + disciplinas adicionadas, com as edições (overrides)
+// por cima das duas. Antes as adicionadas ficavam sem as edições: a nota digitada sumia ao reabrir o app.
+function montarHistorico(){
+  const ov = STATE.historicoOverrides || {};
+  const comEdicao = item => Object.assign({}, item, ov[item.sigla] || {});
+  return [
+    ...DATA.historico.filter(i => !STATE.historicoRemovidos.includes(i.sigla)).map(comEdicao),
+    ...STATE.historicoCustom.map(comEdicao),
+  ];
+}
 function situacao(item){
   const nota = item.nota;
   if(nota === null || nota === undefined || nota === ''){
@@ -3593,6 +3642,8 @@ function situacao(item){
   if(typeof nota === 'string' && nota.trim().toUpperCase() === 'APR') return 'Aprovado';
   const n = Number(typeof nota === 'string' ? nota.replace(',', '.') : nota);
   if(!isNaN(n)){
+    // "não passei" (no fim do semestre, ou reprovado por falta mesmo com nota boa); cursando de novo, conta como cursando
+    if(item.aprovado === false) return STATE.config.disciplinasAtuais.includes(item.sigla) ? 'Cursando' : 'Reprovado';
     if(n >= STATE.config.notaMinima) return 'Aprovado';
     // Aprovado por recuperação: nota abaixo do mínimo mas marcado manualmente ou via import
     if(item.aprovado === true && !STATE.config.disciplinasAtuais.includes(item.sigla)) return 'Aprovado';
@@ -4030,12 +4081,21 @@ function renderDayOverview(){
   }
   // nota que já deve ter saído (prova de 3 a 21 dias atrás): vem por último, sem tirar lugar dos prazos
   const pNota = provasSemNota().find(p => daysUntil(p.data) <= -3 && daysUntil(p.data) >= -21);
-  const nudge = pNota && frases.length < 3 ? `<span class="day-overview__nota">Já saiu a nota da <b>${esc(pNota.tipo)} de ${esc(disc(pNota))}</b>? <button type="button" class="link-btn" data-lancar-nota="${esc(pNota.id)}">Lançar nota</button></span>` : '';
+  // provas acabaram: primeiro pede as notas que faltam; com elas lançadas, sugere encerrar o semestre
+  const nudge = pNota && frases.length < 3 ? `<span class="day-overview__nota">Já saiu a nota da <b>${esc(pNota.tipo)} de ${esc(disc(pNota))}</b>? <button type="button" class="link-btn" data-lancar-nota="${esc(pNota.id)}">Lançar nota</button></span>`
+    : !pNota && semestreParaEncerrar() ? `<span class="day-overview__nota">Parece que o semestre acabou. <button type="button" class="link-btn" data-encerrar-sem>Encerrar semestre</button> <span class="dim">ou</span> <button type="button" class="link-btn" data-sem-depois>agora não</button></span>`
+    : '';
   el.innerHTML = `<span class="day-overview__hi">${saud}${nome ? ', ' + esc(nome) : ''}.</span> ${frases.slice(0,3).join(' ')}${nudge}`;
 }
 document.getElementById('dayOverview').addEventListener('click', e => {
   const b = e.target.closest('[data-lancar-nota]');
   if(b) abrirLancarNota(b.dataset.lancarNota);
+  if(e.target.closest('[data-encerrar-sem]')) abrirFimSemestre();
+  // "agora não": o aviso volta em duas semanas
+  if(e.target.closest('[data-sem-depois]')){
+    lsSet('notif_last_sem_' + (ACTIVE_PROFILE_ID || 'default'), localISO(new Date(Date.now() + 14 * 86400000)));
+    renderDayOverview();
+  }
 });
 
 // último número mostrado em cada card: o painel se redesenha a cada minuto e não deve recontar do zero
@@ -4391,8 +4451,9 @@ function renderHistorico(filter){
       const sigla = span.dataset.toggleRep;
       const item = STATE.historico.find(i => i.sigla===sigla);
       if(!item) return;
-      delete item.aprovado;
-      if(STATE.historicoOverrides[sigla]) delete STATE.historicoOverrides[sigla].aprovado;
+      // false, e não apagar: nas disciplinas adicionadas o "aprovado" também está no próprio registro
+      item.aprovado = false;
+      STATE.historicoOverrides[sigla] = Object.assign(STATE.historicoOverrides[sigla] || {}, {aprovado: false});
       await storeSet('historico_overrides', STATE.historicoOverrides);
       renderHistorico(document.getElementById('histSearch').value);
       renderPainel(); renderMapaSucesso(); renderAtuaisConfig();
@@ -5864,6 +5925,7 @@ document.addEventListener('keydown', e => {
   if(document.getElementById('modalHorario').classList.contains('open')) closeModalHorario();
   else if(document.getElementById('modalTurmas').classList.contains('open')) closeModalTurmas();
   else if(document.getElementById('modalAgenda').classList.contains('open')) fecharModalAgenda();
+  else if(document.getElementById('modalSemestre').classList.contains('open') && SEM && SEM.passo !== 3) fecharFimSemestre();
 });
 
 // ---------------- modal: editar turmas ----------------
@@ -6176,6 +6238,7 @@ function renderConfig(){
   document.getElementById('cSemestre').value = STATE.config.semestre || '';
   document.getElementById('cNotaMinima').value = STATE.config.notaMinima;
   renderAtuaisConfig();
+  renderSemPanel();
   renderMetaNotas();
 
   const posGrid = document.getElementById('railPosGrid');
@@ -6218,6 +6281,277 @@ function renderConfig(){
     });
   }
 }
+// ---------------- fim de semestre ----------------
+// Encerrar o semestre em 3 passos: (1) como terminou cada disciplina, com a nota final que vai
+// para o Histórico; (2) as disciplinas do próximo semestre; (3) o que zerar para começar do zero.
+// Antes de mexer em qualquer coisa, o estado é guardado no registro do semestre, e o último
+// encerramento pode ser desfeito em Configurações.
+const SEM_CAMPOS = {
+  config:'config', historico_overrides:'historicoOverrides', historico_custom:'historicoCustom',
+  faltas:'faltas', faltas_registro:'faltasRegistro', faltas_limites:'faltasLimites',
+  notas_parciais:'notasParciais', metas_notas:'metasNotas', provas:'provas', tarefas:'tarefas',
+  aulas_custom:'aulasCustom', turmas_custom:'turmasCustom', relatorios_ocultos:'relatoriosOcultos',
+};
+let SEM = null;
+const nomeDaDisciplina = s => (STATE.historico.find(i => i.sigla === s) || {}).disciplina || s;
+// média ponderada das notas parciais já lançadas (null sem nenhuma)
+function mediaParcial(sigla){
+  const entradas = STATE.notasParciais[sigla] || [];
+  const feitas = entradas.filter(notaOk);
+  if(!feitas.length) return null;
+  const peso = e => Number(e.peso) || 1;
+  return {media: feitas.reduce((s, e) => s + Number(e.valor) * peso(e), 0) / feitas.reduce((s, e) => s + peso(e), 0), lancadas: feitas.length, total: entradas.length};
+}
+// "2º semestre de 2026" → "1º semestre de 2027"; "2026/1" → "2026/2"; outro formato fica para a pessoa escrever
+function proximoRotulo(s){
+  s = String(s || '').trim();
+  let m = /^([12])\s*º?\s*semestre\s*(?:de\s*)?(\d{4})$/i.exec(s);
+  if(m) return m[1] === '1' ? `2º semestre de ${m[2]}` : `1º semestre de ${Number(m[2]) + 1}`;
+  m = /^(\d{4})\s*([./-])\s*([12])$/.exec(s);
+  if(m) return m[3] === '1' ? `${m[1]}${m[2]}2` : `${Number(m[1]) + 1}${m[2]}1`;
+  return '';
+}
+// parece que o semestre acabou: as provas das disciplinas cursando já passaram, a última há 3 dias ou mais
+function semestreParaEncerrar(){
+  const atuais = STATE.config.disciplinasAtuais || [];
+  if(!atuais.length) return false;
+  const adiado = lsGet('notif_last_sem_' + (ACTIVE_PROFILE_ID || 'default'), null);
+  if(adiado && adiado > localISO(new Date())) return false;
+  const delas = STATE.provas.filter(p => atuais.some(s => provaDaDisciplina(p, s, nomeDaDisciplina(s))));
+  if(!delas.length || delas.some(provaPendente)) return false;
+  const dias = daysUntil(delas.map(p => p.data).sort().pop());
+  return dias <= -3 && dias >= -60;
+}
+function abrirFimSemestre(){
+  const atuais = STATE.config.disciplinasAtuais || [];
+  const min = STATE.config.notaMinima || 60;
+  const finais = {};
+  atuais.forEach(s => {
+    const mp = mediaParcial(s);
+    const item = STATE.historico.find(i => i.sigla === s) || {};
+    // a média das parciais; sem parciais, a nota que já estiver no Histórico
+    const nota = mp ? Math.round(mp.media * 10) / 10 : (typeof item.nota === 'number' ? item.nota : null);
+    finais[s] = {nota, res: nota === null || nota >= min ? 'passei' : 'nao', manual: false};
+  });
+  const prox = histSemestreAtual() + 1;
+  const bloco = buildSemestresCurriculares().find(b => b.numero === prox);
+  SEM = {
+    passo: 1, finais, novas: [], periodoNovo: prox,
+    // as disciplinas do semestre seguinte do curso já vêm marcadas
+    proximas: bloco ? bloco.disciplinas.filter(d => situacao(d) !== 'Aprovado' && !atuais.includes(d.sigla)).map(d => d.sigla) : [],
+    rotulo: proximoRotulo(STATE.config.semestre),
+    limpar: {faltas: true, provas: true, tarefas: true, horario: true, lab: true},
+  };
+  renderFimSemestre();
+  document.getElementById('modalSemestre').classList.add('open');
+}
+function fecharFimSemestre(){ document.getElementById('modalSemestre').classList.remove('open'); SEM = null; }
+function renderFimSemestre(){
+  const body = document.getElementById('semBody');
+  const voltar = document.getElementById('semVoltar'), avancar = document.getElementById('semAvancar');
+  const passos = n => `<div class="sem-passos" aria-hidden="true">${[1, 2, 3].map(i => `<span class="${i <= n ? 'on' : ''}"></span>`).join('')}</div>`;
+  const atuais = STATE.config.disciplinasAtuais || [];
+  const min = STATE.config.notaMinima || 60;
+  voltar.style.visibility = SEM.passo > 1 && SEM.passo < 4 ? 'visible' : 'hidden';
+  avancar.textContent = SEM.passo === 3 ? 'Encerrar semestre' : SEM.passo === 4 ? 'Concluir' : 'Próximo';
+  document.getElementById('semTitulo').textContent = SEM.passo === 4 ? 'Semestre encerrado' : `Encerrar semestre (${SEM.passo} de 3)`;
+
+  if(SEM.passo === 1){
+    body.innerHTML = passos(1) + `<p class="wizard-step-title">Como terminou cada disciplina?</p>
+      <p class="help-text" style="margin:0 0 4px;">A nota já vem da média das suas notas parciais: confira e corrija se precisar. Ela vai para o Histórico.</p>
+      ${atuais.length ? atuais.map(s => {
+        const f = SEM.finais[s], mp = mediaParcial(s), faltas = (STATE.faltas[s] || {}).faltas || 0;
+        const sub = [mp ? `média de ${mp.lancadas} de ${mp.total} ${mp.total === 1 ? 'nota' : 'notas'}` : 'sem notas parciais', `${faltas} ${faltas === 1 ? 'falta' : 'faltas'}`].join(', ');
+        return `<div class="sem-row" data-sem-disc="${esc(s)}">
+          <div><b>${esc(nomeDaDisciplina(s))}</b><small>${sub}</small></div>
+          <input inputmode="decimal" maxlength="5" autocomplete="off" placeholder="Nota" value="${f.nota === null ? '' : fmtNum(f.nota)}" aria-label="Nota final de ${esc(nomeDaDisciplina(s))}">
+          <div class="hist-seg" role="radiogroup" aria-label="Resultado em ${esc(nomeDaDisciplina(s))}">
+            <button type="button" role="radio" data-res="passei" aria-checked="${f.res === 'passei'}">Passei</button>
+            <button type="button" role="radio" data-res="nao" aria-checked="${f.res === 'nao'}">Não passei</button>
+          </div>
+        </div>`;
+      }).join('') : '<div class="empty">Nenhuma disciplina cursando neste semestre.</div>'}`;
+    body.querySelectorAll('[data-sem-disc]').forEach(row => {
+      const f = SEM.finais[row.dataset.semDisc];
+      const marcar = res => { f.res = res; row.querySelectorAll('[data-res]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.res === res))); };
+      row.querySelector('input').addEventListener('input', e => {
+        const t = e.target.value.trim().replace(',', '.');
+        const n = Number(t);
+        f.nota = t === '' || isNaN(n) ? null : Math.min(100, Math.max(0, n));
+        // enquanto a pessoa não escolheu à mão, o resultado segue a nota
+        if(!f.manual && f.nota !== null) marcar(f.nota >= min ? 'passei' : 'nao');
+      });
+      row.querySelectorAll('[data-res]').forEach(b => b.addEventListener('click', () => { f.manual = true; marcar(b.dataset.res); }));
+    });
+    return;
+  }
+
+  if(SEM.passo === 2){
+    // o que ainda falta fazer no curso, já contando o resultado deste semestre
+    const passou = s => SEM.finais[s] && SEM.finais[s].res === 'passei';
+    const blocos = buildSemestresCurriculares()
+      .map(b => ({b, itens: b.disciplinas.filter(d => !passou(d.sigla) && (situacao(d) !== 'Aprovado' || atuais.includes(d.sigla)))}))
+      .filter(x => x.itens.length);
+    const item = (s, nome) => `<label class="wiz-check-item"><input type="checkbox" data-prox="${esc(s)}"${SEM.proximas.includes(s) ? ' checked' : ''}><span>${esc(nome)}</span></label>`;
+    body.innerHTML = passos(2) + `<p class="wizard-step-title">E o próximo semestre?</p>
+      <div class="wiz-field"><label for="semRotulo">Nome do novo semestre</label><input id="semRotulo" value="${esc(SEM.rotulo)}" placeholder="Ex.: 1º semestre de 2027" autocomplete="off"></div>
+      <p class="help-text" style="margin:4px 0 12px;">Marque as disciplinas que você vai cursar.${SEM.proximas.length ? ` As do ${SEM.periodoNovo}º semestre já vêm marcadas.` : ''}</p>
+      ${blocos.map(({b, itens}) => `<div class="wiz-sem-block"><div class="wiz-sem-head"><span>${tituloSemestre(b, blocos.length === 1)}</span></div>
+        <div class="wiz-check-grid">${itens.map(d => item(d.sigla, d.disciplina)).join('')}</div></div>`).join('')}
+      ${SEM.novas.length ? `<div class="wiz-sem-block"><div class="wiz-sem-head"><span>Novas</span></div><div class="wiz-check-grid">${SEM.novas.map(n => item(n.sigla, n.disciplina)).join('')}</div></div>` : ''}
+      <form class="sem-add" id="semAddForm"><input id="semAddNome" placeholder="Outra disciplina que não está na lista" autocomplete="off" aria-label="Nome da disciplina nova"><button type="submit" class="btn btn-sm">Adicionar</button></form>`;
+    document.getElementById('semRotulo').addEventListener('input', e => { SEM.rotulo = e.target.value; });
+    body.querySelectorAll('[data-prox]').forEach(cb => cb.addEventListener('change', () => {
+      SEM.proximas = SEM.proximas.filter(s => s !== cb.dataset.prox);
+      if(cb.checked) SEM.proximas.push(cb.dataset.prox);
+    }));
+    document.getElementById('semAddForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const {codigo, nome} = separarCodigo(document.getElementById('semAddNome').value);
+      if(!nome) return;
+      const usada = s => STATE.historico.some(i => i.sigla === s) || SEM.novas.some(n => n.sigla === s);
+      const sigla = codigo && !usada(codigo) ? codigo : siglaNova(nome, usada);
+      SEM.novas.push({sigla, disciplina: nome});
+      SEM.proximas.push(sigla);
+      renderFimSemestre();
+      document.getElementById('semAddNome').focus();
+    });
+    return;
+  }
+
+  if(SEM.passo === 3){
+    const passadas = STATE.provas.filter(p => !provaPendente(p)).length;
+    const feitas = STATE.tarefas.filter(t => t.status === 'Concluído').length;
+    const opc = (k, titulo, texto) => `<label class="sem-opc"><input type="checkbox" data-limpar="${k}"${SEM.limpar[k] ? ' checked' : ''}><span><b>${titulo}</b><span>${texto}</span></span></label>`;
+    body.innerHTML = passos(3) + `<p class="wizard-step-title">O que limpar para começar do zero?</p>
+      ${opc('faltas', 'Zerar as faltas', 'O total de cada disciplina fica guardado no registro do semestre.')}
+      ${opc('provas', 'Apagar as provas que já passaram', passadas ? `${passadas} ${passadas === 1 ? 'prova' : 'provas'}. As que ainda vão acontecer continuam.` : 'Nenhuma prova passada agora.')}
+      ${opc('tarefas', 'Apagar as tarefas concluídas', feitas ? `${feitas} ${feitas === 1 ? 'tarefa' : 'tarefas'}. As pendentes continuam.` : 'Nenhuma tarefa concluída agora.')}
+      ${opc('horario', 'Limpar o horário de aulas', 'Depois você monta o novo na aba Horário.')}
+      ${opc('lab', 'Limpar o laboratório', 'As turmas e os relatórios deste semestre.')}
+      <div class="notif-agenda" style="margin-top:14px;">
+        <span class="notif-agenda__ic">${ico('download')}</span>
+        <div class="notif-agenda__txt"><b>Por garantia, baixe um backup antes</b><span>E se mudar de ideia, dá para desfazer o encerramento em Configurações.</span></div>
+        <button type="button" class="btn btn-sm" id="semBackup">Baixar backup</button>
+      </div>`;
+    body.querySelectorAll('[data-limpar]').forEach(cb => cb.addEventListener('change', () => { SEM.limpar[cb.dataset.limpar] = cb.checked; }));
+    document.getElementById('semBackup').onclick = () => document.getElementById('btnExport').click();
+    return;
+  }
+
+  // passo 4: pronto
+  const n = (STATE.config.disciplinasAtuais || []).length;
+  body.innerHTML = `<p class="wizard-step-title">Pronto, semestre encerrado!</p>
+    <p class="help-text" style="margin:0 0 14px;">As notas finais foram para o Histórico${STATE.config.semestre ? ` e o ${esc(STATE.config.semestre)} começou` : ' e o novo semestre começou'} com ${n} ${n === 1 ? 'disciplina' : 'disciplinas'}.
+      Agora monte o horário de aulas para o Painel e o botão "Faltei" funcionarem.</p>
+    <button type="button" class="btn btn-primary" id="semHorario">Montar o horário agora</button>`;
+  document.getElementById('semHorario').onclick = () => { fecharFimSemestre(); switchTab('horario'); openModalHorario(); };
+}
+async function encerrarSemestre(){
+  const atuais = [...(STATE.config.disciplinasAtuais || [])];
+  // o estado de antes, para o "Desfazer"
+  const antes = {};
+  Object.entries(SEM_CAMPOS).forEach(([k, campo]) => { antes[k] = clone(STATE[campo]); });
+  const registro = {
+    id: 'sem-' + Date.now(), semestre: STATE.config.semestre || '', encerradoEm: Date.now(), antes,
+    disciplinas: atuais.map(s => {
+      const f = SEM.finais[s] || {};
+      return {sigla: s, nome: nomeDaDisciplina(s), nota: f.nota ?? null, passou: f.res !== 'nao',
+        faltas: (STATE.faltas[s] || {}).faltas || 0, parciais: clone(STATE.notasParciais[s] || [])};
+    }),
+  };
+  // 1. resultado de cada disciplina no Histórico; as notas parciais e metas dela saem
+  atuais.forEach(s => {
+    const f = SEM.finais[s];
+    if(!f) return;
+    STATE.historicoOverrides[s] = Object.assign(STATE.historicoOverrides[s] || {}, {nota: f.nota, aprovado: f.res !== 'nao'});
+    delete STATE.notasParciais[s];
+    delete STATE.metasNotas[s];
+  });
+  // 2. disciplinas novas, no semestre seguinte do curso
+  SEM.novas.forEach(n => STATE.historicoCustom.push({sigla: n.sigla, disciplina: n.disciplina, ch: null, nota: null, semestre: null, periodo: SEM.periodoNovo, _custom: true}));
+  STATE.historico = montarHistorico();
+  // 3. o próximo semestre, na ordem do curso
+  const ordem = STATE.historico.map(d => d.sigla);
+  const pos = x => { const i = ordem.indexOf(x); return i < 0 ? Infinity : i; };
+  STATE.config.disciplinasAtuais = [...new Set(SEM.proximas)].sort((a, b) => pos(a) - pos(b));
+  if(SEM.rotulo.trim()) STATE.config.semestre = SEM.rotulo.trim();
+  // 4. limpeza
+  const L = SEM.limpar;
+  if(L.faltas){ STATE.faltas = {}; STATE.faltasRegistro = []; }
+  Object.keys(STATE.faltasLimites || {}).forEach(s => { if(!STATE.config.disciplinasAtuais.includes(s)) delete STATE.faltasLimites[s]; });
+  if(L.provas) STATE.provas = STATE.provas.filter(provaPendente);
+  if(L.tarefas) STATE.tarefas = STATE.tarefas.filter(t => t.status !== 'Concluído');
+  if(L.horario) STATE.aulasCustom = [];
+  if(L.lab){
+    STATE.turmasCustom = {};
+    STATE.relatoriosOcultos = [...new Set([...(STATE.relatoriosOcultos || []), ...(DATA.relatorios || []).map(r => r.nome)])];
+    STATE.tarefas = STATE.tarefas.filter(t => t.categoria !== 'Relatório de Lab.');
+  }
+  // só o encerramento mais recente guarda o "antes" (é o único que dá para desfazer)
+  STATE.semestres = [...(STATE.semestres || []).map(r => { const c = Object.assign({}, r); delete c.antes; return c; }), registro];
+  for(const [k, campo] of Object.entries(SEM_CAMPOS)) await storeSet(k, STATE[campo]);
+  await storeSet('semestres', STATE.semestres);
+  renderAll();
+}
+async function desfazerEncerramento(id){
+  const reg = (STATE.semestres || []).find(r => r.id === id);
+  if(!reg || !reg.antes) return;
+  if(!confirm(`Desfazer o encerramento${reg.semestre ? ` de ${reg.semestre}` : ''}? Notas, faltas, provas, tarefas, horário e disciplinas voltam a ser como eram antes dele, e o que você mudou depois disso nessas partes se perde.`)) return;
+  for(const [k, campo] of Object.entries(SEM_CAMPOS)){
+    if(!(k in reg.antes)) continue;
+    STATE[campo] = reg.antes[k];
+    await storeSet(k, reg.antes[k]);
+  }
+  STATE.semestres = STATE.semestres.filter(r => r.id !== id);
+  await storeSet('semestres', STATE.semestres);
+  STATE.historico = montarHistorico();
+  renderAll();
+  showToast('Encerramento desfeito', 'success');
+}
+function renderSemPanel(){
+  const p = document.getElementById('semPanel');
+  if(!p) return;
+  const atuais = STATE.config.disciplinasAtuais || [];
+  const arq = [...(STATE.semestres || [])].reverse();
+  p.innerHTML = statusRow('cor-purple', esc(STATE.config.semestre || 'Semestre atual'),
+      `${atuais.length} ${atuais.length === 1 ? 'disciplina' : 'disciplinas'} cursando. Quando as aulas acabarem, encerre o semestre: as notas finais vão para o Histórico, as faltas zeram e você escolhe as disciplinas do próximo.`,
+      `<button class="btn btn-sm btn-primary" id="btnFimSem">Encerrar semestre</button>`, 'calendar')
+    + (arq.length ? `<div class="sem-arq"><div class="notif-quando-t" style="margin:0 0 4px;">Semestres encerrados</div>
+      ${arq.map((r, i) => {
+        const notas = r.disciplinas.filter(d => typeof d.nota === 'number');
+        const media = notas.length ? notas.reduce((s, d) => s + d.nota, 0) / notas.length : null;
+        return `<details><summary><b>${esc(r.semestre || 'Semestre')}</b>
+          <small>encerrado em ${fmtDate(localISO(new Date(r.encerradoEm)))}, ${r.disciplinas.length} ${r.disciplinas.length === 1 ? 'disciplina' : 'disciplinas'}${media !== null ? `, média ${fmtNum(media)}` : ''}</small>
+          ${i === 0 && r.antes ? `<button type="button" class="link-btn" data-desfazer-sem="${esc(r.id)}">Desfazer</button>` : ''}</summary>
+          <ul>${r.disciplinas.map(d => `<li><span>${esc(d.nome)}</span><span>${d.nota !== null ? fmtNum(d.nota) : 'sem nota'}, ${d.passou ? 'passou' : 'não passou'}, ${d.faltas} ${d.faltas === 1 ? 'falta' : 'faltas'}</span></li>`).join('')}</ul>
+        </details>`;
+      }).join('')}</div>` : '');
+  document.getElementById('btnFimSem').onclick = abrirFimSemestre;
+  p.querySelectorAll('[data-desfazer-sem]').forEach(b => b.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); desfazerEncerramento(b.dataset.desfazerSem); }));
+}
+document.getElementById('semFechar').addEventListener('click', fecharFimSemestre);
+document.getElementById('modalSemestre').addEventListener('click', e => { if(e.target === e.currentTarget && SEM && SEM.passo !== 3) fecharFimSemestre(); });
+document.getElementById('semVoltar').addEventListener('click', () => { if(SEM && SEM.passo > 1){ SEM.passo--; renderFimSemestre(); } });
+document.getElementById('semAvancar').addEventListener('click', async e => {
+  if(!SEM) return;
+  if(SEM.passo === 4){ fecharFimSemestre(); return; }
+  if(SEM.passo === 2){
+    // o que ficou escrito sem tocar em "Adicionar" também entra
+    const pendente = document.getElementById('semAddNome');
+    if(pendente && pendente.value.trim()){ document.getElementById('semAddForm').requestSubmit(); }
+  }
+  if(SEM.passo === 3){
+    const b = e.currentTarget; b.disabled = true;
+    try{ await encerrarSemestre(); }
+    catch(err){ showToast('Não foi possível encerrar o semestre: ' + err.message, 'error', 6000); b.disabled = false; return; }
+    b.disabled = false;
+  }
+  SEM.passo++;
+  renderFimSemestre();
+  document.getElementById('semBody').scrollTop = 0;
+});
+
 document.getElementById('btnSaveConfig').addEventListener('click', async () => {
   STATE.config = {
     ...STATE.config,
@@ -6703,6 +7037,7 @@ document.getElementById('btnExport').addEventListener('click', async () => {
     pom_sessions: STATE.pomSessions,
     disc_notes: STATE.discNotes,
     estudos_materiais: STATE.estudos,
+    semestres: STATE.semestres,
     labs: STATE.labs,
     base_data: currentBaseData(),
   };
@@ -6756,7 +7091,7 @@ document.getElementById('fileImport').addEventListener('change', (e) => {
       const BACKUP_KEYS = ['config','historico_overrides','historico_custom','historico_removidos','tarefas',
         'lab_concluido','provas','faltas','faltas_limites','faltas_registro','relatorios_ocultos','relatorios_overrides','horas_comp',
         'horas_global','aulas_custom','turmas_custom','notas_parciais','metas_notas','tema','lembretes',
-        'pom_sessions','disc_notes','estudos_materiais','labs'];
+        'pom_sessions','disc_notes','estudos_materiais','semestres','labs'];
       for(const k of BACKUP_KEYS){ if(k in backup) await storeSet(k, backup[k]); }
       const msg = document.getElementById('importMsg'); msg.classList.add('show');
       setTimeout(()=>msg.classList.remove('show'), 1800);
@@ -6885,9 +7220,10 @@ async function disablePush(){
   _pushSub = null;
 }
 // Linha de estado das Configurações (notificações, conta): ícone colorido, título, texto e botões.
-// estado: '' ou 'is-synced' ok (verde), 'is-syncing' (azul), 'is-local'/'is-offline' desligado (cinza), 'is-error' (vermelho)
+// estado: '' ou 'is-synced' ok (verde), 'is-syncing' (azul), 'is-local'/'is-offline' desligado (cinza), 'is-error' (vermelho),
+// ou 'cor-<nome>' para uma cor fixa (ex.: 'cor-purple')
 function statusRow(estado, titulo, texto, botoes, icone = 'bell'){
-  const cor = {'is-error':'red', 'is-local':'gray', 'is-offline':'gray', 'is-syncing':'blue'}[estado] || 'green';
+  const cor = estado.startsWith('cor-') ? estado.slice(4) : ({'is-error':'red', 'is-local':'gray', 'is-offline':'gray', 'is-syncing':'blue'}[estado] || 'green');
   return `<div class="notif-top">
     <span class="notif-top__ic" style="--c:var(--${cor}); --c-dim:var(--${cor}-dim)">${ico(estado === 'is-error' ? 'alert' : icone)}</span>
     <div class="notif-top__txt"><div class="t">${titulo}</div><div class="s">${texto}</div></div>
