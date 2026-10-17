@@ -1012,7 +1012,8 @@
   .task-group-label::after{content:'';flex:1;height:1px;background:var(--line-soft);}
 
   /* ===== DISC DETAIL MODAL ===== */
-  .disc-modal{background:var(--panel);border:1px solid var(--line);border-radius:12px;width:100%;max-width:600px;max-height:88vh;overflow-y:auto;padding:24px;box-shadow:0 24px 60px rgba(0,0,0,.5);}
+  .disc-modal{background:rgba(30,30,40,.97);border:1px solid var(--line);border-radius:12px;width:100%;max-width:600px;max-height:88vh;overflow-y:auto;padding:24px;box-shadow:0 24px 60px rgba(0,0,0,.5);}
+  html[data-theme="light"] .disc-modal{background:rgba(250,250,253,.98);}
   .disc-modal h3{font-size:17px;font-weight:600;margin:0 0 3px;letter-spacing:-.01em;}
   .disc-modal .dm-sigla{font-family:var(--mono);font-size:11px;color:var(--text-faint);letter-spacing:.06em;margin-bottom:16px;}
   .dm-stat-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
@@ -2165,8 +2166,9 @@
   .mapa-vistas{display:flex; gap:6px;}
   .arv{display:flex; flex-direction:column; gap:12px;}
   .arv-info{position:sticky; top:12px; z-index:5; min-height:96px; padding:12px 14px; border-radius:16px; display:flex; flex-direction:column; gap:6px;
-    background:var(--lg-fill-sheet, var(--panel-2)); backdrop-filter:var(--lg-blur); -webkit-backdrop-filter:var(--lg-blur); box-shadow:var(--lg-drop); border:1px solid var(--line-soft);
+    background:rgba(30,30,40,.96); box-shadow:var(--lg-drop); border:1px solid var(--line-soft);
     font-size:13px; line-height:1.5; color:var(--text-dim);}
+  html[data-theme="light"] .arv-info{background:rgba(250,250,253,.97);}
   .arv-info p{margin:0;}
   .arv-info b{color:var(--text); font-weight:600;}
   .arv-info__t{display:flex; align-items:baseline; gap:4px 10px; flex-wrap:wrap;}
@@ -2203,8 +2205,8 @@
   .arv-no.is-livre .arv-no__c{color:var(--blue);}
   .arv-no.is-bloq{border-style:dashed; color:var(--text-dim);}
   .arv-no.is-bloq .arv-no__n, .arv-no.is-bloq .arv-no__c{opacity:.75;}
-  .arv-palco.tem-sel .arv-no{opacity:.22;}
-  .arv-palco.tem-sel .arv-no.is-sel, .arv-palco.tem-sel .arv-no.is-anc, .arv-palco.tem-sel .arv-no.is-desc{opacity:1;}
+  .arv-palco.tem-sel .arv-no:not(.is-sel):not(.is-anc):not(.is-desc){background:linear-gradient(var(--panel-2), var(--panel-2)), var(--bg); border-color:var(--line-soft); border-style:solid;}
+  .arv-palco.tem-sel .arv-no:not(.is-sel):not(.is-anc):not(.is-desc) > span{opacity:.3;}
   .arv-no.is-sel{box-shadow:0 0 0 2px var(--blue), 0 6px 18px rgba(0,0,0,.18);}
   .arv-no.is-desc{box-shadow:0 0 0 1px var(--blue);}
   .arv-l{fill:none; stroke:var(--text-dim); stroke-width:1.6; stroke-linecap:round;}
@@ -2214,6 +2216,8 @@
   .arv-seta{fill:var(--text-dim);}
   .arv-seta.is-baixo{fill:var(--blue);}
   @media (max-width:880px){ .arv-info{top:calc(58px + env(safe-area-inset-top, 0px));} }
+  /* menu no topo (computador): o quadro para logo abaixo dele, não por trás */
+  @media (min-width:881px){ body.pos-top .arv-info{top:52px;} }
   @media (prefers-reduced-motion: reduce){ .arv-no{transition:none;} }
   /* disciplina que ainda depende de outra: cadeado no Mapa e no montador de grade */
   .badge.is-bloq{opacity:.75;}
@@ -4968,7 +4972,7 @@ function showDiscDetail(sigla){
   const curDisc = curriculoDoPerfil(), creditosDisc = curDisc ? curDisc.creditos[sigla] || 0 : 0;
 
   document.getElementById('ddNome').textContent = item.disciplina;
-  document.getElementById('ddSigla').textContent = `${sigla}, ${ch}h, Semestre ${item.semestre||'—'}`;
+  document.getElementById('ddSigla').textContent = [sigla, item.ch > 0 ? `${item.ch}h` : '', item.semestre ? `semestre ${item.semestre}` : ''].filter(Boolean).join(', ');
 
   document.getElementById('discModalBody').innerHTML = `
     <div class="dm-stat-row">
@@ -5436,7 +5440,11 @@ function renderMapaSucesso(){
     vistas.querySelectorAll('[data-mvista]').forEach(b => { const on = b.dataset.mvista === vista; b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on)); });
   }
   el.hidden = vista === 'arvore';
-  if(arv){ arv.hidden = vista !== 'arvore'; if(vista === 'arvore') renderArvore(); else arv.innerHTML = ''; }
+  if(arv){
+    arv.hidden = vista !== 'arvore';
+    if(vista === 'arvore') renderArvore();
+    else { arv.innerHTML = ''; if(ARV_OBS){ ARV_OBS.disconnect(); ARV_OBS = null; } }
+  }
   el.innerHTML = semestres.map(bloco => {
     const total = bloco.disciplinas.length;
     const aprovadas = bloco.disciplinas.filter(d => situacao(d)==='Aprovado').length;
