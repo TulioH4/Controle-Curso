@@ -2139,6 +2139,82 @@
   button.fm-chip:hover{border-color:var(--blue);}
   .fm-notas{display:flex; flex-direction:column; gap:6px;}
   @media (max-width:640px){ .fm-sem{grid-template-columns:minmax(0, 1fr);} .fm-quando{font-size:21px;} }
+  /* o que está em jogo neste semestre (previsão de formatura) */
+  .fm-jogo{padding:12px 14px; border-radius:14px; background:var(--green-dim); display:flex; flex-direction:column; gap:5px;}
+  .fm-jogo.is-alerta{background:var(--amber-dim);}
+  .fm-jogo .stat__label .i{width:14px; height:14px;}
+  .fm-jogo.is-alerta .stat__label .i{color:var(--amber);}
+  .fm-jogo:not(.is-alerta) .stat__label .i{color:var(--green);}
+  .fm-jogo p{margin:0; font-size:13px; line-height:1.5; color:var(--text-dim); max-width:72ch;}
+  .fm-jogo b{color:var(--text); font-weight:600;}
+  /* Painel: atalho para a previsão; card de risco: disciplina que adia a formatura */
+  .pc-form{margin-top:14px; width:100%; display:flex; align-items:center; gap:8px; padding:10px 12px; border-radius:12px; border:1px solid var(--line-soft); background:transparent; color:var(--text-dim); font:inherit; font-size:13px; text-align:left; cursor:pointer;}
+  .pc-form:hover{border-color:var(--line);}
+  .pc-form b{color:var(--text); font-weight:600;}
+  .pc-form .i{color:var(--green); flex-shrink:0;}
+  .pc-form__ir{margin-left:auto; color:var(--blue); font-size:12.5px; white-space:nowrap; padding-left:8px;}
+  .risco-form{font-size:10.5px; font-weight:600; color:var(--red); white-space:nowrap; flex-shrink:0;}
+  /* montador: a formatura com a grade marcada */
+  .gm-form{display:flex; align-items:center; gap:9px; margin:0 0 12px; padding:10px 14px; border-radius:14px; background:var(--panel-2); font-size:13px; color:var(--text-dim); line-height:1.45;}
+  .gm-form b{color:var(--text); font-weight:600;}
+  .gm-form .i{color:var(--green); flex-shrink:0;}
+  .gm-form.is-pior{background:var(--amber-dim);}
+  .gm-form.is-pior .i{color:var(--amber);}
+  .gm-form.is-melhor{background:var(--green-dim);}
+  /* árvore do curso (Mapa de Sucesso) */
+  .mapa-vistas{display:flex; gap:6px;}
+  .arv{display:flex; flex-direction:column; gap:12px;}
+  .arv-info{position:sticky; top:12px; z-index:5; min-height:96px; padding:12px 14px; border-radius:16px; display:flex; flex-direction:column; gap:6px;
+    background:var(--lg-fill-sheet, var(--panel-2)); backdrop-filter:var(--lg-blur); -webkit-backdrop-filter:var(--lg-blur); box-shadow:var(--lg-drop); border:1px solid var(--line-soft);
+    font-size:13px; line-height:1.5; color:var(--text-dim);}
+  .arv-info p{margin:0;}
+  .arv-info b{color:var(--text); font-weight:600;}
+  .arv-info__t{display:flex; align-items:baseline; gap:4px 10px; flex-wrap:wrap;}
+  .arv-info__t b{font-size:14.5px;}
+  .arv-info__t span{font-size:12px; color:var(--text-faint);}
+  .arv-info__acoes{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  .arv-info__acoes .btn{margin-left:auto;}
+  .arv-info.is-alerta{border-color:var(--amber);}
+  .arv-estados{display:flex; flex-wrap:wrap; gap:6px 14px; font-size:12px;}
+  .arv-estados span, .arv-linhas span{display:inline-flex; align-items:center; gap:6px;}
+  .arv-linhas{display:flex; flex-wrap:wrap; gap:4px 14px; font-size:11.5px; color:var(--text-faint);}
+  .arv-q{width:12px; height:12px; border-radius:4px; border:1px solid var(--line); background:var(--panel-2); flex-shrink:0;}
+  .arv-q.is-ok{background:var(--green-dim); border-color:var(--green);}
+  .arv-q.is-cur{background:var(--amber-dim); border-color:var(--amber);}
+  .arv-q.is-livre{border-color:var(--blue);}
+  .arv-q.is-bloq{border-style:dashed; opacity:.7;}
+  .arv-palco{position:relative; display:flex; flex-direction:column; gap:26px; padding:8px 0 4px;}
+  .arv-svg{position:absolute; left:0; top:0; pointer-events:none; overflow:visible; z-index:0;}
+  .arv-per{display:flex; gap:10px; align-items:flex-start;}
+  .arv-per__h{flex:0 0 24px; font-family:var(--mono); font-size:11.5px; color:var(--text-faint); padding-top:9px; text-align:right;}
+  .arv-nos{flex:1; min-width:0; display:flex; flex-wrap:wrap; gap:10px 10px;}
+  .arv-no{position:relative; z-index:1; width:122px; max-width:calc(50% - 5px); min-height:54px; display:flex; flex-direction:column; align-items:flex-start; gap:1px;
+    padding:7px 9px; border-radius:12px; border:1px solid var(--line); color:var(--text); font:inherit; text-align:left; cursor:pointer;
+    background:linear-gradient(var(--panel-2), var(--panel-2)), var(--bg); transition:opacity .2s, box-shadow .2s, transform .15s;}
+  .arv-no:active{transform:scale(.97);}
+  .arv-no__c{font-family:var(--mono); font-size:11px; font-weight:600; color:var(--text-dim); display:inline-flex; align-items:center; gap:3px;}
+  .arv-no__c .i{width:11px; height:11px;}
+  .arv-no__n{font-size:11.5px; line-height:1.3; overflow:hidden; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2;}
+  .arv-no.is-ok{background:linear-gradient(var(--green-dim), var(--green-dim)), var(--bg); border-color:color-mix(in srgb, var(--green) 45%, transparent);}
+  .arv-no.is-ok .arv-no__c{color:var(--green);}
+  .arv-no.is-cur{background:linear-gradient(var(--amber-dim), var(--amber-dim)), var(--bg); border-color:var(--amber);}
+  .arv-no.is-cur .arv-no__c{color:var(--amber);}
+  .arv-no.is-livre{border-color:var(--blue);}
+  .arv-no.is-livre .arv-no__c{color:var(--blue);}
+  .arv-no.is-bloq{border-style:dashed; color:var(--text-dim);}
+  .arv-no.is-bloq .arv-no__n, .arv-no.is-bloq .arv-no__c{opacity:.75;}
+  .arv-palco.tem-sel .arv-no{opacity:.22;}
+  .arv-palco.tem-sel .arv-no.is-sel, .arv-palco.tem-sel .arv-no.is-anc, .arv-palco.tem-sel .arv-no.is-desc{opacity:1;}
+  .arv-no.is-sel{box-shadow:0 0 0 2px var(--blue), 0 6px 18px rgba(0,0,0,.18);}
+  .arv-no.is-desc{box-shadow:0 0 0 1px var(--blue);}
+  .arv-l{fill:none; stroke:var(--text-dim); stroke-width:1.6; stroke-linecap:round;}
+  .arv-l.is-baixo{stroke:var(--blue);}
+  .arv-l.t-II{stroke-dasharray:6 4;}
+  .arv-l.t-Co{stroke-dasharray:1.5 4.5;}
+  .arv-seta{fill:var(--text-dim);}
+  .arv-seta.is-baixo{fill:var(--blue);}
+  @media (max-width:880px){ .arv-info{top:calc(58px + env(safe-area-inset-top, 0px));} }
+  @media (prefers-reduced-motion: reduce){ .arv-no{transition:none;} }
   /* disciplina que ainda depende de outra: cadeado no Mapa e no montador de grade */
   .badge.is-bloq{opacity:.75;}
   .badge .i{width:11px; height:11px; vertical-align:-1px; margin-right:3px;}
@@ -2788,9 +2864,14 @@
     <section class="tab" id="tab-mapa">
       <div class="screen__header">
         <h2>Mapa de Sucesso</h2>
+        <div class="mapa-vistas" id="mapaVistas" role="group" aria-label="Como ver o curso" hidden>
+          <button type="button" class="view-toggle-btn active" data-mvista="semestres" data-ico="list" aria-pressed="true">Semestres</button>
+          <button type="button" class="view-toggle-btn" data-mvista="arvore" data-ico="map" aria-pressed="false">Árvore</button>
+        </div>
       </div>
       <div id="formaturaPanel" hidden></div>
       <div id="mapaTimeline"></div>
+      <div id="mapaArvore" hidden></div>
     </section>
 
     <!-- FALTAS -->
@@ -3144,6 +3225,7 @@
           </span>
         </div>
         <div class="gm-aviso" id="gmAviso" role="status" hidden></div>
+        <p class="gm-form" id="gmFormatura" hidden></p>
         <div class="gm-montar">
           <div class="panel panel--pad gm-turmas" id="gmTurmas"></div>
           <div class="panel gm-semana" id="gmSemana" aria-label="A semana"></div>
@@ -4114,6 +4196,8 @@ function renderDiscRisco(){
     return;
   }
 
+  // as que, reprovando, adiam a formatura (curso com quadro de requisitos)
+  const curR = curriculoDoPerfil(), pesos = curR ? reqPesos(curR) : {};
   panel.innerHTML = risks.map(r => {
     const faltasCls = r.faltasPct >= 1 ? 'red' : r.faltasPct >= 0.75 ? 'amber' : 'green';
     const barPct = Math.min(100, Math.round(r.totalRisk * 100));
@@ -4121,6 +4205,7 @@ function renderDiscRisco(){
     return `<div class="risco-row">
       <span class="risco-sigla" style="color:${barColor}">${esc(r.sigla)}</span>
       <span class="risco-nome" title="${esc(r.nome)}">${esc(r.nome)}</span>
+      ${pesos[r.sigla] > 0 ? `<span class="risco-form" title="Reprovar nesta adia a formatura em ${pesos[r.sigla]} ${pesos[r.sigla] === 1 ? 'semestre' : 'semestres'}">adia a formatura</span>` : ''}
       <span style="font-size:11px;color:var(--${faltasCls});font-family:var(--mono);width:42px;text-align:right;flex-shrink:0;">${r.faltasCount}/${r.limite}</span>
       ${r.notaLabel ? `<span style="font-size:10.5px;color:var(--text-faint);white-space:nowrap;flex-shrink:0;">${esc(r.notaLabel)}</span>` : ''}
       <div class="risco-bar-wrap"><div class="risco-bar-fill" style="width:${barPct}%;background:${barColor};"></div></div>
@@ -4340,6 +4425,8 @@ function renderProgressoCurso(){
     const todas = Object.keys(cur.creditos), b = reqBase(false);
     const total = reqCred(cur, todas), feitos = reqCred(cur, todas.filter(sg => b.aprov.has(sg)));
     creditos = {total, feitos, cursando: reqCred(cur, todas.filter(sg => b.cursando.has(sg))), pct: total ? Math.round(feitos / total * 100) : 0};
+    const prev = reqPrevisao(cur);
+    creditos.formatura = prev.fim !== null ? reqMaiuscula(reqRotuloEm(prev.fim)) : '';
   }
 
   const barStyle = (p, color) =>
@@ -4368,7 +4455,10 @@ function renderProgressoCurso(){
       </div>` : `<div style="display:flex;align-items:center;">
         <span style="font-size:11.5px;color:var(--text-faint);">Preencha a CH no Histórico para ver a integralização em horas.</span>
       </div>`}
-    </div>`;
+    </div>
+    ${creditos && creditos.formatura ? `<button type="button" class="pc-form" id="pcFormatura">${ico('cap')}<span>Formatura prevista: <b>${esc(creditos.formatura)}</b></span><span class="pc-form__ir">Ver no Mapa ›</span></button>` : ''}`;
+  const irMapa = document.getElementById('pcFormatura');
+  if(irMapa) irMapa.addEventListener('click', () => switchTab('mapa'));
 }
 
 // ---------------- Painel: overview do dia ----------------
@@ -5338,6 +5428,15 @@ function renderMapaSucesso(){
   renderFormatura();
   const semestres = buildSemestresCurriculares();
   const cur = curriculoDoPerfil(), base = cur && reqBase(true);
+  // semestres (linha do tempo) ou árvore do curso (só no curso com quadro de requisitos)
+  const vistas = document.getElementById('mapaVistas'), arv = document.getElementById('mapaArvore');
+  const vista = cur && lsGet('mapa_vista', 'semestres') === 'arvore' ? 'arvore' : 'semestres';
+  if(vistas){
+    vistas.hidden = !cur;
+    vistas.querySelectorAll('[data-mvista]').forEach(b => { const on = b.dataset.mvista === vista; b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on)); });
+  }
+  el.hidden = vista === 'arvore';
+  if(arv){ arv.hidden = vista !== 'arvore'; if(vista === 'arvore') renderArvore(); else arv.innerHTML = ''; }
   el.innerHTML = semestres.map(bloco => {
     const total = bloco.disciplinas.length;
     const aprovadas = bloco.disciplinas.filter(d => situacao(d)==='Aprovado').length;
@@ -5438,24 +5537,40 @@ function reqLimite(cursandoCred){
   const n = Number(STATE.config.creditosSemestre);
   return n >= 8 && n <= 60 ? n : (cursandoCred >= 12 ? cursandoCred : 24);
 }
-// Previsão: distribui o que falta pelos próximos semestres, respeitando os requisitos e o limite de
-// créditos, contando que a pessoa passe nas que está cursando. Vão primeiro as que seguram a sequência
-// mais longa; no empate, as de períodos anteriores.
-function reqPlano(cur, limite){
-  const {dep, per} = reqIndice(cur), cred = sg => cur.creditos[sg] || 0;
-  const base = reqBase(true), feitas = new Set(base.aprov), freq = new Set(base.freq);
-  const faltam = Object.keys(cur.creditos).filter(sg => !feitas.has(sg)), falta = new Set(faltam);
-  // quem ainda espera por sg (o pré-requisito II de quem já cursou sg, mesmo reprovado por nota, já vale)
+// altura de cada disciplina que falta: quantos semestres, no mínimo, ela e o que depende dela ainda
+// ocupam (co-requisito vai junto; o pré-requisito II de quem já cursou, mesmo reprovado por nota, já vale)
+function reqAlturas(cur, base){
+  const {dep} = reqIndice(cur);
+  const falta = new Set(Object.keys(cur.creditos).filter(sg => !base.aprov.has(sg)));
   const espera = sg => (dep[sg] || []).filter(x => falta.has(x.s) && !(x.tipo === 'II' && base.freq.has(sg)));
-  // altura: quantos semestres, no mínimo, sg e o que depende dela ainda ocupam (co-requisito vai junto)
   const alt = Object.create(null);
   const altura = sg => {
     if(alt[sg] !== undefined) return alt[sg];
     alt[sg] = 1;
     return (alt[sg] = Math.max(1, ...espera(sg).map(x => altura(x.s) + (x.tipo === 'Co' ? 0 : 1))));
   };
+  return {altura, espera, falta};
+}
+// Previsão: distribui o que falta pelos próximos semestres, respeitando os requisitos e o limite de
+// créditos, contando que a pessoa passe nas que está cursando. Vão primeiro as que seguram a sequência
+// mais longa; no empate, as de períodos anteriores. Opções: reprova (e se reprovar nesta), primeiro (a
+// grade do montador, que vai inteira no primeiro semestre) e contarCursando (false: as cursando ainda
+// não valem como feitas, para montar o semestre que está começando).
+function reqPlano(cur, limite, opts = {}){
+  const {per} = reqIndice(cur), cred = sg => cur.creditos[sg] || 0;
+  const base = reqBase(opts.contarCursando !== false);
+  // reprovar por nota: a disciplina volta a faltar, mas a frequência continua valendo (pré-requisito II)
+  if(opts.reprova) base.aprov.delete(opts.reprova);
+  const feitas = new Set(base.aprov), freq = new Set(base.freq);
+  const {altura, espera, falta} = reqAlturas(cur, base), faltam = [...falta];
   let resto = faltam.slice().sort((a, b) => altura(b) - altura(a) || (per[a] || 99) - (per[b] || 99) || cred(b) - cred(a));
   const sems = [];
+  const fecha = este => {
+    sems.push({siglas: resto.filter(sg => este.has(sg)), creditos: reqCred(cur, [...este])});
+    este.forEach(sg => { feitas.add(sg); freq.add(sg); });
+    resto = resto.filter(sg => !este.has(sg));
+  };
+  if(opts.primeiro){ const este = new Set(opts.primeiro.filter(sg => falta.has(sg))); if(este.size) fecha(este); }
   while(resto.length && sems.length < 30){
     const este = new Set();
     let soma = 0, mudou = true;
@@ -5468,9 +5583,7 @@ function reqPlano(cur, limite){
       });
     }
     if(!este.size) break;
-    sems.push({siglas: resto.filter(sg => este.has(sg)), creditos: soma});
-    este.forEach(sg => { feitas.add(sg); freq.add(sg); });
-    resto = resto.filter(sg => !este.has(sg));
+    fecha(este);
   }
   // a sequência mais longa entre as que faltam (o mínimo de semestres, com qualquer limite de créditos):
   // [{s, junto}], junto = vai no mesmo semestre da anterior (co-requisito)
@@ -5486,6 +5599,31 @@ function reqPlano(cur, limite){
   }
   return {sems, sobra: resto, cadeia, minimo: faltam.length ? Math.max(...faltam.map(altura)) : 0};
 }
+// A previsão de agora. fim: o semestre da formatura contado a partir deste (0 = este; null = sem previsão).
+function reqPrevisao(cur){
+  const todas = Object.keys(cur.creditos), agora = reqBase(false);
+  const total = reqCred(cur, todas), aprov = reqCred(cur, todas.filter(sg => agora.aprov.has(sg)));
+  const cursandoS = todas.filter(sg => agora.cursando.has(sg)), cursando = reqCred(cur, cursandoS);
+  const faltam = Math.max(0, total - aprov - cursando), limite = reqLimite(cursando);
+  const plano = reqPlano(cur, limite), n = plano.sems.length, comecaAgora = !cursandoS.length;
+  const fim = !faltam ? (cursandoS.length ? 0 : null) : plano.sobra.length ? null : (comecaAgora ? n - 1 : n);
+  return {todas, total, aprov, cursandoS, cursando, faltam, limite, plano, n, comecaAgora, fim};
+}
+// e se reprovar em sg (cursando agora): quantos semestres a formatura atrasa (null = sem previsão)
+function reqAtraso(cur, sg, prev = reqPrevisao(cur)){
+  if(prev.fim === null) return null;
+  const p = reqPlano(cur, prev.limite, {reprova: sg});
+  return p.sobra.length ? null : Math.max(0, p.sems.length - prev.n);
+}
+// o peso de cada disciplina cursando na formatura: {sigla: semestres a mais se reprovar nela}
+function reqPesos(cur, prev = reqPrevisao(cur)){
+  const out = Object.create(null);
+  prev.cursandoS.forEach(sg => { const a = reqAtraso(cur, sg, prev); if(a !== null) out[sg] = a; });
+  return out;
+}
+const reqRotuloEm = k => reqRotulos(k + 1, true)[k];
+// rótulo no meio da frase: "2º semestre de 2028", ou "daqui a 3 semestres"
+const reqMeio = t => /^\d/.test(t) ? t : t.charAt(0).toLowerCase() + t.slice(1);
 // rótulos dos próximos semestres: "1º semestre de 2027"..., a partir do semestre do perfil
 function reqRotulos(n, comecaAgora){
   const out = [];
@@ -5504,22 +5642,16 @@ function renderFormatura(){
   const cur = curriculoDoPerfil();
   el.hidden = !cur;
   if(!cur){ el.innerHTML = ''; return; }
-  const todas = Object.keys(cur.creditos), agora = reqBase(false);
-  const total = reqCred(cur, todas);
-  const aprov = reqCred(cur, todas.filter(sg => agora.aprov.has(sg)));
-  const cursandoS = todas.filter(sg => agora.cursando.has(sg)), cursando = reqCred(cur, cursandoS);
-  const faltam = Math.max(0, total - aprov - cursando);
-  const limite = reqLimite(cursando);
-  const plano = reqPlano(cur, limite);
-  const n = plano.sems.length, rot = reqRotulos(n, cursandoS.length === 0);
+  const prev = reqPrevisao(cur), {total, aprov, cursando, faltam, limite, plano, n} = prev;
+  const rot = reqRotulos(n, prev.comecaAgora);
   const pct = v => total ? (v / total * 100).toFixed(1) : 0;
-  const nCurs = cursandoS.length;
+  const nCurs = prev.cursandoS.length;
   const contando = nCurs ? `, contando que você passe ${nCurs === 1 ? 'na disciplina' : `nas ${nCurs}`} que está cursando` : '';
   let quando, sub;
   if(!faltam && !nCurs){ quando = 'Disciplinas concluídas'; sub = 'Você já foi aprovado em todas as disciplinas do quadro do curso.'; }
   else if(!faltam){ quando = reqMaiuscula(String(STATE.config.semestre || 'Neste semestre')); sub = `As que você está cursando são as últimas do quadro. Passando nelas, acabou.`; }
   else if(plano.sobra.length){ quando = 'Sem previsão'; sub = 'Algumas disciplinas não cabem em nenhum semestre com esses requisitos.'; }
-  else { quando = reqMaiuscula(rot[n - 1]); sub = `Em ${n} ${n === 1 ? 'semestre' : 'semestres'}${nCurs ? ' depois deste' : ''}, com até ${limite} créditos por semestre${contando}.`; }
+  else { quando = reqMaiuscula(reqRotuloEm(prev.fim)); sub = `Em ${n} ${n === 1 ? 'semestre' : 'semestres'}${nCurs ? ' depois deste' : ''}, com até ${limite} créditos por semestre${contando}.`; }
   // com um pouco mais de créditos por semestre, termina antes?
   let atalho = '';
   if(faltam && !plano.sobra.length && n > plano.minimo){
@@ -5541,6 +5673,18 @@ function renderFormatura(){
   if(plano.minimo >= 2 && plano.cadeia.length > 1) notas.push(`Sequência mais longa do que falta: ${esc(plano.cadeia.map((c, i) => (i ? (c.junto ? ' + ' : ' → ') : '') + nome(c.s)).join(''))}. Com qualquer limite de créditos, ela leva ${plano.minimo} semestres${plano.cadeia.some(c => c.junto) ? ' (as ligadas por + vão no mesmo semestre)' : ''}.`);
   if(atalho) notas.push(atalho);
   if(foraDoQuadro.length) notas.push(`Ficam fora desta conta, por não estarem no quadro de créditos: ${esc(foraDoQuadro.map(nome).join(', '))}.`);
+  // o que está em jogo neste semestre: reprovar em qual delas adia a formatura
+  let jogo = '';
+  if(nCurs && prev.fim !== null){
+    const pesos = reqPesos(cur, prev), pesam = prev.cursandoS.filter(sg => pesos[sg] > 0), grupos = {};
+    pesam.forEach(sg => (grupos[pesos[sg]] = grupos[pesos[sg]] || []).push(sg));
+    const ou = arr => arr.length < 2 ? arr.join('') : arr.slice(0, -1).join(', ') + ' ou ' + arr[arr.length - 1];
+    const frases = Object.keys(grupos).sort((a, b) => b - a).map(k => `Reprovar em ${ou(grupos[k].map(sg => `<b>${esc(nome(sg))}</b>`))} adia a formatura em ${k} ${Number(k) === 1 ? 'semestre' : 'semestres'}.`);
+    const outras = nCurs - pesam.length;
+    if(outras) frases.push(pesam.length ? `Nas outras ${outras === 1 ? 'uma' : outras}, uma reprovação ainda cabe nos semestres que faltam.`
+      : nCurs === 1 ? 'Se reprovar na que está cursando, ainda dá para encaixar depois sem mudar a previsão.' : `Se reprovar em uma das ${nCurs}, ainda dá para encaixar depois sem mudar a previsão.`);
+    jogo = `<div class="fm-jogo${pesam.length ? ' is-alerta' : ''}"><div class="stat__label">${ico(pesam.length ? 'alert' : 'check')} O que está em jogo neste semestre</div><p>${frases.join(' ')}</p></div>`;
+  }
   notas.push(`Feita com os pré e co-requisitos do currículo ${esc(cur.versao)}. A oferta de cada semestre e o limite da matrícula podem mudar a ordem. No mapa abaixo, ${ico('lock')} marca as disciplinas que ainda dependem de outras.`);
   el.innerHTML = `<div class="panel panel--pad fm">
     <div class="fm-top">
@@ -5562,6 +5706,7 @@ function renderFormatura(){
         <span>de <b>${total}</b> no curso</span>
       </div>
     </div>
+    ${jogo}
     ${n && faltam ? `<div class="fm-sems">${plano.sems.map((sm, i) => `<div class="fm-sem${i === n - 1 ? ' is-fim' : ''}">
       <div class="fm-sem__h">${esc(reqMaiuscula(rot[i]))}<small>${sm.creditos} créditos</small></div>
       <div class="fm-chips">${sm.siglas.map(chip).join('')}</div>
@@ -5575,6 +5720,14 @@ function renderFormatura(){
     renderFormatura();
   });
   el.querySelectorAll('[data-disc-chip]').forEach(b => b.addEventListener('click', () => showDiscDetail(b.dataset.discChip)));
+}
+// a frase sobre reprovar em sg (cursando): {atraso, html} ou null
+function reqTextoAtraso(cur, sg, prev = reqPrevisao(cur)){
+  const atraso = reqAtraso(cur, sg, prev);
+  if(atraso === null) return null;
+  return {atraso, html: atraso
+    ? `Se reprovar nesta, a formatura prevista passa para <b>${esc(reqMeio(reqRotuloEm(prev.fim + atraso)))}</b> (${atraso} ${atraso === 1 ? 'semestre' : 'semestres'} depois).`
+    : 'Se reprovar nesta, ainda dá para encaixar depois, sem mudar a previsão de formatura.'};
 }
 // requisitos e o que a disciplina libera, para o detalhe da disciplina
 function reqDetalheHtml(sigla, item){
@@ -5601,15 +5754,151 @@ function reqDetalheHtml(sigla, item){
   }
   const libera = (reqIndice(cur).dep[sigla] || []).filter(x => !reqEhGeral(cur, x.s));
   const nomesLibera = esc(libera.map(x => reqNome(cur, x.s)).join(', '));
-  if(html) return `<div style="margin-bottom:16px;">
+  // cursando agora: o que uma reprovação nesta faz com a formatura (seção própria, antes dos requisitos)
+  const t = cursandoEsta ? reqTextoAtraso(cur, sigla) : null;
+  const jogo = t ? `<div style="margin-bottom:16px;">
+      <div class="section-label" style="margin:0 0 8px;">Na formatura</div>
+      <p class="gm-nota" style="font-size:12.5px;color:var(--${t.atraso ? 'amber' : 'text-dim'});">${t.html}</p>
+    </div>` : '';
+  if(html) return jogo + `<div style="margin-bottom:16px;">
       <div class="section-label" style="margin:0 0 8px;">Requisitos</div>
       ${html}${libera.length ? `<p class="gm-nota" style="font-size:12.5px;color:var(--text-dim);margin-top:10px;"><b style="color:var(--text)">Abre caminho para:</b> ${nomesLibera}.</p>` : ''}
     </div>`;
-  return libera.length ? `<div style="margin-bottom:16px;">
+  return jogo + (libera.length ? `<div style="margin-bottom:16px;">
       <div class="section-label" style="margin:0 0 8px;">Abre caminho para</div>
       <p class="gm-nota" style="font-size:12.5px;color:var(--text-dim);">${nomesLibera}.</p>
-    </div>` : '';
+    </div>` : '');
 }
+
+// ---------------- Árvore do curso ----------------
+// O quadro de requisitos desenhado: cada período é uma linha. Tocar numa disciplina acende tudo o que
+// ela exige (acima, em cinza) e tudo o que ela libera (abaixo, em azul), com as ligações.
+let ARV_SEL = null, ARV_ARESTAS = [], ARV_OBS = null;
+// tudo o que sg exige (anc) e tudo o que ela libera (desc), sem o requisito "todas as outras" do TCC
+function arvRede(cur, sg){
+  const {r, dep} = reqIndice(cur), anc = new Set(), desc = new Set();
+  const sobe = s => { if(reqEhGeral(cur, s)) return; (r[s] || []).forEach(x => { if(!anc.has(x.s)){ anc.add(x.s); sobe(x.s); } }); };
+  const desce = s => (dep[s] || []).forEach(x => { if(!reqEhGeral(cur, x.s) && !desc.has(x.s)){ desc.add(x.s); desce(x.s); } });
+  sobe(sg); desce(sg);
+  return {anc, desc};
+}
+// as ligações do caminho até sg (cima) e a partir dela (baixo)
+function arvArestas(cur, sg, rede){
+  const {r} = reqIndice(cur), out = [], cima = new Set([sg, ...rede.anc]), baixo = new Set([sg, ...rede.desc]);
+  cima.forEach(d => { if(!reqEhGeral(cur, d)) (r[d] || []).forEach(x => { if(cima.has(x.s)) out.push({de: x.s, para: d, tipo: x.tipo, lado: 'cima'}); }); });
+  baixo.forEach(d => { if(d !== sg && !reqEhGeral(cur, d)) (r[d] || []).forEach(x => { if(baixo.has(x.s)) out.push({de: x.s, para: d, tipo: x.tipo, lado: 'baixo'}); }); });
+  return out;
+}
+// dentro de um período, a disciplina exigida vem antes da que a exige (co-requisito do mesmo período)
+function arvOrdem(cur, sgs){
+  const {r} = reqIndice(cur), dentro = new Set(sgs), vistos = new Set(), out = [];
+  let falta = sgs.slice(), voltas = 0;
+  while(falta.length && voltas++ < 20){
+    falta = falta.filter(sg => {
+      if((r[sg] || []).some(x => dentro.has(x.s) && !vistos.has(x.s))) return true;
+      out.push(sg); vistos.add(sg); return false;
+    });
+  }
+  return out.concat(falta);
+}
+function arvEstado(cur, sg, agora, prox){
+  return agora.aprov.has(sg) ? 'ok' : agora.cursando.has(sg) ? 'cur' : reqTrava(cur, sg, prox).length ? 'bloq' : 'livre';
+}
+const ARV_ROT = {ok: 'aprovada', cur: 'cursando', livre: 'pode cursar no próximo semestre', bloq: 'ainda bloqueada'};
+function renderArvore(){
+  const el = document.getElementById('mapaArvore'), cur = curriculoDoPerfil();
+  if(!el || !cur || el.hidden) return;
+  if(ARV_SEL && !cur.creditos[ARV_SEL]) ARV_SEL = null;
+  const agora = reqBase(false), prox = reqBase(true);
+  const no = sg => {
+    const st = arvEstado(cur, sg, agora, prox), nm = reqNome(cur, sg);
+    return `<button type="button" class="arv-no is-${st}" data-arv="${esc(sg)}" aria-pressed="false" aria-label="${esc(nm)} (${esc(sg)}), ${ARV_ROT[st]}"><span class="arv-no__c">${st === 'ok' ? '✓' : st === 'bloq' ? ico('lock') : ''}${esc(sg)}</span><span class="arv-no__n">${esc(nm)}</span></button>`;
+  };
+  el.innerHTML = `<div class="arv">
+    <div class="arv-info" id="arvInfo" aria-live="polite"></div>
+    <div class="panel panel--pad">
+      <div class="arv-palco" id="arvPalco">
+        <svg class="arv-svg" id="arvSvg" aria-hidden="true"></svg>
+        ${cur.semestres.map((sem, i) => {
+          const sgs = arvOrdem(cur, sem.map(([sg]) => sg).filter(sg => cur.creditos[sg]));
+          return sgs.length ? `<div class="arv-per"><span class="arv-per__h" aria-label="${i + 1}º período">${i + 1}º</span><div class="arv-nos">${sgs.map(no).join('')}</div></div>` : '';
+        }).join('')}
+      </div>
+    </div>
+  </div>`;
+  el.querySelectorAll('[data-arv]').forEach(b => b.addEventListener('click', () => {
+    ARV_SEL = ARV_SEL === b.dataset.arv ? null : b.dataset.arv;
+    arvSelecionar(cur);
+  }));
+  arvSelecionar(cur);
+  // as disciplinas mudam de linha quando a largura muda: as ligações acompanham
+  if(ARV_OBS) ARV_OBS.disconnect();
+  if(window.ResizeObserver){ ARV_OBS = new ResizeObserver(() => arvDesenhar()); ARV_OBS.observe(document.getElementById('arvPalco')); }
+}
+function arvSelecionar(cur){
+  const palco = document.getElementById('arvPalco'), info = document.getElementById('arvInfo');
+  if(!palco || !info) return;
+  const sel = ARV_SEL, rede = sel ? arvRede(cur, sel) : null;
+  palco.classList.toggle('tem-sel', !!sel);
+  palco.querySelectorAll('[data-arv]').forEach(b => {
+    const sg = b.dataset.arv;
+    b.classList.toggle('is-sel', sg === sel);
+    b.classList.toggle('is-anc', !!rede && rede.anc.has(sg));
+    b.classList.toggle('is-desc', !!rede && rede.desc.has(sg));
+    b.setAttribute('aria-pressed', String(sg === sel));
+  });
+  ARV_ARESTAS = sel ? arvArestas(cur, sel, rede) : [];
+  arvDesenhar();
+  info.classList.remove('is-alerta');
+  if(!sel){
+    info.innerHTML = `<p><b>Árvore do curso.</b> Cada linha é um período. Toque numa disciplina para acender o que ela exige (acima) e o que ela libera (abaixo).</p>
+      <div class="arv-estados"><span><i class="arv-q is-ok"></i>Aprovada</span><span><i class="arv-q is-cur"></i>Cursando</span><span><i class="arv-q is-livre"></i>Pode cursar no próximo semestre</span><span><i class="arv-q is-bloq"></i>Ainda bloqueada</span></div>`;
+    return;
+  }
+  const agora = reqBase(false), nome = s => reqNome(cur, s), cr = cur.creditos[sel], {r, dep} = reqIndice(cur);
+  const st = arvEstado(cur, sel, agora, reqBase(true));
+  let precisa;
+  if(reqEhGeral(cur, sel)){
+    const f = reqDe(cur, sel).filter(x => !agora.aprov.has(x.s)).length;
+    precisa = `todas as outras disciplinas do quadro, aprovadas antes ou cursadas junto${f ? ` (faltam ${f}, contando as que você está cursando)` : ''}`;
+  } else precisa = (r[sel] || []).map(x => `${nome(x.s)} (${REQ_TIPO[x.tipo]}${agora.aprov.has(x.s) ? ', ✓' : agora.cursando.has(x.s) ? '; você está cursando' : ''})`).join(', ');
+  const diretas = (dep[sel] || []).filter(x => !reqEhGeral(cur, x.s)), depois = rede.desc.size - diretas.length;
+  const t = st === 'cur' ? reqTextoAtraso(cur, sel) : null;
+  if(t && t.atraso) info.classList.add('is-alerta');
+  const temLinhas = ARV_ARESTAS.length > 0, tipos = new Set(ARV_ARESTAS.map(a => a.tipo));
+  const linha = (tipo, txt) => tipos.has(tipo) ? `<span><svg width="24" height="8" aria-hidden="true"><line x1="1" y1="4" x2="23" y2="4" class="arv-l t-${tipo}"/></svg>${txt}</span>` : '';
+  info.innerHTML = `<div class="arv-info__t"><b>${esc(nome(sel))}</b><span>${esc(sel)} · ${cr} ${cr === 1 ? 'crédito' : 'créditos'} · ${ARV_ROT[st]}</span></div>
+    <p><b>Precisa de</b> ${precisa ? esc(precisa) : 'nada antes: não tem pré-requisito'}.</p>
+    ${diretas.length ? `<p><b>Libera</b> ${esc(diretas.map(x => nome(x.s)).join(', '))}${depois > 0 ? ` e, depois ${diretas.length === 1 ? 'dela' : 'delas'}, mais ${depois}` : ''}.</p>` : reqEhGeral(cur, sel) ? '' : '<p><b>Libera</b> só o TCC (que pede todas).</p>'}
+    ${t ? `<p>${t.html}</p>` : ''}
+    <div class="arv-info__acoes">
+      ${temLinhas ? `<span class="arv-linhas">${linha('I', 'aprovada antes')}${linha('II', 'cursada antes')}${linha('Co', 'antes ou junto')}</span>` : ''}
+      ${STATE.historico.some(i => i.sigla === sel) ? `<button type="button" class="btn btn-sm" data-arv-ver="${esc(sel)}">Ver detalhes</button>` : ''}
+    </div>`;
+  const ver = info.querySelector('[data-arv-ver]');
+  if(ver) ver.addEventListener('click', () => showDiscDetail(ver.dataset.arvVer));
+}
+// as ligações, por cima do quadro: de baixo da exigida até em cima da que exige (mesma linha: um arco)
+function arvDesenhar(){
+  const palco = document.getElementById('arvPalco'), svg = document.getElementById('arvSvg');
+  if(!palco || !svg || !palco.offsetParent) return;
+  const W = palco.offsetWidth, H = palco.offsetHeight, pr = palco.getBoundingClientRect(), cx = {};
+  svg.setAttribute('width', W); svg.setAttribute('height', H); svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  if(!ARV_ARESTAS.length){ svg.innerHTML = ''; return; }
+  palco.querySelectorAll('[data-arv]').forEach(b => { const q = b.getBoundingClientRect(); cx[b.dataset.arv] = {l: q.left - pr.left, r: q.right - pr.left, t: q.top - pr.top, b: q.bottom - pr.top}; });
+  const n = v => Math.round(v * 10) / 10;
+  const linhas = ARV_ARESTAS.map(a => {
+    const p = cx[a.de], q = cx[a.para];
+    if(!p || !q) return '';
+    const px = (p.l + p.r) / 2, qx = (q.l + q.r) / 2;
+    let d;
+    if(q.t >= p.b - 1){ const m = (p.b + q.t) / 2; d = `M${n(px)},${n(p.b)} C${n(px)},${n(m)} ${n(qx)},${n(m)} ${n(qx)},${n(q.t - 2)}`; }
+    else { const y = Math.min(p.t, q.t) - 16; d = `M${n(px)},${n(p.t)} C${n(px)},${n(y)} ${n(qx)},${n(y)} ${n(qx)},${n(q.t - 2)}`; }
+    return `<path d="${d}" class="arv-l t-${a.tipo} is-${a.lado}" marker-end="url(#arvSeta-${a.lado})"/>`;
+  }).join('');
+  svg.innerHTML = `<defs>${['cima', 'baixo'].map(l => `<marker id="arvSeta-${l}" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" class="arv-seta is-${l}"/></marker>`).join('')}</defs>${linhas}`;
+}
+document.querySelectorAll('[data-mvista]').forEach(b => b.addEventListener('click', () => { lsSet('mapa_vista', b.dataset.mvista); renderMapaSucesso(); }));
 
 // ---------------- "Faltei" nas aulas de hoje ----------------
 // sigla em curso de uma aula ("P10", "P10-A" ou o nome da disciplina), ou null
@@ -7295,8 +7584,9 @@ function gAvaliar(ops){
   return {dias: Object.keys(porDia).length, janelas};
 }
 // Busca com poda. Cada disciplina tem um valor (w): vence a combinação de maior soma, então mais
-// disciplinas primeiro; na "melhor grade" o valor é 1000 menos o período, e no empate ganham as de
-// períodos anteriores. Entre as de mesma soma: menos dias no campus, depois menos janelas.
+// disciplinas primeiro; na "melhor grade", no empate ganham as que seguram a formatura (no curso com
+// quadro de requisitos) e depois as de períodos anteriores. Entre as de mesma soma: menos dias no
+// campus, depois menos janelas.
 function gBuscar(itens, turno, limite, valida){
   const ds = itens.map(x => ({s: x.s, w: x.w, ops: gOpcoes(x.d, turno)})).sort((a, b) => b.w - a.w || a.ops.length - b.ops.length);
   const max = limite || Infinity, LIMITE = 250000;
@@ -7418,9 +7708,10 @@ function gMelhorGrade(){
   // pré-requisitos: só entram as que o quadro do curso libera. As cursando já estão matriculadas e entram
   // sempre; planejando o próximo semestre (já com horário), conta que a pessoa passe nelas.
   const cur = curriculoDoPerfil();
-  let valida = null, travadas = 0;
+  let valida = null, travadas = 0, altura = null;
   if(cur){
     const base = reqBase(!semHorario), ids = new Set(cands.map(d => d.sigla));
+    altura = reqAlturas(cur, base).altura;
     const livre = sg => gStatus(sg) === 'cursando' || !cur.creditos[sg];
     const antes = cands.length;
     // co-requisito que falta: só se a outra também for candidata (a busca confere que vão juntas)
@@ -7431,7 +7722,10 @@ function gMelhorGrade(){
   GM.req = cur ? {contouCursando: !semHorario && (STATE.config.disciplinasAtuais || []).length > 0} : null;
   // por que nada foi escolhido: nenhuma no histórico, todas feitas, pré-requisitos, ou nenhuma nos horários marcados
   GM.motivo = !todas.some(d => gStatus(d.sigla) !== 'fora') ? 'desconhecidas' : !cands.length ? (travadas ? 'requisitos' : 'feitas') : 'horarios';
-  GM.opcoes = cands.length ? gBuscar(cands.map(d => ({s: d.sigla, d, w: 1000 - gPeriodo(d)})), p.turno, p.limite, valida).filter(o => o.esc.length) : [];
+  // valor: cada disciplina vale ~100000 (mais disciplinas sempre vence); a altura (quantos semestres a
+  // sequência dela ainda ocupa) desempata, e depois o período
+  const valor = d => altura ? 100000 + 100 * Math.min(altura(d.sigla), 50) - gPeriodo(d) : 1000 - gPeriodo(d);
+  GM.opcoes = cands.length ? gBuscar(cands.map(d => ({s: d.sigla, d, w: valor(d)})), p.turno, p.limite, valida).filter(o => o.esc.length) : [];
   GM.opIdx = 0;
   gAplicarOpcao();
 }
@@ -7537,7 +7831,23 @@ function gTravas(marcadas){
 }
 function renderGradeMontagem(){
   gContagem();
-  renderGradeTurmas(); renderGradeSemana(); renderGradeAviso(); renderGradeResumo();
+  renderGradeTurmas(); renderGradeSemana(); renderGradeAviso(); renderGradeFormatura(); renderGradeResumo();
+}
+// com a grade marcada: em que semestre a pessoa se forma, comparado com a previsão
+function renderGradeFormatura(){
+  const el = document.getElementById('gmFormatura'), cur = curriculoDoPerfil();
+  const marcadas = gPlano().escolhidas.filter(s => GM.disc.has(s));
+  const prev = cur && marcadas.length ? reqPrevisao(cur) : null;
+  if(!prev || !prev.faltam || prev.fim === null){ el.hidden = true; return; }
+  // já com horário, a grade é a do próximo semestre; sem horário, a deste que está começando
+  const proximo = gContaCursando();
+  const plano = reqPlano(cur, prev.limite, {primeiro: marcadas, contarCursando: proximo});
+  if(plano.sobra.length){ el.hidden = true; return; }
+  const fim = proximo ? plano.sems.length : plano.sems.length - 1, dif = fim - prev.fim;
+  const qtd = k => `${k} ${k === 1 ? 'semestre' : 'semestres'}`;
+  el.className = 'gm-form' + (dif > 0 ? ' is-pior' : dif < 0 ? ' is-melhor' : '');
+  el.innerHTML = `${ico('cap')}<span>Com esta grade, formatura prevista para <b>${esc(reqMeio(reqRotuloEm(fim)))}</b>${dif === 0 ? ', a mesma da previsão do Mapa' : dif > 0 ? `, ${qtd(dif)} depois da previsão do Mapa` : `, ${qtd(-dif)} antes da previsão do Mapa`}.</span>`;
+  el.hidden = false;
 }
 function renderGradeTurmas(){
   const el = document.getElementById('gmTurmas'), p = gPlano();
@@ -7623,7 +7933,7 @@ function renderGradeAviso(){
   if(GM.modo === 'auto'){
     const cur = curriculoDoPerfil(), cr = cur ? reqCred(cur, marcadas) : 0;
     const req = GM.req ? ` Só entram as que os pré-requisitos liberam${GM.req.contouCursando ? ', contando que você passe nas que está cursando' : ''}.` : ' Ele não conhece os pré-requisitos: confira antes da matrícula.';
-    aviso('ok', `<span><b>${marcadas.length} ${marcadas.length === 1 ? 'disciplina' : 'disciplinas'} sem choque</b>${cr ? ` (${cr} créditos)` : ''}, ${noCampus}. O app escolheu o máximo que cabe nos horários marcados, começando pelas dos primeiros períodos.${req}</span>`);
+    aviso('ok', `<span><b>${marcadas.length} ${marcadas.length === 1 ? 'disciplina' : 'disciplinas'} sem choque</b>${cr ? ` (${cr} créditos)` : ''}, ${noCampus}. O app escolheu o máximo que cabe nos horários marcados, começando pelas ${GM.req ? 'que seguram a formatura' : 'dos primeiros períodos'}.${req}</span>`);
     return;
   }
   const fora = GM.modo === 'marcadas' && GM.opcoes.length ? marcadas.filter(s => !GM.opcoes[GM.opIdx].esc.some(x => x.s === s)) : [];

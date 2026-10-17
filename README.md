@@ -45,7 +45,8 @@ Atualizações chegam sozinhas: a cada nova versão publicada, o app instalado s
 - **Notas:** notas parciais com peso, meta por disciplina, calculadora de quanto falta na prova final, simulador de IRA e gráficos de desempenho; a nota de uma prova realizada pode ser lançada direto nela, e vai para a aba Notas
 - **Faltas:** contador com limite editável por disciplina, aviso quando chega perto do limite, ranking de risco e um botão **Faltei** nas aulas de hoje do painel
 - **Histórico** do curso inteiro, separado por semestre, com busca e filtros; para adicionar uma disciplina basta o nome, o semestre e se já passou, está cursando ou ainda vai fazer
-- **Mapa de Sucesso:** o currículo organizado semestre a semestre. Em Engenharia de Produção do INATEL (currículo 3.2), com o quadro de pré e co-requisitos e os créditos: previsão de formatura (o que cabe em cada semestre, com o limite de créditos que você escolher), cadeado nas disciplinas que ainda dependem de outras e, no detalhe de cada uma, o que ela exige e o que ela libera
+- **Mapa de Sucesso:** o currículo organizado semestre a semestre. Em Engenharia de Produção do INATEL (currículo 3.2), com o quadro de pré e co-requisitos e os créditos: previsão de formatura (o que cabe em cada semestre, com o limite de créditos que você escolher), cadeado nas disciplinas que ainda dependem de outras e, no detalhe de cada uma, o que ela exige e o que ela libera. Mostra também o que está em jogo no semestre: em quais disciplinas uma reprovação adia a formatura (aviso que aparece também no card de risco do Painel)
+- **Árvore do curso:** o quadro de pré-requisitos desenhado, um período por linha; tocar numa disciplina acende tudo o que ela exige e tudo o que ela libera, com as ligações (aprovada antes, cursada antes, antes ou junto)
 - **Horas complementares** e **Laboratório** (turmas e entrega de relatórios)
 
 **Organização**
@@ -53,7 +54,7 @@ Atualizações chegam sozinhas: a cada nova versão publicada, o app instalado s
 - Calendário de provas: tocar num dia já abre o formulário com a data
 - Provas, tarefas e entregas exportadas para a agenda do celular (arquivo .ics, com aviso na véspera), ou uma prova por vez no Google Agenda
 - Grade de horário semanal (no celular, um dia por vez, começando por hoje)
-- **Montar a grade do semestre** pelo PDF de horários da faculdade (no formato do Inatel), lido no próprio aparelho: o app mostra as turmas de cada disciplina, avisa dos choques e monta as combinações sem choque, da que usa menos dias no campus para a que usa mais. Ou monta a melhor grade sozinho: o máximo de disciplinas que faltam nos horários em que você pode ter aula, começando pelas dos primeiros períodos. No curso com quadro de requisitos, só entram as disciplinas que os pré-requisitos liberam, e marcar uma bloqueada avisa que a matrícula recusa
+- **Montar a grade do semestre** pelo PDF de horários da faculdade (no formato do Inatel), lido no próprio aparelho: o app mostra as turmas de cada disciplina, avisa dos choques e monta as combinações sem choque, da que usa menos dias no campus para a que usa mais. Ou monta a melhor grade sozinho: o máximo de disciplinas que faltam nos horários em que você pode ter aula, começando pelas dos primeiros períodos. No curso com quadro de requisitos, só entram as disciplinas que os pré-requisitos liberam, primeiro as que seguram a formatura; marcar uma bloqueada avisa que a matrícula recusa, e cada grade mostra em que semestre você se forma com ela
 - Timer Pomodoro de 25 ou 50 minutos, com pausa longa a cada 4 rodadas e registro das sessões por disciplina; segue contando com a tela bloqueada ou o app fechado
 
 **Do jeito de um app**
