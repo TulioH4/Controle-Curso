@@ -4319,7 +4319,7 @@ function renderHorarioDia(real, nowHM){
   const hoje = todayName();
   if(!_horarioDia) _horarioDia = WEEK_DAYS.includes(hoje) ? hoje : 'Segunda';
   const doDia = d => real.filter(a => a.dia === d).sort((a, b) => a.inicio.localeCompare(b.inicio));
-  const nomeDisc = s => (STATE.historico.find(i => i.sigla === s) || {}).disciplina || '';
+  const nomeDisc = s => { const h = STATE.historico; const it = h.find(i => i.sigla === s) || h.find(i => i.sigla === String(s).split('-')[0].trim()); return it ? it.disciplina : ''; };
   const aulas = doDia(_horarioDia);
   el.innerHTML = `
     <div class="hday__pick" role="tablist" aria-label="Dia da semana">${WEEK_DAYS.map(d => `
@@ -4636,13 +4636,22 @@ function renderHistorico(filter){
       if(isCustom){
         STATE.historicoCustom = STATE.historicoCustom.filter(c => c.sigla !== sigla);
         await storeSet('historico_custom', STATE.historicoCustom);
+        // as edições (nota, horas) iam junto para uma disciplina nova que recebesse o mesmo código
+        if(STATE.historicoOverrides[sigla]){ delete STATE.historicoOverrides[sigla]; await storeSet('historico_overrides', STATE.historicoOverrides); }
       } else {
         if(!STATE.historicoRemovidos.includes(sigla)) STATE.historicoRemovidos.push(sigla);
         await storeSet('historico_removidos', STATE.historicoRemovidos);
       }
       STATE.historico = STATE.historico.filter(i => i.sigla !== sigla);
+      // fora do histórico, ela também deixa de ser cursada (Faltas e Notas não ficam com um cartão solto)
+      const eraAtual = (STATE.config.disciplinasAtuais || []).includes(sigla);
+      if(eraAtual){
+        STATE.config.disciplinasAtuais = STATE.config.disciplinasAtuais.filter(x => x !== sigla);
+        await storeSet('config', STATE.config);
+      }
       renderHistorico(document.getElementById('histSearch').value);
       renderPainel(); renderMapaSucesso(); renderAtuaisConfig();
+      if(eraAtual){ renderFaltas(); renderProvas(); renderMetaNotas(); updateDiscSuggestList(); }
     });
   });
 }
@@ -5935,6 +5944,7 @@ document.getElementById('btnAddDisc').addEventListener('click', async () => {
   const disc = {sigla, disciplina: nome, ch: null, nota, semestre: null, _custom: true};
   if(per) disc.periodo = per;
   if(_hSit === 'feita') disc.aprovado = true; // "já passei" vale mesmo sem nota ou com recuperação
+  if(STATE.historicoOverrides[sigla]){ delete STATE.historicoOverrides[sigla]; await storeSet('historico_overrides', STATE.historicoOverrides); }
   STATE.historicoCustom.push(disc);
   STATE.historico.push(disc);
   await storeSet('historico_custom', STATE.historicoCustom);
@@ -6973,8 +6983,11 @@ function gMelhorGrade(){
   const p = gPlano();
   // as cursando entram só no começo do semestre, ainda sem horário (são as que a pessoa vai fazer agora)
   const semHorario = !getAulas().some(a => a.inicio && a.inicio !== '—');
-  const cands = [...GM.disc.values()].filter(d => (gStatus(d.sigla) === 'falta' || (semHorario && gStatus(d.sigla) === 'cursando')) && (d.teoria.length || d.lab.length));
+  const todas = [...GM.disc.values()].filter(d => d.teoria.length || d.lab.length);
+  const cands = todas.filter(d => gStatus(d.sigla) === 'falta' || (semHorario && gStatus(d.sigla) === 'cursando'));
   GM.modo = 'auto';
+  // por que nada foi escolhido: nenhuma no histórico, todas feitas, ou nenhuma nos horários marcados
+  GM.motivo = !todas.some(d => gStatus(d.sigla) !== 'fora') ? 'desconhecidas' : !cands.length ? 'feitas' : 'horarios';
   GM.opcoes = cands.length ? gBuscar(cands.map(d => ({s: d.sigla, d, w: 1000 - gPeriodo(d)})), p.turno, p.limite).filter(o => o.esc.length) : [];
   GM.opIdx = 0;
   gAplicarOpcao();
@@ -7036,9 +7049,15 @@ function renderGradeLista(){
   todas.filter(d => ['falta', 'cursando'].includes(gStatus(d.sigla)) || p.escolhidas.includes(d.sigla)).forEach(d => {
     const k = gPeriodo(d); if(!grupos.has(k)) grupos.set(k, []); grupos.get(k).push(d);
   });
+  // nenhum código do PDF no histórico (outro curso, ou códigos criados pelo app): lista tudo, por período
+  const conhecidas = todas.some(d => gStatus(d.sigla) !== 'fora');
+  if(!conhecidas) todas.filter(d => !p.escolhidas.includes(d.sigla)).forEach(d => {
+    const k = gPeriodo(d); if(!grupos.has(k)) grupos.set(k, []); grupos.get(k).push(d);
+  });
   const resto = st => todas.filter(d => gStatus(d.sigla) === st && !p.escolhidas.includes(d.sigla));
-  const feitas = resto('feita'), fora = resto('fora');
-  el.innerHTML = [...grupos].map(([k, ds]) => `<div class="wiz-sem-block"><div class="wiz-sem-head"><span>${k < 9 ? k + 'º período' : 'Outras'}</span></div><div class="gm-disc-grid">${ds.map(item).join('')}</div></div>`).join('')
+  const feitas = resto('feita'), fora = conhecidas ? resto('fora') : [];
+  el.innerHTML = (conhecidas ? '' : '<p class="gm-nota" style="margin:0 0 10px;">As disciplinas deste PDF não estão no seu Histórico com os mesmos códigos, então o app não sabe quais você já fez. Marque as que quer cursar.</p>')
+    + [...grupos].sort((a, b) => a[0] - b[0]).map(([k, ds]) => `<div class="wiz-sem-block"><div class="wiz-sem-head"><span>${k < 9 ? k + 'º período' : 'Outras'}</span></div><div class="gm-disc-grid">${ds.map(item).join('')}</div></div>`).join('')
     + (feitas.length ? `<details class="gm-mais"><summary>Já feitas (${feitas.length})</summary><div class="gm-disc-grid">${feitas.map(item).join('')}</div></details>` : '')
     + (fora.length ? `<details class="gm-mais"><summary>Fora do seu histórico (${fora.length})</summary><div class="gm-disc-grid">${fora.map(item).join('')}</div></details>` : '')
     || '<div class="empty">Nenhuma disciplina neste PDF.</div>';
@@ -7116,7 +7135,13 @@ function renderGradeAviso(){
   const aviso = (tipo, html) => { el.className = 'gm-aviso is-' + tipo; el.innerHTML = html; el.hidden = false; };
   const dias = new Set(lista.flatMap(e => e.t.slots.map(s => s.dia)));
   const noCampus = `${dias.size} ${dias.size === 1 ? 'dia' : 'dias'} no campus${dias.size ? ` (${WEEK_DAYS.filter(d => dias.has(d)).map(d => GRADE_DIA[d]).join(', ')})` : ''}`;
-  if(GM.modo === 'auto' && !GM.opcoes.length){ aviso('erro', '<span>Nenhuma disciplina que falta cabe nos horários marcados. Marque mais horários acima.</span>'); return; }
+  if(GM.modo === 'auto' && !GM.opcoes.length){
+    aviso(GM.motivo === 'horarios' ? 'erro' : 'info', `<span>${{
+      desconhecidas: 'As disciplinas deste PDF não estão no seu Histórico, então o app não sabe quais faltam. Marque as que quer cursar e toque em <b>Montar sozinho</b>.',
+      feitas: 'Você já fez ou está cursando todas as disciplinas deste PDF.',
+      horarios: 'Nenhuma disciplina que falta cabe nos horários marcados. Marque mais horários acima.'}[GM.motivo]}</span>`);
+    return;
+  }
   if(!marcadas.length){ el.hidden = true; return; }
   const choques = Object.entries(mapa).filter(([, es]) => es.length > 1);
   if(choques.length){
@@ -7178,12 +7203,15 @@ async function lerPdfDeGrade(arquivo){
     }
     const regs = lerGradePdf(paginas);
     if(!regs.length) throw new Error('vazio');
-    STATE.gradeOferta = {titulo: arquivo.name.replace(/\.pdf$/i, ''), lidoEm: Date.now(),
+    const titulo = arquivo.name.replace(/\.pdf$/i, '');
+    // outro arquivo é outro semestre: o que estava marcado era do anterior
+    const novoSemestre = !STATE.gradeOferta || STATE.gradeOferta.titulo !== titulo;
+    STATE.gradeOferta = {titulo, lidoEm: Date.now(),
       registros: regs.map(r => [r.periodo, r.sigla, r.turma, r.dia, r.hora, r.semHorario ? 1 : 0, r.prof || '', r.sala || ''])};
     await storeSet('grade_oferta', STATE.gradeOferta);
     GM.disc = gModelo(regs);
     const p = gPlano();
-    p.escolhidas = p.escolhidas.filter(s => GM.disc.has(s));
+    p.escolhidas = novoSemestre ? [] : p.escolhidas.filter(s => GM.disc.has(s));
     p.sel = {};
     gPreMarcar(); gMexeu();
     GM.msg = `Pronto: ${GM.disc.size} disciplinas lidas de ${doc.numPages} ${doc.numPages === 1 ? 'página' : 'páginas'}.`;
@@ -7197,12 +7225,19 @@ async function lerPdfDeGrade(arquivo){
 }
 // passa o horário montado para a aba Horário e as disciplinas para "cursando"
 async function usarGradeMontada(){
-  const p = gPlano(), lista = gEscolhidas();
-  const marcadas = p.escolhidas.filter(s => GM.disc.has(s));
+  const p = gPlano();
+  let lista = gEscolhidas(), marcadas = p.escolhidas.filter(s => GM.disc.has(s));
   if(!marcadas.length){ showToast('Marque as disciplinas primeiro', 'info'); return; }
   if(Object.values(gOcupado(lista)).some(es => es.length > 1)){ showToast('Ainda tem choque de horário: troque uma das turmas', 'error'); return; }
-  const faltam = marcadas.filter(s => { const d = GM.disc.get(s), sel = p.sel[s] || {}; return (d.teoria.length && !sel.teoria) || (d.lab.length && !sel.lab); });
-  if(faltam.length){ showToast(`Falta escolher a turma de ${faltam.map(gNome).join(', ')}`, 'info', 4000); return; }
+  let faltam = marcadas.filter(s => { const d = GM.disc.get(s), sel = p.sel[s] || {}; return (d.teoria.length && !sel.teoria) || (d.lab.length && !sel.lab); });
+  if(faltam.length){
+    // a que ficou de fora no "Montar sozinho" (ou sem turma escolhida) pode ficar fora do horário
+    if(faltam.length === marcadas.length){ showToast(`Escolha a turma de ${faltam.map(gNome).join(', ')}`, 'info', 4000); return; }
+    if(!confirm(`Sem turma escolhida: ${faltam.map(gNome).join(', ')}.\n\nUsar o horário só com as outras ${marcadas.length - faltam.length}?`)) return;
+  }
+  const usadas = marcadas.filter(s => !faltam.includes(s));
+  lista = lista.filter(e => usadas.includes(e.sigla));
+  marcadas = usadas;
   const atuais = STATE.config.disciplinasAtuais || [];
   const saem = atuais.filter(s => !marcadas.includes(s));
   const temHorario = getAulas().some(a => a.inicio && a.inicio !== '—');
@@ -7253,8 +7288,7 @@ document.getElementById('gmSozinho').addEventListener('click', () => {
 document.getElementById('gmOpAnt').addEventListener('click', () => { if(!GM.opcoes.length) return; GM.opIdx = (GM.opIdx - 1 + GM.opcoes.length) % GM.opcoes.length; gAplicarOpcao(); });
 document.getElementById('gmOpProx').addEventListener('click', () => { if(!GM.opcoes.length) return; GM.opIdx = (GM.opIdx + 1) % GM.opcoes.length; gAplicarOpcao(); });
 document.getElementById('gmUsar').addEventListener('click', usarGradeMontada);
-document.getElementById('gmCopiar').addEventListener('click', async e => {
-  const b = e.currentTarget;
+document.getElementById('gmCopiar').addEventListener('click', async () => {
   const texto = gLinhasResumo().map(r => `${r.nome} (${r.sigla}), turma ${r.turma}${r.lab ? ' (lab)' : ''}: ${r.horarios}${r.sala ? ', sala ' + r.sala : ''}`).join('\n');
   try{ await navigator.clipboard.writeText(texto); showToast('Resumo copiado', 'success', 1800); }
   catch(err){ showToast('Não deu para copiar', 'error'); }
