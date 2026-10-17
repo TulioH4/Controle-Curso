@@ -15,7 +15,7 @@
 // only a call carrying it (header x-cron-secret, see push.sql) runs the reminders at all,
 // so nobody else can make the function read every account and push over and over.
 import webpush from 'npm:web-push@3.6.7';
-import { createClient } from 'npm:@supabase/supabase-js@2';
+import { createClient } from 'npm:@supabase/supabase-js@2.117.2';
 
 // ---------------------------------------------------------------------------
 // Pure rules (no I/O), kept separate so they can be tested on their own

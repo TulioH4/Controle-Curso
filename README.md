@@ -94,10 +94,10 @@ Atualizações chegam sozinhas: a cada nova versão publicada, o app instalado s
 Rodar localmente (o service worker exige `http://`, não `file://`):
 
 ```bash
-python -m http.server 8731
+python -m http.server 8731 --bind 127.0.0.1
 ```
 
-Depois, abra `http://localhost:8731`. O `index.html` também abre direto com duplo clique, só sem o modo offline do PWA.
+Depois, abra `http://localhost:8731`. O `--bind 127.0.0.1` importa: sem ele o servidor atende toda a rede, e quem estiver no mesmo Wi-Fi consegue baixar a pasta inteira (os seus dados em `dados_curso.js`, backups e a chave de `supabase/vapid.local.env`). O `index.html` também abre direto com duplo clique, só sem o modo offline do PWA.
 
 Gerar a versão de publicação em `dist/`:
 
@@ -107,7 +107,7 @@ node scripts/build-pwa.mjs
 
 O build copia o app, troca os dados pelo modelo vazio, carimba o service worker com uma versão nova e acrescenta a política de segurança (CSP) com a impressão digital do script do app. Abrindo o `index.html` direto, sem o build, ela não se aplica. Ao enviar para a branch `main`, o GitHub Actions faz o build e publica no GitHub Pages.
 
-Para usar um projeto Supabase próprio, rode [`supabase/schema.sql`](supabase/schema.sql) no SQL Editor e troque a URL e a chave pública no início de [`sync.js`](sync.js).
+Para usar um projeto Supabase próprio, rode [`supabase/schema.sql`](supabase/schema.sql) e [`supabase/limits.sql`](supabase/limits.sql) no SQL Editor e troque a URL e a chave pública no início de [`sync.js`](sync.js). O `limits.sql` limita o espaço de cada conta (20 MB): como qualquer pessoa pode criar conta, sem ele uma só conta conseguiria encher o banco.
 
 ### Estrutura
 

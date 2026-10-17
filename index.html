@@ -3245,6 +3245,20 @@
 </div>
 
 <script>
+// Dentro de um quadro (iframe) o app não abre: uma página poderia escondê-lo por baixo dela e fazer
+// a pessoa tocar em "Sair", "Encerrar semestre" ou "Excluir" sem perceber. O GitHub Pages não deixa
+// mandar o cabeçalho que proíbe isso, então o próprio app confere.
+if(window.top !== window.self){
+  const aviso = document.createElement('div');
+  aviso.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:#0A0A10;color:#EEF2FF;font:16px system-ui,sans-serif;padding:32px';
+  aviso.textContent = 'O Centro de Controle não abre dentro de outra página. ';
+  const abrir = document.createElement('a');
+  abrir.href = location.href; abrir.target = '_top'; abrir.rel = 'noopener'; abrir.style.color = '#60A5FA';
+  abrir.textContent = 'Abrir o Centro de Controle';
+  aviso.appendChild(abrir);
+  document.body.replaceChildren(aviso);
+  throw new Error('Centro de Controle: aberto dentro de um quadro');
+}
 const DAY_NAMES = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
 const WEEK_DAYS = ["Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
 const MESES = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
@@ -3354,6 +3368,102 @@ async function applyBaseData(){
   BASE_KEYS.forEach(k => { DATA[k] = base[k] !== undefined ? clone(base[k]) : clone(DATA_DEFAULTS[k]); });
 }
 
+
+// ---------------- dados com o formato certo ----------------
+// O que vem do armazenamento (da nuvem, de um backup, de outra versão do app) pode chegar com o
+// tipo errado: um texto no lugar de um número, um item que não é objeto, um código de disciplina
+// "__proto__" (que, usado como chave, mexeria em todos os objetos do app). Antes de qualquer tela
+// usar, cada parte é corrigida aqui; o que já está certo fica como está.
+const CHAVE_PROIBIDA = new Set(['__proto__', 'constructor', 'prototype']);
+const siglaOk = v => typeof v === 'string' && v.trim() !== '' && !CHAVE_PROIBIDA.has(v);
+function sanearDados(){
+  const ehObj = v => v !== null && typeof v === 'object' && !Array.isArray(v);
+  const obj = v => {
+    if(!ehObj(v)) return {};
+    Object.keys(v).forEach(k => { if(CHAVE_PROIBIDA.has(k)) delete v[k]; });
+    return v;
+  };
+  const lista = v => Array.isArray(v) ? v.filter(ehObj) : [];
+  const textos = v => Array.isArray(v) ? v.filter(x => typeof x === 'string') : [];
+  const num = (v, min = 0, max = Infinity, padrao = 0) => { const n = Number(v); return Number.isFinite(n) && v !== '' && v !== null ? Math.min(max, Math.max(min, n)) : padrao; };
+  const numOuNulo = (v, min = 0, max = Infinity) => v === null || v === undefined || v === '' ? null : num(v, min, max, null);
+  const txt = v => typeof v === 'string' ? v : (typeof v === 'number' && Number.isFinite(v) ? String(v) : '');
+  const mapa = (v, fn) => { const o = obj(v); Object.keys(o).forEach(k => { const r = fn(o[k]); if(r === undefined) delete o[k]; else o[k] = r; }); return o; };
+  const disciplina = d => {
+    if(!siglaOk(d.sigla)) return null;
+    d.disciplina = txt(d.disciplina) || d.sigla;
+    if(d.ch !== undefined) d.ch = numOuNulo(d.ch, 0, 10000);
+    if(d.periodo !== undefined) d.periodo = numOuNulo(d.periodo, 0, 50);
+    if(d.nota !== null && d.nota !== undefined && typeof d.nota !== 'number' && typeof d.nota !== 'string') d.nota = null;
+    return d;
+  };
+
+  // base do curso (DATA) e configuração
+  DATA.historico = lista(DATA.historico).map(disciplina).filter(Boolean);
+  DATA.aulas = lista(DATA.aulas);
+  DATA.relatorios = lista(DATA.relatorios);
+  DATA.provasOficiais = lista(DATA.provasOficiais);
+  DATA.turmas = mapa(DATA.turmas, v => Array.isArray(v) ? textos(v) : undefined);
+  DATA.disciplinasAtuais = textos(DATA.disciplinasAtuais).filter(siglaOk);
+  const c = STATE.config = obj(STATE.config);
+  c.notaMinima = num(c.notaMinima, 0, 100, 60);
+  c.disciplinasAtuais = textos(c.disciplinasAtuais).filter(siglaOk);
+  ['aluno', 'curso', 'instituicao', 'semestre'].forEach(k => { c[k] = txt(c[k]); });
+
+  // histórico
+  STATE.historicoOverrides = mapa(STATE.historicoOverrides, v => ehObj(v) ? obj(v) : undefined);
+  STATE.historicoCustom = lista(STATE.historicoCustom).map(disciplina).filter(Boolean);
+  STATE.historicoRemovidos = textos(STATE.historicoRemovidos);
+
+  // faltas e notas
+  STATE.faltas = mapa(STATE.faltas, v => ehObj(v) ? Object.assign(v, {faltas: Math.round(num(v.faltas, 0, 9999))}) : undefined);
+  STATE.faltasLimites = mapa(STATE.faltasLimites, v => { const n = num(v, 1, 9999, NaN); return Number.isNaN(n) ? undefined : Math.round(n); });
+  STATE.faltasRegistro = lista(STATE.faltasRegistro).filter(r => typeof r.data === 'string' && siglaOk(r.sigla)).map(r => Object.assign(r, {n: Math.round(num(r.n, 1, 99, 1)), inicio: txt(r.inicio)}));
+  STATE.notasParciais = mapa(STATE.notasParciais, v => Array.isArray(v) ? lista(v).map(e => Object.assign(e, {
+    label: txt(e.label), valor: numOuNulo(e.valor, 0, 100), peso: num(e.peso, 0.01, 100, 1)})) : undefined);
+  STATE.metasNotas = mapa(STATE.metasNotas, v => { const n = num(v, 0, 100, NaN); return Number.isNaN(n) ? undefined : n; });
+
+  // listas do dia a dia
+  STATE.tarefas = lista(STATE.tarefas).map((t, i) => Object.assign(t, {id: txt(t.id) || 't-' + Date.now() + '-' + i, nome: txt(t.nome),
+    prazo: typeof t.prazo === 'string' && t.prazo ? t.prazo : null}));
+  STATE.provas = lista(STATE.provas).filter(p => typeof p.data === 'string' && p.data)
+    .map((p, i) => Object.assign(p, {id: txt(p.id) || 'p-' + Date.now() + '-' + i, disciplina: txt(p.disciplina), tipo: txt(p.tipo) || 'Prova',
+      hora: typeof p.hora === 'string' && p.hora ? p.hora : null}));
+  STATE.lembretes = lista(STATE.lembretes);
+  STATE.horasComp = lista(STATE.horasComp).map((h, i) => Object.assign(h, {id: txt(h.id) || 'hc-' + Date.now() + '-' + i, nome: txt(h.nome), sigla: txt(h.sigla),
+    total: num(h.total, 0, 100000), validadas: num(h.validadas, 0, 100000)}));
+  const hg = STATE.horasGlobal = obj(STATE.horasGlobal);
+  ['confirmadas', 'consumidas', 'previstas', 'creditos'].forEach(k => { hg[k] = num(hg[k], 0, 100000); });
+  STATE.pomSessions = lista(STATE.pomSessions).map(x => Object.assign(x, {duracaoMin: num(x.duracaoMin, 0, 1440), sigla: txt(x.sigla), nome: txt(x.nome)}));
+  STATE.discNotes = mapa(STATE.discNotes, v => typeof v === 'string' ? v : undefined);
+  STATE.labConcluido = obj(STATE.labConcluido);
+  STATE.relatoriosOcultos = textos(STATE.relatoriosOcultos);
+  STATE.relatoriosOverrides = mapa(STATE.relatoriosOverrides, v => ehObj(v) ? v : undefined);
+  STATE.labs = obj(STATE.labs);
+  if(STATE.aulasCustom !== null) STATE.aulasCustom = lista(STATE.aulasCustom);
+  if(STATE.turmasCustom !== null) STATE.turmasCustom = mapa(STATE.turmasCustom, v => Array.isArray(v) ? textos(v) : undefined);
+  STATE.estudos = lista(STATE.estudos).map(m => Object.assign(m, {titulo: txt(m.titulo), criadoEm: num(m.criadoEm, 0, 1e15, Date.now()),
+    quizHist: lista(m.quizHist).map(q => ({em: num(q.em, 0, 1e15), acertos: Math.round(num(q.acertos, 0, 1000)), total: Math.round(num(q.total, 0, 1000))}))}));
+
+  // semestres encerrados e montador de grade
+  STATE.semestres = lista(STATE.semestres).map(r => Object.assign(r, {semestre: txt(r.semestre), encerradoEm: num(r.encerradoEm, 0, 1e15, Date.now()),
+    disciplinas: lista(r.disciplinas).map(d => Object.assign(d, {nome: txt(d.nome), nota: numOuNulo(d.nota, 0, 100), faltas: Math.round(num(d.faltas, 0, 9999))}))}));
+  if(STATE.gradeOferta !== null){
+    const of = obj(STATE.gradeOferta);
+    of.registros = Array.isArray(of.registros) ? of.registros.filter(r => Array.isArray(r) && siglaOk(r[1])).map(r => r.map((x, i) => i === 5 ? (x ? 1 : 0) : txt(x))) : [];
+    of.titulo = txt(of.titulo); of.lidoEm = num(of.lidoEm, 0, 1e15, Date.now());
+    STATE.gradeOferta = of.registros.length ? of : null;
+  }
+  if(STATE.gradePlano !== null){
+    const pl = obj(STATE.gradePlano);
+    pl.escolhidas = textos(pl.escolhidas).filter(siglaOk);
+    pl.sel = mapa(pl.sel, v => ehObj(v) ? {teoria: typeof v.teoria === 'string' ? v.teoria : null, lab: typeof v.lab === 'string' ? v.lab : null} : undefined);
+    pl.turno = obj(pl.turno);
+    pl.limite = Math.round(num(pl.limite, 0, 20));
+    STATE.gradePlano = pl;
+  }
+}
+
 // ---------------- init ----------------
 let _initInProgress = false;
 async function init(opts = {}){
@@ -3367,6 +3477,7 @@ async function init(opts = {}){
     aluno: (DATA.aluno && !/preencha/i.test(DATA.aluno)) ? DATA.aluno : '', curso: DATA.curso, instituicao: DATA.instituicao,
     semestre: DATA.semestre, notaMinima: DATA.notaMinima, disciplinasAtuais: DATA.disciplinasAtuais
   });
+  if(!STATE.config || typeof STATE.config !== 'object' || Array.isArray(STATE.config)) STATE.config = {};
   if(!STATE.config.railPosition) STATE.config.railPosition = 'left';
   if(STATE.config.railAutoHide === undefined) STATE.config.railAutoHide = false;
   applyRailPosition(STATE.config.railPosition, STATE.config.railAutoHide);
@@ -3385,7 +3496,6 @@ async function init(opts = {}){
   STATE.historicoOverrides = await storeGet('historico_overrides', {});
   STATE.historicoCustom = await storeGet('historico_custom', []);
   STATE.historicoRemovidos = await storeGet('historico_removidos', []);
-  STATE.historico = montarHistorico();
 
   let tarefas = await storeGet('tarefas', null);
   if(!tarefas){
@@ -3428,6 +3538,9 @@ async function init(opts = {}){
     await storeSet('provas', provas);
   }
   STATE.provas = provas;
+  // tudo carregado: corrige o que tiver formato errado e remonta o histórico com os dados limpos
+  sanearDados();
+  STATE.historico = montarHistorico();
 
   const now0 = new Date();
   STATE.calMonth = {y: now0.getFullYear(), m: now0.getMonth()};
@@ -3775,7 +3888,8 @@ function closeMoreSheet(){
       mudou = true;
     });
     if(!mudou) return;
-    if(keys.some(k => k.startsWith('historico_'))) STATE.historico = montarHistorico();
+    sanearDados();
+    STATE.historico = montarHistorico();
     renderAll();
   }
 })();
@@ -4674,8 +4788,9 @@ function renderHistorico(filter){
 function exportHistoricoCSV(){
   const rows = STATE.historico.map(item => {
     const s = situacao(item);
+    // texto que começa com = + - @ vira fórmula ao abrir no Excel (CSV injection): leva um apóstrofo na frente
     return [item.sigla, item.disciplina, item.nota??'', item.ch??'', item.semestre??'', s]
-      .map(v => `"${String(v).replace(/"/g,'""')}"`).join(',');
+      .map(v => { let t = String(v); if(/^[=+\-@\t\r]/.test(t) && !/^-?\d+([.,]\d+)?$/.test(t)) t = "'" + t; return `"${t.replace(/"/g,'""')}"`; }).join(',');
   });
   const csv = 'Sigla,Disciplina,Nota,CH,Semestre,Situação\n' + rows.join('\n');
   baixarArquivo(new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8;'}), 'historico_academico.csv');
@@ -4719,7 +4834,7 @@ function showDiscDetail(sigla){
   document.getElementById('discModalBody').innerHTML = `
     <div class="dm-stat-row">
       <div class="dm-stat"><label>Situação</label><span style="color:var(--${meta.cls})">${meta.label}</span></div>
-      <div class="dm-stat"><label>Nota</label><span>${item.nota != null ? item.nota : '—'}</span></div>
+      <div class="dm-stat"><label>Nota</label><span>${item.nota != null ? esc(item.nota) : '—'}</span></div>
       <div class="dm-stat"><label>Faltas</label><span style="color:var(--${faltasCls})">${faltasCount}/${limite}</span></div>
       ${mediaAtual !== null ? `<div class="dm-stat"><label>Média atual</label><span style="color:var(--${mediaAtual>=notaMin?'green':'red'})">${fmtNum(mediaAtual)}</span></div>` : ''}
       ${totalMinSess > 0 ? `<div class="dm-stat"><label>Horas estudadas (30d)</label><span style="color:var(--blue)">${Math.floor(totalMinSess/60)}h${totalMinSess%60>0?String(totalMinSess%60)+'m':''}</span></div>` : ''}
@@ -6222,13 +6337,13 @@ function renderTarefas(){
     if(t.id === _editingTarefaId){
       const catOpts = (CATS.includes(t.categoria) ? CATS : [t.categoria, ...CATS]).map(c=>`<option${t.categoria===c?' selected':''}>${esc(c)}</option>`).join('');
       const prioOpts = PRIOS.map(p=>`<option${t.prioridade===p?' selected':''}>${p}</option>`).join('');
-      return `<div class="task-edit-panel" id="tEdit_${t.id}">
-        <div class="field" style="margin-bottom:8px;"><input id="tEditNome_${t.id}" value="${esc(t.nome)}" aria-label="Nome da tarefa" style="font-weight:600;"></div>
+      return `<div class="task-edit-panel" id="tEdit_${esc(t.id)}">
+        <div class="field" style="margin-bottom:8px;"><input id="tEditNome_${esc(t.id)}" value="${esc(t.nome)}" aria-label="Nome da tarefa" style="font-weight:600;"></div>
         <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:10px;">
-          <div class="field"><label>Categoria</label><select id="tEditCat_${t.id}">${catOpts}</select></div>
-          <div class="field"><label>Disciplina</label><input id="tEditDisc_${t.id}" value="${esc(t.disciplina||'')}" list="discSuggestList"></div>
-          <div class="field"><label>Prazo</label><input id="tEditPrazo_${t.id}" type="date" value="${t.prazo||''}"></div>
-          <div class="field"><label>Prioridade</label><select id="tEditPrio_${t.id}">${prioOpts}</select></div>
+          <div class="field"><label>Categoria</label><select id="tEditCat_${esc(t.id)}">${catOpts}</select></div>
+          <div class="field"><label>Disciplina</label><input id="tEditDisc_${esc(t.id)}" value="${esc(t.disciplina||'')}" list="discSuggestList"></div>
+          <div class="field"><label>Prazo</label><input id="tEditPrazo_${esc(t.id)}" type="date" value="${esc(t.prazo||'')}"></div>
+          <div class="field"><label>Prioridade</label><select id="tEditPrio_${esc(t.id)}">${prioOpts}</select></div>
         </div>
         <div style="display:flex;gap:8px;justify-content:flex-end;">
           <button class="btn" data-cancel-edit-tarefa="${esc(t.id)}">Cancelar</button>
@@ -7205,16 +7320,18 @@ function carregarPdfjs(){
   return _pdfjs;
 }
 async function lerPdfDeGrade(arquivo){
+  if(arquivo.size > 15 * 1048576){ GM.msg = 'Esse PDF passa de 15 MB. O de horários costuma ter menos de 1 MB: confira se é o arquivo certo.'; GM.erro = true; renderGradeFonte(); return; }
   GM.msg = `Lendo ${arquivo.name}…`; GM.erro = false; renderGradeFonte();
   try{
     const lib = await carregarPdfjs();
     const doc = await lib.getDocument({data: new Uint8Array(await arquivo.arrayBuffer()), isEvalSupported: false}).promise;
+    if(doc.numPages > 40) throw new Error('vazio');
     const paginas = [];
     for(let n = 1; n <= doc.numPages; n++){
       const pag = await doc.getPage(n), alt = pag.view[3], tc = await pag.getTextContent();
       paginas.push({itens: tc.items.map(it => ({str: it.str, x: it.transform[4], top: alt - it.transform[5] - (it.height || Math.abs(it.transform[3])), w: it.width}))});
     }
-    const regs = lerGradePdf(paginas);
+    const regs = lerGradePdf(paginas).slice(0, 5000);
     if(!regs.length) throw new Error('vazio');
     const titulo = arquivo.name.replace(/\.pdf$/i, '');
     // outro arquivo é outro semestre: o que estava marcado era do anterior
@@ -7395,16 +7512,16 @@ function renderProvas(){
       return `<div class="task-edit-panel" style="margin:4px 0;">
         <div style="display:grid;grid-template-columns:minmax(0,2fr) repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px;">
           <div class="field edit-span"><label>Disciplina</label>
-            <select id="pEditDisc_${p.id}">
+            <select id="pEditDisc_${esc(p.id)}">
               ${makeDiscOpts(p.disciplina)}
             </select>
           </div>
-          <div class="field"><label>Tipo</label><select id="pEditTipo_${p.id}">${tipoOpts}</select></div>
-          <div class="field"><label>Data</label><input id="pEditData_${p.id}" type="date" value="${p.data}"></div>
-          <div class="field"><label>Hora</label><input id="pEditHora_${p.id}" type="time" value="${p.hora||''}"></div>
+          <div class="field"><label>Tipo</label><select id="pEditTipo_${esc(p.id)}">${tipoOpts}</select></div>
+          <div class="field"><label>Data</label><input id="pEditData_${esc(p.id)}" type="date" value="${esc(p.data)}"></div>
+          <div class="field"><label>Hora</label><input id="pEditHora_${esc(p.id)}" type="time" value="${esc(p.hora||'')}"></div>
         </div>
         <div style="display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:end;">
-          <div class="field edit-span" style="margin:0;"><label>Local</label><input id="pEditLocal_${p.id}" value="${esc(p.local||'')}" placeholder="ex: Lab A203"></div>
+          <div class="field edit-span" style="margin:0;"><label>Local</label><input id="pEditLocal_${esc(p.id)}" value="${esc(p.local||'')}" placeholder="ex: Lab A203"></div>
           <button class="btn" data-cancel-edit-prova="${esc(p.id)}">Cancelar</button>
           <button class="btn btn-primary" data-save-prova="${esc(p.id)}">Salvar</button>
         </div>
@@ -7643,7 +7760,7 @@ function agendaItens(){
     rels: relatoriosAbertos().filter(r => r.fim >= hoje),
   };
 }
-const icsTexto = s => String(s ?? '').replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+const icsTexto = s => String(s ?? '').replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r\n|\r|\n/g, '\\n');
 // o formato pede linhas de no máximo 75 bytes, continuadas com um espaço
 function icsLinha(linha){
   const enc = new TextEncoder(), partes = [];
@@ -7670,7 +7787,7 @@ function gerarICS(sel){
   const aviso = (quando, texto) => ['BEGIN:VALARM', 'ACTION:DISPLAY', `TRIGGER:${quando}`, `DESCRIPTION:${icsTexto(texto)}`, 'END:VALARM'];
   // dia inteiro: o aviso de -15h cai às 9h da véspera
   const diaInteiro = iso => [`DTSTART;VALUE=DATE:${icsData(iso)}`, `DTEND;VALUE=DATE:${icsDiaSeguinte(iso)}`];
-  const evento = (uid, titulo, quando, extra, avisos) => L.push('BEGIN:VEVENT', `UID:${uid}@centro-de-controle`, `DTSTAMP:${carimbo}`,
+  const evento = (uid, titulo, quando, extra, avisos) => L.push('BEGIN:VEVENT', `UID:${String(uid).replace(/[^\w.-]/g, '')}@centro-de-controle`, `DTSTAMP:${carimbo}`,
     ...quando, `SUMMARY:${icsTexto(titulo)}`, ...extra, ...avisos.flat(), 'END:VEVENT');
   let total = 0;
   if(sel.provas) provas.forEach(p => {
@@ -7818,6 +7935,7 @@ document.addEventListener('click', e => {
 document.getElementById('fileImport').addEventListener('change', (e) => {
   const file = e.target.files[0];
   if(!file) return;
+  if(file.size > 25 * 1048576){ showToast('Esse arquivo é grande demais para ser um backup deste painel.', 'error', 4500); e.target.value = ''; return; }
   const reader = new FileReader();
   // lê e zera já: um arquivo errado ou um "cancelar" no assistente não pode afetar a próxima importação
   const intoNewProfile = window._importIntoNewProfile;
@@ -8597,7 +8715,14 @@ function renderAll(){
 // SISTEMA DE PERFIS
 // ============================================================
 
-function getProfileIndex(){ return lsGet('profiles', []); }
+// a lista de perfis também chega pela nuvem: só entram perfis com id válido, e nome e curso como texto
+function getProfileIndex(){
+  const lista = lsGet('profiles', []);
+  return (Array.isArray(lista) ? lista : [])
+    .filter(p => p && typeof p === 'object' && typeof p.id === 'string' && /^[\w-]{1,64}$/.test(p.id))
+    .map(p => Object.assign({}, p, {name: typeof p.name === 'string' ? p.name : '', curso: typeof p.curso === 'string' ? p.curso : '',
+      createdAt: Number.isFinite(Number(p.createdAt)) ? Number(p.createdAt) : null}));
+}
 function saveProfileIndex(list){ lsSet('profiles', list); updateProfileControls(); }
 
 // Com conta, cada pessoa usa a própria conta: criar perfil vira entrar com outra conta,
@@ -9018,7 +9143,7 @@ function wizardStep1(body){
     <p class="wizard-step-desc">Essas informações aparecerão no painel e no cabeçalho do app.</p>
     <div class="wiz-2col">
       <div class="wiz-field"><label>Seu nome</label><input id="wNome" value="${esc(WIZARD_DATA.nome)}" placeholder="Ex.: Maria Silva" autocomplete="name"></div>
-      <div class="wiz-field"><label>Nota mínima para passar (quase sempre 60)</label><input id="wNotaMin" type="number" inputmode="numeric" min="0" max="100" value="${WIZARD_DATA.notaMinima}"></div>
+      <div class="wiz-field"><label>Nota mínima para passar (quase sempre 60)</label><input id="wNotaMin" type="number" inputmode="numeric" min="0" max="100" value="${esc(WIZARD_DATA.notaMinima)}"></div>
     </div>
     <div class="wiz-2col">
       <div class="wiz-field"><label>Curso</label><input id="wCurso" value="${esc(WIZARD_DATA.curso)}" placeholder="Ex.: Engenharia de Produção"></div>
@@ -9278,6 +9403,7 @@ function loadSheetJS(cb){
 function handleWizFile(file){
   const status = document.getElementById('wizFileStatus');
   if(!status) return;
+  if(file.size > 10 * 1048576){ status.textContent = 'Essa planilha passa de 10 MB. Use só a aba com as disciplinas.'; return; }
   status.textContent = 'Carregando…';
   if(file.name.endsWith('.csv') || file.name.endsWith('.txt')){
     const reader = new FileReader();
@@ -9442,7 +9568,7 @@ function wizardStep3Notas(body){
           <div class="wiz-sem-head"><span>${b.n}º semestre</span></div>
           ${b.itens.map(([s,nome]) => `<label class="wiz-nota-row">
             ${mostraCodigo ? `<span class="wiz-disc-sig">${esc(s)}</span>` : ''}<span class="wiz-disc-nome">${esc(nome)}</span>
-            <input type="text" inputmode="decimal" autocomplete="off" maxlength="5" placeholder="Nota" data-nota="${esc(s)}" value="${WIZARD_DATA.notas[s] ?? ''}">
+            <input type="text" inputmode="decimal" autocomplete="off" maxlength="5" placeholder="Nota" data-nota="${esc(s)}" value="${esc(WIZARD_DATA.notas[s] ?? '')}">
           </label>`).join('')}
         </div>`).join('')}`;
 }

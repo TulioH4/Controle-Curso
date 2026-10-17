@@ -33,7 +33,10 @@
   const enabled = !!(window.supabase && window.supabase.createClient && CONFIG.key);
   if (enabled) {
     client = window.supabase.createClient(CONFIG.url, CONFIG.key, {
-      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: 'cc-auth' },
+      // detectSessionInUrl off: the app signs in only with e-mail and password. With it on, a link
+      // carrying someone else's tokens (#access_token=...) would silently sign this device into
+      // that account, and everything the person typed afterwards would sync to it.
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storageKey: 'cc-auth' },
     });
   }
 
