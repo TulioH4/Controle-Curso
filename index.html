@@ -5347,7 +5347,7 @@ function renderMapaSucesso(){
       const check = s==='Aprovado' ? '✓ ' : '';
       // ainda depende de outra (contando que passe nas que está cursando): cadeado
       const trava = cur && cur.creditos[d.sigla] && (s === 'Pendente' || s === 'Reprovado') ? reqTrava(cur, d.sigla, base) : [];
-      const porque = trava.length ? ` — depende de ${trava.length > 3 ? trava.length + ' disciplinas' : trava.map(r => gNome(r.s)).join(', ')}` : '';
+      const porque = trava.length ? ` — depende de ${trava.length > 3 ? trava.length + ' disciplinas' : trava.map(r => reqNome(cur, r.s)).join(', ')}` : '';
       return `<span class="badge badge-${meta.cls}${trava.length ? ' is-bloq' : ''}" title="${esc(d.disciplina)} — ${meta.label}${esc(porque)} (clique para detalhes)" data-disc-chip="${esc(d.sigla)}" style="cursor:pointer;">${trava.length ? ico('lock') : ''}${check}${esc(d.sigla)}</span>`;
     }).join('');
     return `
@@ -5427,6 +5427,12 @@ function reqTrava(cur, sg, base, visto = new Set()){
   return reqFaltando(cur, sg, base, base.cursando).filter(r => r.tipo !== 'Co' || (!visto.has(r.s) && reqTrava(cur, r.s, base, visto).length > 0));
 }
 const reqCred = (cur, siglas) => siglas.reduce((a, sg) => a + (cur.creditos[sg] || 0), 0);
+function reqNome(cur, sg){
+  const item = STATE.historico.find(i => i.sigla === sg);
+  if(item) return item.disciplina;
+  const cat = cur.semestres.flat().find(([x]) => x === sg);
+  return cat ? cat[1] : sg;
+}
 // limite de créditos por semestre da previsão: o escolhido, ou o ritmo de agora
 function reqLimite(cursandoCred){
   const n = Number(STATE.config.creditosSemestre);
@@ -5439,12 +5445,14 @@ function reqPlano(cur, limite){
   const {dep, per} = reqIndice(cur), cred = sg => cur.creditos[sg] || 0;
   const base = reqBase(true), feitas = new Set(base.aprov), freq = new Set(base.freq);
   const faltam = Object.keys(cur.creditos).filter(sg => !feitas.has(sg)), falta = new Set(faltam);
+  // quem ainda espera por sg (o pré-requisito II de quem já cursou sg, mesmo reprovado por nota, já vale)
+  const espera = sg => (dep[sg] || []).filter(x => falta.has(x.s) && !(x.tipo === 'II' && base.freq.has(sg)));
   // altura: quantos semestres, no mínimo, sg e o que depende dela ainda ocupam (co-requisito vai junto)
   const alt = Object.create(null);
   const altura = sg => {
     if(alt[sg] !== undefined) return alt[sg];
     alt[sg] = 1;
-    return (alt[sg] = Math.max(1, ...(dep[sg] || []).filter(x => falta.has(x.s)).map(x => altura(x.s) + (x.tipo === 'Co' ? 0 : 1))));
+    return (alt[sg] = Math.max(1, ...espera(sg).map(x => altura(x.s) + (x.tipo === 'Co' ? 0 : 1))));
   };
   let resto = faltam.slice().sort((a, b) => altura(b) - altura(a) || (per[a] || 99) - (per[b] || 99) || cred(b) - cred(a));
   const sems = [];
@@ -5464,14 +5472,16 @@ function reqPlano(cur, limite){
     este.forEach(sg => { feitas.add(sg); freq.add(sg); });
     resto = resto.filter(sg => !este.has(sg));
   }
-  // a sequência mais longa entre as que faltam (o mínimo de semestres, com qualquer limite de créditos)
+  // a sequência mais longa entre as que faltam (o mínimo de semestres, com qualquer limite de créditos):
+  // [{s, junto}], junto = vai no mesmo semestre da anterior (co-requisito)
   const cadeia = [];
   if(faltam.length){
-    let sg = faltam.reduce((m, x) => altura(x) > altura(m) ? x : m, faltam[0]);
+    let sg = faltam.reduce((m, x) => altura(x) > altura(m) ? x : m, faltam[0]), junto = false;
     while(sg && cadeia.length < 8){
-      cadeia.push(sg);
-      const h = altura(sg), prox = (dep[sg] || []).filter(x => falta.has(x.s) && !reqEhGeral(cur, x.s) && altura(x.s) + (x.tipo === 'Co' ? 0 : 1) === h);
-      sg = (prox.find(x => x.tipo !== 'Co') || prox[0] || {}).s;
+      cadeia.push({s: sg, junto});
+      const h = altura(sg), prox = espera(sg).filter(x => !reqEhGeral(cur, x.s) && altura(x.s) + (x.tipo === 'Co' ? 0 : 1) === h);
+      const x = prox.find(y => y.tipo !== 'Co') || prox[0];
+      sg = x && x.s; junto = !!x && x.tipo === 'Co';
     }
   }
   return {sems, sobra: resto, cadeia, minimo: faltam.length ? Math.max(...faltam.map(altura)) : 0};
@@ -5520,16 +5530,17 @@ function renderFormatura(){
   }
   const opcoes = [...new Set([12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, limite])].sort((a, b) => a - b);
   const noHist = new Set(STATE.historico.map(i => i.sigla));
+  const nome = sg => reqNome(cur, sg);
   const chip = sg => {
-    const t = `${gNome(sg)} (${sg}), ${cur.creditos[sg]} ${cur.creditos[sg] === 1 ? 'crédito' : 'créditos'}`;
-    return noHist.has(sg) ? `<button type="button" class="fm-chip" data-disc-chip="${esc(sg)}" title="${esc(t)}">${esc(gNome(sg))}</button>` : `<span class="fm-chip" title="${esc(t)}">${esc(gNome(sg))}</span>`;
+    const t = `${nome(sg)} (${sg}), ${cur.creditos[sg]} ${cur.creditos[sg] === 1 ? 'crédito' : 'créditos'}`;
+    return noHist.has(sg) ? `<button type="button" class="fm-chip" data-disc-chip="${esc(sg)}" title="${esc(t)}">${esc(nome(sg))}</button>` : `<span class="fm-chip" title="${esc(t)}">${esc(nome(sg))}</span>`;
   };
   // disciplinas do curso que faltam e estão fora do quadro (estágio, trilha...): ficam fora da conta
   const foraDoQuadro = cur.semestres.flat().map(([sg]) => sg).filter(sg => !cur.creditos[sg] && noHist.has(sg) && situacao(STATE.historico.find(i => i.sigla === sg)) !== 'Aprovado');
   const notas = [];
-  if(plano.cadeia.length > 1) notas.push(`Sequência mais longa do que falta: ${esc(plano.cadeia.map(gNome).join(' → '))}. Com qualquer limite de créditos, ela leva ${plano.minimo} ${plano.minimo === 1 ? 'semestre' : 'semestres'}.`);
+  if(plano.minimo >= 2 && plano.cadeia.length > 1) notas.push(`Sequência mais longa do que falta: ${esc(plano.cadeia.map((c, i) => (i ? (c.junto ? ' + ' : ' → ') : '') + nome(c.s)).join(''))}. Com qualquer limite de créditos, ela leva ${plano.minimo} semestres${plano.cadeia.some(c => c.junto) ? ' (as ligadas por + vão no mesmo semestre)' : ''}.`);
   if(atalho) notas.push(atalho);
-  if(foraDoQuadro.length) notas.push(`Ficam fora desta conta, por não estarem no quadro de créditos: ${esc(foraDoQuadro.map(gNome).join(', '))}.`);
+  if(foraDoQuadro.length) notas.push(`Ficam fora desta conta, por não estarem no quadro de créditos: ${esc(foraDoQuadro.map(nome).join(', '))}.`);
   notas.push(`Feita com os pré e co-requisitos do currículo ${esc(cur.versao)}. A oferta de cada semestre e o limite da matrícula podem mudar a ordem. No mapa abaixo, ${ico('lock')} marca as disciplinas que ainda dependem de outras.`);
   el.innerHTML = `<div class="panel panel--pad fm">
     <div class="fm-top">
@@ -5569,13 +5580,14 @@ function renderFormatura(){
 function reqDetalheHtml(sigla, item){
   const cur = curriculoDoPerfil();
   if(!cur || !cur.creditos[sigla]) return '';
-  const base = reqBase(false), aprovada = situacao(item) === 'Aprovado';
+  const base = reqBase(false), aprovada = situacao(item) === 'Aprovado', cursandoEsta = base.cursando.has(sigla);
   const reqs = reqDe(cur, sigla);
-  const cumprido = r => r.tipo === 'II' ? base.freq.has(r.s) : base.aprov.has(r.s);
+  // co-requisito cursado no mesmo semestre desta também está cumprido
+  const cumprido = r => r.tipo === 'II' ? base.freq.has(r.s) : base.aprov.has(r.s) || (r.tipo === 'Co' && cursandoEsta && base.cursando.has(r.s));
   const linha = r => {
-    const [ic, cor, est] = cumprido(r) ? ['✓', 'green', r.tipo === 'II' && !base.aprov.has(r.s) ? 'cursada' : 'aprovada']
+    const [ic, cor, est] = cumprido(r) ? ['✓', 'green', !base.aprov.has(r.s) ? (base.cursando.has(r.s) ? 'cursando junto' : 'cursada') : 'aprovada']
       : base.cursando.has(r.s) ? ['◐', 'amber', 'cursando agora'] : ['✕', 'red', 'falta'];
-    return `<div class="dd-req"><span class="dd-req__ic" style="color:var(--${cor})" aria-hidden="true">${ic}</span><span class="dd-req__n">${esc(gNome(r.s))}<small>${esc(r.s)} · ${REQ_TIPO[r.tipo]}</small></span><span class="dd-req__t" style="color:var(--${cor})">${est}</span></div>`;
+    return `<div class="dd-req"><span class="dd-req__ic" style="color:var(--${cor})" aria-hidden="true">${ic}</span><span class="dd-req__n">${esc(reqNome(cur, r.s))}<small>${esc(r.s)} · ${REQ_TIPO[r.tipo]}</small></span><span class="dd-req__t" style="color:var(--${cor})">${est}</span></div>`;
   };
   let html = '';
   if(!aprovada && reqs.length){
@@ -5588,12 +5600,15 @@ function reqDetalheHtml(sigla, item){
     }
   }
   const libera = (reqIndice(cur).dep[sigla] || []).filter(x => !reqEhGeral(cur, x.s));
-  const blocoLibera = libera.length ? `<p class="gm-nota" style="font-size:12.5px;color:var(--text-dim);margin-top:${html ? 10 : 0}px;"><b style="color:var(--text)">Abre caminho para:</b> ${esc(libera.map(x => gNome(x.s)).join(', '))}.</p>` : '';
-  if(!html && !blocoLibera) return '';
-  return `<div style="margin-bottom:16px;">
-      <div class="section-label" style="margin:0 0 8px;">${html ? 'Pré-requisitos' : 'Requisitos'}</div>
-      ${html}${blocoLibera}
+  const nomesLibera = esc(libera.map(x => reqNome(cur, x.s)).join(', '));
+  if(html) return `<div style="margin-bottom:16px;">
+      <div class="section-label" style="margin:0 0 8px;">Requisitos</div>
+      ${html}${libera.length ? `<p class="gm-nota" style="font-size:12.5px;color:var(--text-dim);margin-top:10px;"><b style="color:var(--text)">Abre caminho para:</b> ${nomesLibera}.</p>` : ''}
     </div>`;
+  return libera.length ? `<div style="margin-bottom:16px;">
+      <div class="section-label" style="margin:0 0 8px;">Abre caminho para</div>
+      <p class="gm-nota" style="font-size:12.5px;color:var(--text-dim);">${nomesLibera}.</p>
+    </div>` : '';
 }
 
 // ---------------- "Faltei" nas aulas de hoje ----------------
@@ -7473,7 +7488,7 @@ function renderGradeLista(){
     const trava = cur && cur.creditos[d.sigla] && gStatus(d.sigla) === 'falta' ? reqTrava(cur, d.sigla, base) : [];
     const st = trava.length ? 'bloq' : gStatus(d.sigla), nT = d.teoria.length;
     const sub = [d.sigla, nT ? `${nT} ${nT === 1 ? 'turma' : 'turmas'}` : 'sem horário fixo', d.lab.length ? `${d.lab.length} lab` : '',
-      trava.length ? `precisa de ${trava.length > 2 ? trava.length + ' disciplinas' : trava.map(r => gNome(r.s)).join(' e ')}` : ''].filter(Boolean).join(' · ');
+      trava.length ? `precisa de ${trava.length > 2 ? trava.length + ' disciplinas' : trava.map(r => reqNome(cur, r.s)).join(' e ')}` : ''].filter(Boolean).join(' · ');
     return `<label class="gm-disc st-${st}"><input type="checkbox" data-gdisc="${esc(d.sigla)}"${p.escolhidas.includes(d.sigla) ? ' checked' : ''}>
       <span class="gm-disc__n"><b>${esc(gNome(d.sigla))}</b><small>${esc(sub)}</small></span>${ROT[st] ? `<span class="badge">${st === 'bloq' ? ico('lock') : ''}${ROT[st]}</span>` : ''}</label>`;
   };
@@ -7517,7 +7532,7 @@ function gTravas(marcadas){
   return marcadas.filter(s => cur.creditos[s] && gStatus(s) !== 'cursando').map(s => {
     const f = reqFaltando(cur, s, base, juntas);
     if(!f.length) return '';
-    return `${gNome(s)} (${f.length > 3 ? `faltam ${f.length} disciplinas antes` : 'precisa de ' + f.map(r => `${gNome(r.s)} ${r.tipo === 'Co' ? 'antes ou junto' : r.tipo === 'II' ? 'cursada antes' : 'aprovada antes'}`).join(', ')})`;
+    return `${gNome(s)} (${f.length > 3 ? `faltam ${f.length} disciplinas antes` : 'precisa de ' + f.map(r => `${reqNome(cur, r.s)} ${r.tipo === 'Co' ? 'antes ou junto' : r.tipo === 'II' ? 'cursada antes' : 'aprovada antes'}`).join(', ')})`;
   }).filter(Boolean);
 }
 function renderGradeMontagem(){
