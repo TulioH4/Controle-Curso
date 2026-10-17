@@ -2117,6 +2117,38 @@
     .gm-res .mono{white-space:normal; flex-basis:100%; order:1;}
     .gm-res td[data-l]::before{content:attr(data-l) " "; color:var(--text-faint); font-size:11.5px;}
   }
+  /* previsão de formatura (Mapa de Sucesso): créditos, semestres que faltam e o que cabe em cada um */
+  .fm{display:flex; flex-direction:column; gap:16px; margin-bottom:22px;}
+  .fm-top{display:flex; align-items:flex-end; justify-content:space-between; gap:14px; flex-wrap:wrap;}
+  .fm-top > div{min-width:0;}
+  .fm-quando{font-size:24px; font-weight:700; letter-spacing:-.02em; color:var(--text); line-height:1.2; margin-top:4px; text-wrap:balance;}
+  .fm-sub{font-size:13px; color:var(--text-dim); margin-top:4px; line-height:1.45; max-width:62ch;}
+  .fm-barra{display:flex; height:8px; border-radius:4px; background:var(--line-soft); overflow:hidden;}
+  .fm-barra span{height:100%;}
+  .fm-leg{display:flex; flex-wrap:wrap; gap:6px 16px; margin-top:8px; font-size:12.5px; color:var(--text-dim);}
+  .fm-leg b{color:var(--text); font-weight:650; font-family:var(--mono);}
+  .fm-leg i{display:inline-block; width:8px; height:8px; border-radius:2px; margin-right:6px;}
+  .fm-sems{display:flex; flex-direction:column;}
+  .fm-sem{display:grid; grid-template-columns:150px minmax(0, 1fr); gap:6px 14px; padding:11px 0; border-top:1px solid var(--line-soft);}
+  .fm-sem__h{display:flex; flex-direction:column; gap:2px; font-size:13px; font-weight:650; color:var(--text);}
+  .fm-sem__h small{font-size:11.5px; font-weight:500; color:var(--text-faint); font-family:var(--mono);}
+  .fm-sem.is-fim .fm-sem__h{color:var(--green);}
+  .fm-chips{display:flex; flex-wrap:wrap; gap:6px; min-width:0;}
+  .fm-chip{max-width:100%; border:1px solid var(--line); background:var(--panel-2); color:var(--text); border-radius:999px; padding:3px 10px; font:inherit; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  button.fm-chip{cursor:pointer;}
+  button.fm-chip:hover{border-color:var(--blue);}
+  .fm-notas{display:flex; flex-direction:column; gap:6px;}
+  @media (max-width:640px){ .fm-sem{grid-template-columns:minmax(0, 1fr);} .fm-quando{font-size:21px;} }
+  /* disciplina que ainda depende de outra: cadeado no Mapa e no montador de grade */
+  .badge.is-bloq{opacity:.75;}
+  .badge .i{width:11px; height:11px; vertical-align:-1px; margin-right:3px;}
+  .gm-disc.st-bloq .badge{background:var(--gray-dim); color:var(--gray);}
+  .gm-disc.st-bloq{opacity:.8;}
+  .dd-req{display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid var(--line-soft); font-size:12.5px;}
+  .dd-req__ic{width:16px; text-align:center; font-weight:800; flex-shrink:0;}
+  .dd-req__n{flex:1; min-width:0; color:var(--text);}
+  .dd-req__n small{display:block; color:var(--text-faint); font-size:11px; margin-top:1px;}
+  .dd-req__t{font-size:11.5px; font-weight:600; flex-shrink:0; text-align:right;}
   /* aulas de hoje: a aula que passou fica apagada, mas o botão Faltei continua legível */
   .row-item.past{opacity:1;}
   .row-item.past > .time, .row-item.past > .info{opacity:.45;}
@@ -2757,6 +2789,7 @@
       <div class="screen__header">
         <h2>Mapa de Sucesso</h2>
       </div>
+      <div id="formaturaPanel" hidden></div>
       <div id="mapaTimeline"></div>
     </section>
 
@@ -3408,7 +3441,8 @@ function sanearDados(){
   const c = STATE.config = obj(STATE.config);
   c.notaMinima = num(c.notaMinima, 0, 100, 60);
   c.disciplinasAtuais = textos(c.disciplinasAtuais).filter(siglaOk);
-  ['aluno', 'curso', 'instituicao', 'semestre'].forEach(k => { c[k] = txt(c[k]); });
+  ['aluno', 'curso', 'instituicao', 'semestre', 'curriculo'].forEach(k => { c[k] = txt(c[k]); });
+  c.creditosSemestre = Math.round(num(c.creditosSemestre, 0, 60, 0));
 
   // histórico
   STATE.historicoOverrides = mapa(STATE.historicoOverrides, v => ehObj(v) ? obj(v) : undefined);
@@ -3642,6 +3676,7 @@ const ICONS = {
   keyboard:'<rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6.5 10h.01M10 10h.01M14 10h.01M17.5 10h.01M7.5 14h9"/>',
   calendar:'<rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
   cloud:'<path d="M7.2 18.5h10.3a4 4 0 0 0 .5-7.97A6 6 0 0 0 6.4 9.2a4.7 4.7 0 0 0 .8 9.3z"/>',
+  lock:'<rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/>',
   magic:'<path d="m4 20 10-10"/><path d="m12.5 8.5 3 3"/><path d="M17 3.5v3M15.5 5h3M19.5 10v2.5M18.25 11.25h2.5M9 3.5v2M8 4.5h2"/>',
 };
 function ico(name, cls){
@@ -4298,6 +4333,14 @@ function renderProgressoCurso(){
     if(ch){ chTotal += ch; if(situacao(item) === 'Aprovado') chAprovado += ch; }
   });
   const chPct = chTotal ? Math.round(chAprovado / chTotal * 100) : 0;
+  // curso com quadro de créditos: créditos aprovados no lugar da carga horária
+  const cur = curriculoDoPerfil();
+  let creditos = null;
+  if(cur){
+    const todas = Object.keys(cur.creditos), b = reqBase(false);
+    const total = reqCred(cur, todas), feitos = reqCred(cur, todas.filter(sg => b.aprov.has(sg)));
+    creditos = {total, feitos, cursando: reqCred(cur, todas.filter(sg => b.cursando.has(sg))), pct: total ? Math.round(feitos / total * 100) : 0};
+  }
 
   const barStyle = (p, color) =>
     `<div style="height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:4px;margin-bottom:2px;">
@@ -4312,7 +4355,12 @@ function renderProgressoCurso(){
         <span style="font-size:12px;font-family:var(--mono);color:var(--green);">${aprovadas}/${total}</span>
         <span style="font-size:11px;color:var(--text-faint);margin-left:4px;">(${pct}%)</span>
       </div>
-      ${chTotal > 0 ? `<div>
+      ${creditos ? `<div>
+        <div class="stat__label">Créditos aprovados</div>
+        ${barStyle(creditos.pct,'var(--blue)')}
+        <span style="font-size:12px;font-family:var(--mono);color:var(--blue);">${creditos.feitos}/${creditos.total}</span>
+        <span style="font-size:11px;color:var(--text-faint);margin-left:4px;">(${creditos.pct}%)${creditos.cursando ? ` · ${creditos.cursando} cursando` : ''}</span>
+      </div>` : chTotal > 0 ? `<div>
         <div class="stat__label">Carga horária integralizada</div>
         ${barStyle(chPct,'var(--blue)')}
         <span style="font-size:12px;font-family:var(--mono);color:var(--blue);">${chAprovado}/${chTotal} h</span>
@@ -4827,6 +4875,7 @@ function showDiscDetail(sigla){
   const cutoff30 = new Date(); cutoff30.setDate(cutoff30.getDate()-30);
   const sessDisc = STATE.pomSessions.filter(se => se.sigla === sigla && new Date(se.ts) >= cutoff30);
   const totalMinSess = sessDisc.reduce((a,se) => a+se.duracaoMin, 0);
+  const curDisc = curriculoDoPerfil(), creditosDisc = curDisc ? curDisc.creditos[sigla] || 0 : 0;
 
   document.getElementById('ddNome').textContent = item.disciplina;
   document.getElementById('ddSigla').textContent = `${sigla}, ${ch}h, Semestre ${item.semestre||'—'}`;
@@ -4836,6 +4885,7 @@ function showDiscDetail(sigla){
       <div class="dm-stat"><label>Situação</label><span style="color:var(--${meta.cls})">${meta.label}</span></div>
       <div class="dm-stat"><label>Nota</label><span>${item.nota != null ? esc(item.nota) : '—'}</span></div>
       <div class="dm-stat"><label>Faltas</label><span style="color:var(--${faltasCls})">${faltasCount}/${limite}</span></div>
+      ${creditosDisc ? `<div class="dm-stat"><label>Créditos</label><span>${creditosDisc}</span></div>` : ''}
       ${mediaAtual !== null ? `<div class="dm-stat"><label>Média atual</label><span style="color:var(--${mediaAtual>=notaMin?'green':'red'})">${fmtNum(mediaAtual)}</span></div>` : ''}
       ${totalMinSess > 0 ? `<div class="dm-stat"><label>Horas estudadas (30d)</label><span style="color:var(--blue)">${Math.floor(totalMinSess/60)}h${totalMinSess%60>0?String(totalMinSess%60)+'m':''}</span></div>` : ''}
     </div>
@@ -4848,6 +4898,7 @@ function showDiscDetail(sigla){
         return `<div class="sim-row"><span class="sim-sigla">${esc(e.label||'?')}</span><span style="font-size:11.5px;color:var(--text-faint);">peso ${fmtPeso(e.peso)}</span><span style="flex:1;"></span><span class="sim-atual" style="color:${v!==null?(v>=notaMin?'var(--green)':'var(--red)'):'var(--text-faint)'};">${v !== null ? fmtNum(v) : '—'}</span></div>`;
       }).join('')}
     </div>` : ''}
+    ${reqDetalheHtml(sigla, item)}
     ${provasDisc.length ? `
     <div style="margin-bottom:16px;">
       <div class="section-label" style="margin:0 0 8px;">Próximas avaliações</div>
@@ -5284,7 +5335,9 @@ const tituloSemestre = (bloco, unico) => bloco.numero ? `${bloco.numero}º semes
 function renderMapaSucesso(){
   const el = document.getElementById('mapaTimeline');
   if(!el) return;
+  renderFormatura();
   const semestres = buildSemestresCurriculares();
+  const cur = curriculoDoPerfil(), base = cur && reqBase(true);
   el.innerHTML = semestres.map(bloco => {
     const total = bloco.disciplinas.length;
     const aprovadas = bloco.disciplinas.filter(d => situacao(d)==='Aprovado').length;
@@ -5292,7 +5345,10 @@ function renderMapaSucesso(){
     const chips = bloco.disciplinas.map(d => {
       const s = situacao(d); const meta = situacaoMeta(s);
       const check = s==='Aprovado' ? '✓ ' : '';
-      return `<span class="badge badge-${meta.cls}" title="${esc(d.disciplina)} — ${meta.label} (clique para detalhes)" data-disc-chip="${esc(d.sigla)}" style="cursor:pointer;">${check}${esc(d.sigla)}</span>`;
+      // ainda depende de outra (contando que passe nas que está cursando): cadeado
+      const trava = cur && cur.creditos[d.sigla] && (s === 'Pendente' || s === 'Reprovado') ? reqTrava(cur, d.sigla, base) : [];
+      const porque = trava.length ? ` — depende de ${trava.length > 3 ? trava.length + ' disciplinas' : trava.map(r => gNome(r.s)).join(', ')}` : '';
+      return `<span class="badge badge-${meta.cls}${trava.length ? ' is-bloq' : ''}" title="${esc(d.disciplina)} — ${meta.label}${esc(porque)} (clique para detalhes)" data-disc-chip="${esc(d.sigla)}" style="cursor:pointer;">${trava.length ? ico('lock') : ''}${check}${esc(d.sigla)}</span>`;
     }).join('');
     return `
       <div class="timeline-node">
@@ -5310,6 +5366,234 @@ function renderMapaSucesso(){
   el.querySelectorAll('[data-disc-chip]').forEach(chip => {
     chip.addEventListener('click', () => showDiscDetail(chip.dataset.discChip));
   });
+}
+
+// ---------------- Requisitos, créditos e previsão de formatura ----------------
+// Só nos cursos do catálogo que têm o quadro de pré/co-requisitos. O perfil guarda qual é
+// (config.curriculo); nos perfis de antes disso, valem o curso escrito e os códigos do histórico.
+function curriculoDoPerfil(){
+  const c = STATE.config || {}, comQuadro = CURRICULOS.filter(x => x.requisitos);
+  if(c.curriculo) return comQuadro.find(x => x.id === c.curriculo) || null;
+  const siglas = new Set((STATE.historico || []).map(i => i.sigla)), inst = wizNorm(c.instituicao);
+  return comQuadro.find(x => {
+    // outra faculdade escrita no perfil: códigos parecidos não querem dizer o mesmo curso
+    if(inst && !inst.includes(wizNorm(x.instituicao))) return false;
+    const cods = Object.keys(x.creditos), em = cods.filter(sg => siglas.has(sg)).length / cods.length;
+    return em >= 0.6 || (em >= 0.3 && wizNorm(c.curso).includes(wizNorm(x.curso)));
+  }) || null;
+}
+// requisitos de cada disciplina ({s, tipo}), quem depende dela e o período de cada uma (lido uma vez)
+function reqIndice(cur){
+  if(cur._idx) return cur._idx;
+  const todas = Object.keys(cur.creditos), r = Object.create(null), dep = Object.create(null), per = Object.create(null);
+  Object.entries(cur.requisitos).forEach(([d, txt]) => {
+    r[d] = txt.split(',').flatMap(parte => {
+      const [x, tipo] = parte.trim().split(/\s+/);
+      return x === '*' ? todas.filter(o => o !== d).map(o => ({s: o, tipo})) : [{s: x, tipo}];
+    });
+    r[d].forEach(x => (dep[x.s] = dep[x.s] || []).push({s: d, tipo: x.tipo}));
+  });
+  cur.semestres.forEach((sem, i) => sem.forEach(([sg]) => { per[sg] = i + 1; }));
+  return (cur._idx = {r, dep, per});
+}
+const reqDe = (cur, sg) => reqIndice(cur).r[sg] || [];
+// o requisito "todas as outras" (TCC) aparece resumido, não disciplina por disciplina
+const reqEhGeral = (cur, sg) => /\*/.test(cur.requisitos[sg] || '');
+const REQ_TIPO = {I: 'aprovada antes', II: 'cursada antes', Co: 'aprovada antes ou junto'};
+// "não passei" com nota de aprovação: reprovou por falta (não vale nem para o pré-requisito II)
+const reprovouPorFalta = i => i.aprovado === false && Number(String(i.nota ?? '').replace(',', '.')) >= (STATE.config.notaMinima || 60);
+// O que já conta para os requisitos. aprov: aprovadas (com contarCursando, também as que está
+// cursando, contando que passe); freq: cursadas com frequência (II); cursando: as deste semestre.
+function reqBase(contarCursando){
+  const aprov = new Set(), freq = new Set(), cursando = new Set(STATE.config.disciplinasAtuais || []);
+  STATE.historico.forEach(i => {
+    const st = situacao(i);
+    if(st === 'Aprovado'){ aprov.add(i.sigla); freq.add(i.sigla); }
+    else if(st === 'Reprovado' && !reprovouPorFalta(i)) freq.add(i.sigla);
+  });
+  cursando.forEach(sg => { if(aprov.has(sg)) cursando.delete(sg); });
+  if(contarCursando) cursando.forEach(sg => { aprov.add(sg); freq.add(sg); });
+  return {aprov, freq, cursando};
+}
+// requisitos de sg ainda não cumpridos; junto: as que vão ser cursadas no mesmo semestre (co-requisito)
+function reqFaltando(cur, sg, base, junto){
+  return reqDe(cur, sg).filter(r => r.tipo === 'II' ? !base.freq.has(r.s)
+    : r.tipo === 'Co' ? !(base.aprov.has(r.s) || (junto && junto.has(r.s)))
+    : !base.aprov.has(r.s));
+}
+// o que impede de cursar sg: pré-requisitos que faltam e co-requisitos que também não dá para cursar ainda
+function reqTrava(cur, sg, base, visto = new Set()){
+  visto.add(sg);
+  return reqFaltando(cur, sg, base, base.cursando).filter(r => r.tipo !== 'Co' || (!visto.has(r.s) && reqTrava(cur, r.s, base, visto).length > 0));
+}
+const reqCred = (cur, siglas) => siglas.reduce((a, sg) => a + (cur.creditos[sg] || 0), 0);
+// limite de créditos por semestre da previsão: o escolhido, ou o ritmo de agora
+function reqLimite(cursandoCred){
+  const n = Number(STATE.config.creditosSemestre);
+  return n >= 8 && n <= 60 ? n : (cursandoCred >= 12 ? cursandoCred : 24);
+}
+// Previsão: distribui o que falta pelos próximos semestres, respeitando os requisitos e o limite de
+// créditos, contando que a pessoa passe nas que está cursando. Vão primeiro as que seguram a sequência
+// mais longa; no empate, as de períodos anteriores.
+function reqPlano(cur, limite){
+  const {dep, per} = reqIndice(cur), cred = sg => cur.creditos[sg] || 0;
+  const base = reqBase(true), feitas = new Set(base.aprov), freq = new Set(base.freq);
+  const faltam = Object.keys(cur.creditos).filter(sg => !feitas.has(sg)), falta = new Set(faltam);
+  // altura: quantos semestres, no mínimo, sg e o que depende dela ainda ocupam (co-requisito vai junto)
+  const alt = Object.create(null);
+  const altura = sg => {
+    if(alt[sg] !== undefined) return alt[sg];
+    alt[sg] = 1;
+    return (alt[sg] = Math.max(1, ...(dep[sg] || []).filter(x => falta.has(x.s)).map(x => altura(x.s) + (x.tipo === 'Co' ? 0 : 1))));
+  };
+  let resto = faltam.slice().sort((a, b) => altura(b) - altura(a) || (per[a] || 99) - (per[b] || 99) || cred(b) - cred(a));
+  const sems = [];
+  while(resto.length && sems.length < 30){
+    const este = new Set();
+    let soma = 0, mudou = true;
+    while(mudou){
+      mudou = false;
+      resto.forEach(sg => {
+        if(este.has(sg) || soma + cred(sg) > limite) return;
+        const ok = reqDe(cur, sg).every(r => r.tipo === 'II' ? freq.has(r.s) : r.tipo === 'Co' ? (feitas.has(r.s) || este.has(r.s)) : feitas.has(r.s));
+        if(ok){ este.add(sg); soma += cred(sg); mudou = true; }
+      });
+    }
+    if(!este.size) break;
+    sems.push({siglas: resto.filter(sg => este.has(sg)), creditos: soma});
+    este.forEach(sg => { feitas.add(sg); freq.add(sg); });
+    resto = resto.filter(sg => !este.has(sg));
+  }
+  // a sequência mais longa entre as que faltam (o mínimo de semestres, com qualquer limite de créditos)
+  const cadeia = [];
+  if(faltam.length){
+    let sg = faltam.reduce((m, x) => altura(x) > altura(m) ? x : m, faltam[0]);
+    while(sg && cadeia.length < 8){
+      cadeia.push(sg);
+      const h = altura(sg), prox = (dep[sg] || []).filter(x => falta.has(x.s) && !reqEhGeral(cur, x.s) && altura(x.s) + (x.tipo === 'Co' ? 0 : 1) === h);
+      sg = (prox.find(x => x.tipo !== 'Co') || prox[0] || {}).s;
+    }
+  }
+  return {sems, sobra: resto, cadeia, minimo: faltam.length ? Math.max(...faltam.map(altura)) : 0};
+}
+// rótulos dos próximos semestres: "1º semestre de 2027"..., a partir do semestre do perfil
+function reqRotulos(n, comecaAgora){
+  const out = [];
+  let r = String(STATE.config.semestre || '').trim();
+  for(let i = 0; i < n; i++){
+    if(!(i === 0 && comecaAgora && r)) r = r ? proximoRotulo(r) : '';
+    const k = i + (comecaAgora ? 0 : 1);
+    out.push(r || (k === 0 ? 'Este semestre' : k === 1 ? 'Próximo semestre' : `Daqui a ${k} semestres`));
+  }
+  return out;
+}
+const reqMaiuscula = t => t.charAt(0).toUpperCase() + t.slice(1);
+function renderFormatura(){
+  const el = document.getElementById('formaturaPanel');
+  if(!el) return;
+  const cur = curriculoDoPerfil();
+  el.hidden = !cur;
+  if(!cur){ el.innerHTML = ''; return; }
+  const todas = Object.keys(cur.creditos), agora = reqBase(false);
+  const total = reqCred(cur, todas);
+  const aprov = reqCred(cur, todas.filter(sg => agora.aprov.has(sg)));
+  const cursandoS = todas.filter(sg => agora.cursando.has(sg)), cursando = reqCred(cur, cursandoS);
+  const faltam = Math.max(0, total - aprov - cursando);
+  const limite = reqLimite(cursando);
+  const plano = reqPlano(cur, limite);
+  const n = plano.sems.length, rot = reqRotulos(n, cursandoS.length === 0);
+  const pct = v => total ? (v / total * 100).toFixed(1) : 0;
+  const nCurs = cursandoS.length;
+  const contando = nCurs ? `, contando que você passe ${nCurs === 1 ? 'na disciplina' : `nas ${nCurs}`} que está cursando` : '';
+  let quando, sub;
+  if(!faltam && !nCurs){ quando = 'Disciplinas concluídas'; sub = 'Você já foi aprovado em todas as disciplinas do quadro do curso.'; }
+  else if(!faltam){ quando = reqMaiuscula(String(STATE.config.semestre || 'Neste semestre')); sub = `As que você está cursando são as últimas do quadro. Passando nelas, acabou.`; }
+  else if(plano.sobra.length){ quando = 'Sem previsão'; sub = 'Algumas disciplinas não cabem em nenhum semestre com esses requisitos.'; }
+  else { quando = reqMaiuscula(rot[n - 1]); sub = `Em ${n} ${n === 1 ? 'semestre' : 'semestres'}${nCurs ? ' depois deste' : ''}, com até ${limite} créditos por semestre${contando}.`; }
+  // com um pouco mais de créditos por semestre, termina antes?
+  let atalho = '';
+  if(faltam && !plano.sobra.length && n > plano.minimo){
+    for(let l = limite + 2; l <= Math.min(60, limite + 12); l += 2){
+      const m = reqPlano(cur, l).sems.length;
+      if(m < n){ atalho = `Com até ${l} créditos por semestre, seriam ${m} ${m === 1 ? 'semestre' : 'semestres'}.`; break; }
+    }
+  }
+  const opcoes = [...new Set([12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, limite])].sort((a, b) => a - b);
+  const noHist = new Set(STATE.historico.map(i => i.sigla));
+  const chip = sg => {
+    const t = `${gNome(sg)} (${sg}), ${cur.creditos[sg]} ${cur.creditos[sg] === 1 ? 'crédito' : 'créditos'}`;
+    return noHist.has(sg) ? `<button type="button" class="fm-chip" data-disc-chip="${esc(sg)}" title="${esc(t)}">${esc(gNome(sg))}</button>` : `<span class="fm-chip" title="${esc(t)}">${esc(gNome(sg))}</span>`;
+  };
+  // disciplinas do curso que faltam e estão fora do quadro (estágio, trilha...): ficam fora da conta
+  const foraDoQuadro = cur.semestres.flat().map(([sg]) => sg).filter(sg => !cur.creditos[sg] && noHist.has(sg) && situacao(STATE.historico.find(i => i.sigla === sg)) !== 'Aprovado');
+  const notas = [];
+  if(plano.cadeia.length > 1) notas.push(`Sequência mais longa do que falta: ${esc(plano.cadeia.map(gNome).join(' → '))}. Com qualquer limite de créditos, ela leva ${plano.minimo} ${plano.minimo === 1 ? 'semestre' : 'semestres'}.`);
+  if(atalho) notas.push(atalho);
+  if(foraDoQuadro.length) notas.push(`Ficam fora desta conta, por não estarem no quadro de créditos: ${esc(foraDoQuadro.map(gNome).join(', '))}.`);
+  notas.push(`Feita com os pré e co-requisitos do currículo ${esc(cur.versao)}. A oferta de cada semestre e o limite da matrícula podem mudar a ordem. No mapa abaixo, ${ico('lock')} marca as disciplinas que ainda dependem de outras.`);
+  el.innerHTML = `<div class="panel panel--pad fm">
+    <div class="fm-top">
+      <div>
+        <div class="stat__label">${ico('cap')} Formatura prevista</div>
+        <div class="fm-quando">${esc(quando)}</div>
+        <div class="fm-sub">${esc(sub)}</div>
+      </div>
+      ${faltam ? `<label class="gm-limite">Até <select id="fmLimite" aria-label="Créditos por semestre na previsão">${opcoes.map(o => `<option value="${o}"${o === limite ? ' selected' : ''}>${o}</option>`).join('')}</select> créditos por semestre</label>` : ''}
+    </div>
+    <div>
+      <div class="fm-barra" role="img" aria-label="${aprov} créditos aprovados, ${cursando} cursando e ${faltam} faltando, de ${total}">
+        <span style="width:${pct(aprov)}%;background:var(--green)"></span><span style="width:${pct(cursando)}%;background:var(--amber)"></span>
+      </div>
+      <div class="fm-leg">
+        <span><i style="background:var(--green)"></i><b>${aprov}</b> créditos aprovados</span>
+        ${cursando ? `<span><i style="background:var(--amber)"></i><b>${cursando}</b> cursando</span>` : ''}
+        <span><i style="background:var(--line)"></i><b>${faltam}</b> faltam</span>
+        <span>de <b>${total}</b> no curso</span>
+      </div>
+    </div>
+    ${n && faltam ? `<div class="fm-sems">${plano.sems.map((sm, i) => `<div class="fm-sem${i === n - 1 ? ' is-fim' : ''}">
+      <div class="fm-sem__h">${esc(reqMaiuscula(rot[i]))}<small>${sm.creditos} créditos</small></div>
+      <div class="fm-chips">${sm.siglas.map(chip).join('')}</div>
+    </div>`).join('')}</div>` : ''}
+    <div class="fm-notas">${notas.map(t => `<p class="gm-nota">${t}</p>`).join('')}</div>
+  </div>`;
+  const sel = document.getElementById('fmLimite');
+  if(sel) sel.addEventListener('change', async () => {
+    STATE.config.creditosSemestre = Number(sel.value);
+    await storeSet('config', STATE.config);
+    renderFormatura();
+  });
+  el.querySelectorAll('[data-disc-chip]').forEach(b => b.addEventListener('click', () => showDiscDetail(b.dataset.discChip)));
+}
+// requisitos e o que a disciplina libera, para o detalhe da disciplina
+function reqDetalheHtml(sigla, item){
+  const cur = curriculoDoPerfil();
+  if(!cur || !cur.creditos[sigla]) return '';
+  const base = reqBase(false), aprovada = situacao(item) === 'Aprovado';
+  const reqs = reqDe(cur, sigla);
+  const cumprido = r => r.tipo === 'II' ? base.freq.has(r.s) : base.aprov.has(r.s);
+  const linha = r => {
+    const [ic, cor, est] = cumprido(r) ? ['✓', 'green', r.tipo === 'II' && !base.aprov.has(r.s) ? 'cursada' : 'aprovada']
+      : base.cursando.has(r.s) ? ['◐', 'amber', 'cursando agora'] : ['✕', 'red', 'falta'];
+    return `<div class="dd-req"><span class="dd-req__ic" style="color:var(--${cor})" aria-hidden="true">${ic}</span><span class="dd-req__n">${esc(gNome(r.s))}<small>${esc(r.s)} · ${REQ_TIPO[r.tipo]}</small></span><span class="dd-req__t" style="color:var(--${cor})">${est}</span></div>`;
+  };
+  let html = '';
+  if(!aprovada && reqs.length){
+    if(reqEhGeral(cur, sigla)){
+      const falt = reqs.filter(r => !cumprido(r)), nc = falt.filter(r => base.cursando.has(r.s)).length, nf = falt.length - nc;
+      html += `<p class="gm-nota" style="font-size:12.5px;color:var(--text-dim);">Precisa de todas as outras disciplinas do quadro, aprovadas antes ou cursadas junto. ${falt.length ? `Faltam ${nf}${nc ? `, fora as ${nc} que você está cursando` : ''}.` : 'Todas já estão aprovadas.'}</p>`;
+    } else {
+      html += reqs.map(linha).join('');
+      if(reqs.some(r => r.tipo === 'II')) html += `<p class="gm-nota" style="margin-top:6px;">"Cursada antes": basta ter feito com frequência, mesmo sem passar.</p>`;
+    }
+  }
+  const libera = (reqIndice(cur).dep[sigla] || []).filter(x => !reqEhGeral(cur, x.s));
+  const blocoLibera = libera.length ? `<p class="gm-nota" style="font-size:12.5px;color:var(--text-dim);margin-top:${html ? 10 : 0}px;"><b style="color:var(--text)">Abre caminho para:</b> ${esc(libera.map(x => gNome(x.s)).join(', '))}.</p>` : '';
+  if(!html && !blocoLibera) return '';
+  return `<div style="margin-bottom:16px;">
+      <div class="section-label" style="margin:0 0 8px;">${html ? 'Pré-requisitos' : 'Requisitos'}</div>
+      ${html}${blocoLibera}
+    </div>`;
 }
 
 // ---------------- "Faltei" nas aulas de hoje ----------------
@@ -6998,7 +7282,7 @@ function gAvaliar(ops){
 // Busca com poda. Cada disciplina tem um valor (w): vence a combinação de maior soma, então mais
 // disciplinas primeiro; na "melhor grade" o valor é 1000 menos o período, e no empate ganham as de
 // períodos anteriores. Entre as de mesma soma: menos dias no campus, depois menos janelas.
-function gBuscar(itens, turno, limite){
+function gBuscar(itens, turno, limite, valida){
   const ds = itens.map(x => ({s: x.s, w: x.w, ops: gOpcoes(x.d, turno)})).sort((a, b) => b.w - a.w || a.ops.length - b.ops.length);
   const max = limite || Infinity, LIMITE = 250000;
   const usados = new Set(), atual = [];
@@ -7016,6 +7300,7 @@ function gBuscar(itens, turno, limite){
     if(++passos > LIMITE) return;
     if(W + teto(i, n) < melhor) return;
     if(i === ds.length || n >= max){
+      if(valida && !valida(atual)) return; // co-requisito sem a outra disciplina junto
       if(W > melhor){ melhor = W; achadas = []; }
       if(W === melhor){
         achadas.push({W, esc: atual.slice(), nota: gAvaliar(atual.map(x => x.o))});
@@ -7113,11 +7398,25 @@ function gMelhorGrade(){
   // as cursando entram só no começo do semestre, ainda sem horário (são as que a pessoa vai fazer agora)
   const semHorario = !getAulas().some(a => a.inicio && a.inicio !== '—');
   const todas = [...GM.disc.values()].filter(d => d.teoria.length || d.lab.length);
-  const cands = todas.filter(d => gStatus(d.sigla) === 'falta' || (semHorario && gStatus(d.sigla) === 'cursando'));
+  let cands = todas.filter(d => gStatus(d.sigla) === 'falta' || (semHorario && gStatus(d.sigla) === 'cursando'));
   GM.modo = 'auto';
-  // por que nada foi escolhido: nenhuma no histórico, todas feitas, ou nenhuma nos horários marcados
-  GM.motivo = !todas.some(d => gStatus(d.sigla) !== 'fora') ? 'desconhecidas' : !cands.length ? 'feitas' : 'horarios';
-  GM.opcoes = cands.length ? gBuscar(cands.map(d => ({s: d.sigla, d, w: 1000 - gPeriodo(d)})), p.turno, p.limite).filter(o => o.esc.length) : [];
+  // pré-requisitos: só entram as que o quadro do curso libera. As cursando já estão matriculadas e entram
+  // sempre; planejando o próximo semestre (já com horário), conta que a pessoa passe nelas.
+  const cur = curriculoDoPerfil();
+  let valida = null, travadas = 0;
+  if(cur){
+    const base = reqBase(!semHorario), ids = new Set(cands.map(d => d.sigla));
+    const livre = sg => gStatus(sg) === 'cursando' || !cur.creditos[sg];
+    const antes = cands.length;
+    // co-requisito que falta: só se a outra também for candidata (a busca confere que vão juntas)
+    cands = cands.filter(d => livre(d.sigla) || reqFaltando(cur, d.sigla, base, base.cursando).every(r => r.tipo === 'Co' && ids.has(r.s)));
+    travadas = antes - cands.length;
+    valida = escolha => { const juntas = new Set(escolha.map(x => x.s)); return escolha.every(x => livre(x.s) || reqFaltando(cur, x.s, base, base.cursando).every(r => juntas.has(r.s))); };
+  }
+  GM.req = cur ? {contouCursando: !semHorario && (STATE.config.disciplinasAtuais || []).length > 0} : null;
+  // por que nada foi escolhido: nenhuma no histórico, todas feitas, pré-requisitos, ou nenhuma nos horários marcados
+  GM.motivo = !todas.some(d => gStatus(d.sigla) !== 'fora') ? 'desconhecidas' : !cands.length ? (travadas ? 'requisitos' : 'feitas') : 'horarios';
+  GM.opcoes = cands.length ? gBuscar(cands.map(d => ({s: d.sigla, d, w: 1000 - gPeriodo(d)})), p.turno, p.limite, valida).filter(o => o.esc.length) : [];
   GM.opIdx = 0;
   gAplicarOpcao();
 }
@@ -7167,12 +7466,16 @@ function renderGradeFonte(){
 function renderGradeLista(){
   const el = document.getElementById('gmLista'), p = gPlano();
   const todas = [...GM.disc.values()].sort((a, b) => gPeriodo(a) - gPeriodo(b) || a.sigla.localeCompare(b.sigla));
-  const ROT = {falta: 'Falta', cursando: 'Cursando', feita: 'Já fez'};
+  const ROT = {falta: 'Falta', cursando: 'Cursando', feita: 'Já fez', bloq: 'Bloqueada'};
+  // pré-requisitos: as que ainda dependem de outras ficam com cadeado (dá para marcar, mas a matrícula recusa)
+  const cur = curriculoDoPerfil(), base = cur && reqBase(gContaCursando());
   const item = d => {
-    const st = gStatus(d.sigla), nT = d.teoria.length;
-    const sub = [d.sigla, nT ? `${nT} ${nT === 1 ? 'turma' : 'turmas'}` : 'sem horário fixo', d.lab.length ? `${d.lab.length} lab` : ''].filter(Boolean).join(' · ');
+    const trava = cur && cur.creditos[d.sigla] && gStatus(d.sigla) === 'falta' ? reqTrava(cur, d.sigla, base) : [];
+    const st = trava.length ? 'bloq' : gStatus(d.sigla), nT = d.teoria.length;
+    const sub = [d.sigla, nT ? `${nT} ${nT === 1 ? 'turma' : 'turmas'}` : 'sem horário fixo', d.lab.length ? `${d.lab.length} lab` : '',
+      trava.length ? `precisa de ${trava.length > 2 ? trava.length + ' disciplinas' : trava.map(r => gNome(r.s)).join(' e ')}` : ''].filter(Boolean).join(' · ');
     return `<label class="gm-disc st-${st}"><input type="checkbox" data-gdisc="${esc(d.sigla)}"${p.escolhidas.includes(d.sigla) ? ' checked' : ''}>
-      <span class="gm-disc__n"><b>${esc(gNome(d.sigla))}</b><small>${esc(sub)}</small></span>${ROT[st] ? `<span class="badge">${ROT[st]}</span>` : ''}</label>`;
+      <span class="gm-disc__n"><b>${esc(gNome(d.sigla))}</b><small>${esc(sub)}</small></span>${ROT[st] ? `<span class="badge">${st === 'bloq' ? ico('lock') : ''}${ROT[st]}</span>` : ''}</label>`;
   };
   const grupos = new Map();
   todas.filter(d => ['falta', 'cursando'].includes(gStatus(d.sigla)) || p.escolhidas.includes(d.sigla)).forEach(d => {
@@ -7200,8 +7503,22 @@ function renderGradeLista(){
   gContagem();
 }
 function gContagem(){
-  const n = gPlano().escolhidas.filter(s => GM.disc.has(s)).length;
-  document.getElementById('gmConta').textContent = n ? `${n} ${n === 1 ? 'marcada' : 'marcadas'}` : '';
+  const marcadas = gPlano().escolhidas.filter(s => GM.disc.has(s)), n = marcadas.length;
+  const cur = curriculoDoPerfil(), cr = cur ? reqCred(cur, marcadas) : 0;
+  document.getElementById('gmConta').textContent = n ? `${n} ${n === 1 ? 'marcada' : 'marcadas'}${cr ? ` · ${cr} ${cr === 1 ? 'crédito' : 'créditos'}` : ''}` : '';
+}
+// já tem horário: o montador está planejando o próximo semestre (conta que a pessoa passe nas de agora)
+const gContaCursando = () => getAulas().some(a => a.inicio && a.inicio !== '—');
+// marcadas que a matrícula recusaria pelos pré-requisitos: ["Nome (precisa de ...)"]
+function gTravas(marcadas){
+  const cur = curriculoDoPerfil();
+  if(!cur) return [];
+  const base = reqBase(gContaCursando()), juntas = new Set([...marcadas, ...base.cursando]);
+  return marcadas.filter(s => cur.creditos[s] && gStatus(s) !== 'cursando').map(s => {
+    const f = reqFaltando(cur, s, base, juntas);
+    if(!f.length) return '';
+    return `${gNome(s)} (${f.length > 3 ? `faltam ${f.length} disciplinas antes` : 'precisa de ' + f.map(r => `${gNome(r.s)} ${r.tipo === 'Co' ? 'antes ou junto' : r.tipo === 'II' ? 'cursada antes' : 'aprovada antes'}`).join(', ')})`;
+  }).filter(Boolean);
 }
 function renderGradeMontagem(){
   gContagem();
@@ -7268,6 +7585,7 @@ function renderGradeAviso(){
     aviso(GM.motivo === 'horarios' ? 'erro' : 'info', `<span>${{
       desconhecidas: 'As disciplinas deste PDF não estão no seu Histórico, então o app não sabe quais faltam. Marque as que quer cursar e toque em <b>Montar sozinho</b>.',
       feitas: 'Você já fez ou está cursando todas as disciplinas deste PDF.',
+      requisitos: 'As disciplinas que faltam neste PDF ainda dependem de outras (pré-requisitos). No Mapa de Sucesso, toque numa delas para ver o quê.',
       horarios: 'Nenhuma disciplina que falta cabe nos horários marcados. Marque mais horários acima.'}[GM.motivo]}</span>`);
     return;
   }
@@ -7282,8 +7600,15 @@ function renderGradeAviso(){
     aviso('erro', `<span><b>${txt.length === 1 ? 'Choque' : txt.length + ' choques'}:</b> ${esc(txt.join('; '))}. Troque uma das turmas.</span>`);
     return;
   }
+  const travas = GM.modo === 'auto' ? [] : gTravas(marcadas);
+  if(travas.length){
+    aviso('erro', `<span><b>Pelos pré-requisitos, a matrícula recusa:</b> ${esc(travas.join('; '))}.</span>`);
+    return;
+  }
   if(GM.modo === 'auto'){
-    aviso('ok', `<span><b>${marcadas.length} ${marcadas.length === 1 ? 'disciplina' : 'disciplinas'} sem choque</b>, ${noCampus}. O app escolheu o máximo que cabe nos horários marcados, começando pelas dos primeiros períodos. Ele não conhece os pré-requisitos: confira antes da matrícula.</span>`);
+    const cur = curriculoDoPerfil(), cr = cur ? reqCred(cur, marcadas) : 0;
+    const req = GM.req ? ` Só entram as que os pré-requisitos liberam${GM.req.contouCursando ? ', contando que você passe nas que está cursando' : ''}.` : ' Ele não conhece os pré-requisitos: confira antes da matrícula.';
+    aviso('ok', `<span><b>${marcadas.length} ${marcadas.length === 1 ? 'disciplina' : 'disciplinas'} sem choque</b>${cr ? ` (${cr} créditos)` : ''}, ${noCampus}. O app escolheu o máximo que cabe nos horários marcados, começando pelas dos primeiros períodos.${req}</span>`);
     return;
   }
   const fora = GM.modo === 'marcadas' && GM.opcoes.length ? marcadas.filter(s => !GM.opcoes[GM.opIdx].esc.some(x => x.s === s)) : [];
@@ -8924,8 +9249,38 @@ const CURRICULOS = [
     [["AT08","Atividade Complementar VIII"],["A16","Instalações Elétricas"],["P16","Logística Empresarial"],["P17","Simulação Industrial"],["P18","Indústria 4.0"],["P19","Sistemas de Informação"],["P20","Design Estratégico"]],
     [["AT09","Atividade Complementar IX"],["EST1","Estágio Supervisionado"],["H04","Ciências do Ambiente"],["P21","Engenharia de Vendas Complexas"],["P22","Engenharia de Produtos Digitais"]],
     [["AT10","Atividade Complementar X"],["A18","Manutenção Industrial, Normalização e Certificações"],["P23","Gestão do Conhecimento e Inovação"],["TCC","Trabalho de Conclusão de Curso I"]]
-  ]},
+  ],
+  // Quadro de pré/co-requisitos do currículo 3.2 (Serviços Acadêmicos → Matrícula). Créditos de cada
+  // disciplina e o que ela exige: "I" = pré-requisito nível I (aprovada antes), "II" = nível II (cursada
+  // antes, basta a frequência), "Co" = co-requisito (aprovada antes ou cursada junto). "*" = todas as
+  // outras do quadro. Estágio, Trilha, Feira e Comportamento Profissional não entram no quadro.
+  versao:'3.2',
+  creditos:{
+    M02:4, Q01:2, E01:2, H01:2, C02:4, P01:1, AT01:1, M01:4,
+    P02:4, AT02:1, G04:1, M03:4, H02:2, E10:1, F01:4, C03:2,
+    P03:4, P04:2, F02:4, AT03:1, M04:4, P05:2, F05:2, E04:2,
+    F03:3, P07:4, P08:2, P06:4, AT04:1, E07:2, M05:4,
+    P13:2, P10:2, AT05:1, P09:4, P12:2, P11:2, C06:4, M11:4,
+    P30:4, T02:4, H03:4, M06:4, AT06:1, C11:4,
+    P31:4, P15:2, AT07:1, P24:1, P14:4, M09:2, P25:2, P26:2, C23:3,
+    P16:4, P17:2, P18:4, P19:2, P20:2, A16:4, AT08:1,
+    P22:2, H04:4, AT09:1, P21:2,
+    P23:2, TCC:2, A18:3, AT10:1,
+  },
+  requisitos:{
+    AT02:'AT01 Co', M03:'M01 I', E10:'E01 II', F01:'M03 Co', C03:'C02 I',
+    F02:'F01 II, M03 II', AT03:'AT01 I, AT02 Co', M04:'M03 I', F05:'F01 II', E04:'E01 I',
+    F03:'F02 Co, M02 II, M03 II', P07:'G04 I', P08:'P06 Co', P06:'H01 I', AT04:'AT02 I, AT03 Co', E07:'E01 II', M05:'M03 I',
+    P13:'M01 I', AT05:'AT03 I, AT04 Co', P09:'P06 I', P12:'P13 Co', C06:'C03 I', M11:'M04 I',
+    T02:'C03 II', M06:'C02 I, M03 I, M11 Co', AT06:'AT04 I, AT05 Co', C11:'C06 II',
+    AT07:'AT05 I, AT06 Co', P14:'P09 I', M09:'M01 I, M02 I', P25:'P06 I', P26:'P10 I', C23:'C06 I, C11 I',
+    P16:'P14 Co', P17:'M11 I, P09 I, P16 Co', P18:'C03 I, E01 I, E04 I, E07 I', P20:'P02 I', A16:'E04 II, M06 II', AT08:'AT06 I, AT07 Co',
+    P22:'P02 I, P07 I', AT09:'AT07 I, AT08 Co', P21:'P15 I',
+    P23:'P02 I', TCC:'* Co', A18:'M06 II', AT10:'AT08 Co, AT09 Co',
+  }},
 ];
+// tabelas sem protótipo: um código como "toString" vindo dos dados não acha nada nelas
+CURRICULOS.forEach(c => ['creditos', 'requisitos'].forEach(k => { if(c[k]) c[k] = Object.assign(Object.create(null), c[k]); }));
 const WIZ_STATUS = {falta:'A fazer', feita:'Concluída', cursando:'Cursando'};
 const WIZ_NEXT_STATUS = {falta:'feita', feita:'cursando', cursando:'falta'};
 
@@ -9705,7 +10060,9 @@ async function wizardFinish(){
   await storeSet('config', {
     aluno: WIZARD_DATA.nome, curso: WIZARD_DATA.curso,
     instituicao: WIZARD_DATA.instituicao, semestre: WIZARD_DATA.semestre,
-    notaMinima: WIZARD_DATA.notaMinima, disciplinasAtuais: WIZARD_DATA.disciplinasAtuais
+    notaMinima: WIZARD_DATA.notaMinima, disciplinasAtuais: WIZARD_DATA.disciplinasAtuais,
+    // catálogo escolhido (os requisitos e créditos vêm dele); "outro" = sem quadro de requisitos
+    curriculo: WIZARD_DATA.catalogo && WIZARD_DATA.catalogo !== 'planilha' ? WIZARD_DATA.catalogo : ''
   });
   await storeSet('base_data', {
     aluno: WIZARD_DATA.nome, curso: WIZARD_DATA.curso, instituicao: WIZARD_DATA.instituicao,
