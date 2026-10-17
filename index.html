@@ -2142,6 +2142,21 @@
   button.fm-chip:hover{border-color:var(--blue);}
   .fm-notas{display:flex; flex-direction:column; gap:6px;}
   @media (max-width:640px){ .fm-sem{grid-template-columns:minmax(0, 1fr);} .fm-quando{font-size:21px;} }
+  /* Meu plano: disciplina fixada num semestre, escolha que quebra requisito, semestre acima do limite */
+  .fm-chip{display:inline-flex; align-items:center; gap:5px;}
+  .fm-chip > span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0;}
+  .fm-chip .i{width:12px; height:12px; flex-shrink:0;}
+  .fm-chip.is-fixo{border-color:var(--blue); color:var(--text);}
+  .fm-chip.is-fixo .i{color:var(--blue);}
+  .fm-chip.is-erro{border-color:var(--red); background:var(--red-dim);}
+  .fm-chip.is-erro .i{color:var(--red);}
+  .fm-sem__h small.is-excede{color:var(--amber);}
+  .fm-conta{font-size:12.5px; color:var(--text-faint); margin-top:2px;}
+  .fm-alerta{color:var(--red) !important;}
+  .fm-alerta .i{width:13px; height:13px; vertical-align:-2px; margin-right:3px;}
+  .fm-acoes{display:flex; flex-wrap:wrap; gap:6px 14px; align-items:center;}
+  .dd-plano{display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:13px; color:var(--text-dim); margin-bottom:6px;}
+  .dd-plano select{background:var(--panel-2); border:1px solid var(--line); border-radius:10px; color:var(--text); padding:7px 9px; font:inherit; font-size:13px; max-width:100%;}
   /* o que está em jogo neste semestre (previsão de formatura) */
   .fm-jogo{padding:12px 14px; border-radius:14px; background:var(--green-dim); display:flex; flex-direction:column; gap:5px;}
   .fm-jogo.is-alerta{background:var(--amber-dim);}
@@ -3534,6 +3549,9 @@ function sanearDados(){
   c.disciplinasAtuais = textos(c.disciplinasAtuais).filter(siglaOk);
   ['aluno', 'curso', 'instituicao', 'semestre', 'curriculo'].forEach(k => { c[k] = txt(c[k]); });
   c.creditosSemestre = Math.round(num(c.creditosSemestre, 0, 60, 0));
+  // "Meu plano": sigla → número absoluto do semestre (ano × 2 + 0 ou 1)
+  c.planoCurso = mapa(c.planoCurso, v => { const n = num(v, 3000, 5000, NaN); return Number.isNaN(n) ? undefined : Math.round(n); });
+  Object.keys(c.planoCurso).forEach(k => { if(!siglaOk(k) || !/^[A-Za-z0-9-]{1,16}$/.test(k)) delete c.planoCurso[k]; });
 
   // histórico
   STATE.historicoOverrides = mapa(STATE.historicoOverrides, v => ehObj(v) ? obj(v) : undefined);
@@ -3767,6 +3785,7 @@ const ICONS = {
   keyboard:'<rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6.5 10h.01M10 10h.01M14 10h.01M17.5 10h.01M7.5 14h9"/>',
   calendar:'<rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
   cloud:'<path d="M7.2 18.5h10.3a4 4 0 0 0 .5-7.97A6 6 0 0 0 6.4 9.2a4.7 4.7 0 0 0 .8 9.3z"/>',
+  pin:'<path d="M9.5 3.5h5l-.8 5.2 3.3 3.3v1.5H7v-1.5l3.3-3.3z"/><path d="M12 13.5v7"/>',
   lock:'<rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/>',
   magic:'<path d="m4 20 10-10"/><path d="m12.5 8.5 3 3"/><path d="M17 3.5v3M15.5 5h3M19.5 10v2.5M18.25 11.25h2.5M9 3.5v2M8 4.5h2"/>',
 };
@@ -5014,6 +5033,8 @@ function showDiscDetail(sigla){
     </div>
   `;
 
+  const selPlano = document.getElementById('ddPlano');
+  if(selPlano) selPlano.addEventListener('change', () => reqEscolherSemestre(sigla, selPlano.value));
   const notesArea = document.getElementById('discNotes_'+sigla);
   if(notesArea) notesArea.addEventListener('input', async () => {
     STATE.discNotes[sigla] = notesArea.value;
@@ -5576,7 +5597,12 @@ function reqPlano(cur, limite, opts = {}){
   if(opts.reprova) base.aprov.delete(opts.reprova);
   const feitas = new Set(base.aprov), freq = new Set(base.freq);
   const {altura, espera, falta} = reqAlturas(cur, base), faltam = [...falta];
-  let resto = faltam.slice().sort((a, b) => altura(b) - altura(a) || (per[a] || 99) - (per[b] || 99) || cred(b) - cred(a));
+  // "Meu plano" (fixos: sigla → índice do semestre no plano): o que as escolhas pedem antes vai primeiro
+  const fixos = Object.create(null), pedidas = new Set();
+  Object.entries(opts.fixos || {}).forEach(([sg, k]) => { if(falta.has(sg)) fixos[sg] = k; });
+  const pede = sg => { if(reqEhGeral(cur, sg)) return; reqDe(cur, sg).forEach(x => { if(falta.has(x.s) && !pedidas.has(x.s)){ pedidas.add(x.s); pede(x.s); } }); };
+  Object.keys(fixos).forEach(pede);
+  let resto = faltam.slice().sort((a, b) => (pedidas.has(b) - pedidas.has(a)) || altura(b) - altura(a) || (per[a] || 99) - (per[b] || 99) || cred(b) - cred(a));
   const sems = [];
   const fecha = este => {
     sems.push({siglas: resto.filter(sg => este.has(sg)), creditos: reqCred(cur, [...este])});
@@ -5585,19 +5611,36 @@ function reqPlano(cur, limite, opts = {}){
   };
   if(opts.primeiro){ const este = new Set(opts.primeiro.filter(sg => falta.has(sg))); if(este.size) fecha(este); }
   while(resto.length && sems.length < 30){
-    const este = new Set();
-    let soma = 0, mudou = true;
+    const k = sems.length;
+    // as fixadas neste semestre entram primeiro, mesmo sem os requisitos (o aviso aparece depois);
+    // as fixadas para depois esperam; as de um semestre que ficou para trás voltam a ser livres
+    const este = new Set(resto.filter(sg => fixos[sg] === k));
+    let soma = reqCred(cur, [...este]), mudou = true;
     while(mudou){
       mudou = false;
       resto.forEach(sg => {
-        if(este.has(sg) || soma + cred(sg) > limite) return;
+        if(este.has(sg) || fixos[sg] > k || soma + cred(sg) > limite) return;
         const ok = reqDe(cur, sg).every(r => r.tipo === 'II' ? freq.has(r.s) : r.tipo === 'Co' ? (feitas.has(r.s) || este.has(r.s)) : feitas.has(r.s));
         if(ok){ este.add(sg); soma += cred(sg); mudou = true; }
       });
     }
-    if(!este.size) break;
+    if(!este.size){
+      // nada coube agora, mas há escolhas para semestres depois: este fica vazio
+      if(resto.some(sg => fixos[sg] > k)){ sems.push({siglas: [], creditos: 0}); continue; }
+      break;
+    }
     fecha(este);
   }
+  // escolhas que quebram um requisito: {sigla: [requisitos que não ficaram antes dela]}
+  const pos = Object.create(null), violacoes = Object.create(null);
+  sems.forEach((sm, k) => sm.siglas.forEach(sg => { pos[sg] = k; }));
+  Object.keys(fixos).forEach(sg => {
+    const k = pos[sg];
+    if(k === undefined) return;
+    const f = reqDe(cur, sg).filter(x => x.tipo === 'II' ? !(base.freq.has(x.s) || pos[x.s] < k)
+      : x.tipo === 'Co' ? !(base.aprov.has(x.s) || pos[x.s] <= k) : !(base.aprov.has(x.s) || pos[x.s] < k));
+    if(f.length) violacoes[sg] = f;
+  });
   // a sequência mais longa entre as que faltam (o mínimo de semestres, com qualquer limite de créditos):
   // [{s, junto}], junto = vai no mesmo semestre da anterior (co-requisito)
   const cadeia = [];
@@ -5610,22 +5653,68 @@ function reqPlano(cur, limite, opts = {}){
       sg = x && x.s; junto = !!x && x.tipo === 'Co';
     }
   }
-  return {sems, sobra: resto, cadeia, minimo: faltam.length ? Math.max(...faltam.map(altura)) : 0};
+  return {sems, sobra: resto, cadeia, minimo: faltam.length ? Math.max(...faltam.map(altura)) : 0, violacoes, pos, fixos};
+}
+// número absoluto de um semestre: "2º semestre de 2026", "2026/2" ou "2026.2" → 2026 × 2 + 1; null se não der
+function semNum(rot){
+  const t = String(rot || '').trim();
+  let m = /^([12])\s*º?\s*semestre\s*(?:de\s*)?(\d{4})$/i.exec(t);
+  if(m) return Number(m[2]) * 2 + Number(m[1]) - 1;
+  m = /^(\d{4})\s*[./-]\s*([12])$/.exec(t);
+  return m ? Number(m[1]) * 2 + Number(m[2]) - 1 : null;
+}
+// "Meu plano": o semestre que a pessoa escolheu para cada disciplina (config.planoCurso: sigla → número
+// absoluto) vira {sigla: índice no plano}, contado a partir de inicioAbs. Escolha de semestre que já
+// passou não vale; sem o semestre atual escrito no perfil, não há como contar.
+function reqFixos(cur, inicioAbs){
+  const out = Object.create(null), plano = STATE.config.planoCurso || {};
+  if(inicioAbs === null) return out;
+  Object.keys(plano).forEach(sg => { const k = plano[sg] - inicioAbs; if(cur.creditos[sg] && k >= 0 && k < 30) out[sg] = k; });
+  return out;
 }
 // A previsão de agora. fim: o semestre da formatura contado a partir deste (0 = este; null = sem previsão).
+// atual: número absoluto deste semestre; inicioAbs: o do primeiro semestre do plano.
 function reqPrevisao(cur){
   const todas = Object.keys(cur.creditos), agora = reqBase(false);
   const total = reqCred(cur, todas), aprov = reqCred(cur, todas.filter(sg => agora.aprov.has(sg)));
   const cursandoS = todas.filter(sg => agora.cursando.has(sg)), cursando = reqCred(cur, cursandoS);
-  const faltam = Math.max(0, total - aprov - cursando), limite = reqLimite(cursando);
-  const plano = reqPlano(cur, limite), n = plano.sems.length, comecaAgora = !cursandoS.length;
+  const faltam = Math.max(0, total - aprov - cursando), limite = reqLimite(cursando), comecaAgora = !cursandoS.length;
+  const atual = semNum(STATE.config.semestre), inicioAbs = atual === null ? null : atual + (comecaAgora ? 0 : 1);
+  const fixos = reqFixos(cur, inicioAbs);
+  const plano = reqPlano(cur, limite, {fixos}), n = plano.sems.length;
   const fim = !faltam ? (cursandoS.length ? 0 : null) : plano.sobra.length ? null : (comecaAgora ? n - 1 : n);
-  return {todas, total, aprov, cursandoS, cursando, faltam, limite, plano, n, comecaAgora, fim};
+  return {todas, total, aprov, cursandoS, cursando, faltam, limite, plano, n, comecaAgora, fim, atual, inicioAbs, fixos};
+}
+const reqPara = t => !t ? 'no plano' : /^\d/.test(t) ? `para o ${t}` : t === 'Este semestre' ? 'para este semestre' : t === 'Próximo semestre' ? 'para o próximo semestre' : `para ${reqMeio(t)}`;
+// quanto falta até o fim do semestre absoluto abs (julho no 1º, meados de dezembro no 2º)
+function reqContagem(abs){
+  if(abs === null || abs === undefined) return '';
+  const ano = Math.floor(abs / 2), fim = abs % 2 ? new Date(ano, 11, 15) : new Date(ano, 6, 1), hoje = new Date();
+  const meses = (fim.getFullYear() - hoje.getFullYear()) * 12 + fim.getMonth() - hoje.getMonth();
+  if(meses < 1) return 'no fim deste semestre';
+  const a = Math.floor(meses / 12), m = meses % 12;
+  return 'daqui a cerca de ' + [a ? `${a} ${a === 1 ? 'ano' : 'anos'}` : '', m ? `${m} ${m === 1 ? 'mês' : 'meses'}` : ''].filter(Boolean).join(' e ');
+}
+// a frase do "Meu plano" no detalhe de uma disciplina que falta
+function reqPlanoInfo(cur, prev, sg){
+  const fixo = (STATE.config.planoCurso || {})[sg] !== undefined, viol = prev.plano.violacoes[sg];
+  const quando = prev.fim !== null ? ` Formatura prevista: <b>${esc(reqMeio(reqRotuloEm(prev.fim)))}</b>.` : '';
+  if(viol) return `<span class="fm-alerta">Nesse semestre ela ainda não pode: ${viol.length > 3 ? `faltam ${viol.length} disciplinas antes` : 'precisa de ' + esc(viol.map(x => `${reqNome(cur, x.s)} (${REQ_TIPO[x.tipo]})`).join(', '))}.</span>${quando}`;
+  return (fixo ? 'Fixada por você: a previsão organiza o resto em volta.' : 'No automático, a previsão escolhe o semestre.') + quando;
+}
+// escolher (ou voltar ao automático) o semestre de uma disciplina no "Meu plano"
+async function reqEscolherSemestre(sigla, valor){
+  const plano = STATE.config.planoCurso = Object.assign({}, STATE.config.planoCurso);
+  if(valor) plano[sigla] = Number(valor); else delete plano[sigla];
+  await storeSet('config', STATE.config);
+  renderMapaSucesso();
+  const info = document.getElementById('ddPlanoInfo'), cur = curriculoDoPerfil();
+  if(info && cur) info.innerHTML = reqPlanoInfo(cur, reqPrevisao(cur), sigla);
 }
 // e se reprovar em sg (cursando agora): quantos semestres a formatura atrasa (null = sem previsão)
 function reqAtraso(cur, sg, prev = reqPrevisao(cur)){
   if(prev.fim === null) return null;
-  const p = reqPlano(cur, prev.limite, {reprova: sg});
+  const p = reqPlano(cur, prev.limite, {reprova: sg, fixos: prev.fixos});
   return p.sobra.length ? null : Math.max(0, p.sems.length - prev.n);
 }
 // o peso de cada disciplina cursando na formatura: {sigla: semestres a mais se reprovar nela}
@@ -5669,17 +5758,23 @@ function renderFormatura(){
   let atalho = '';
   if(faltam && !plano.sobra.length && n > plano.minimo){
     for(let l = limite + 2; l <= Math.min(60, limite + 12); l += 2){
-      const m = reqPlano(cur, l).sems.length;
+      const m = reqPlano(cur, l, {fixos: prev.fixos}).sems.length;
       if(m < n){ atalho = `Com até ${l} créditos por semestre, seriam ${m} ${m === 1 ? 'semestre' : 'semestres'}.`; break; }
     }
   }
   const opcoes = [...new Set([12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, limite])].sort((a, b) => a - b);
   const noHist = new Set(STATE.historico.map(i => i.sigla));
   const nome = sg => reqNome(cur, sg);
+  // fixada no "Meu plano": alfinete; escolha que quebra requisito: em vermelho
   const chip = sg => {
-    const t = `${nome(sg)} (${sg}), ${cur.creditos[sg]} ${cur.creditos[sg] === 1 ? 'crédito' : 'créditos'}`;
-    return noHist.has(sg) ? `<button type="button" class="fm-chip" data-disc-chip="${esc(sg)}" title="${esc(t)}">${esc(nome(sg))}</button>` : `<span class="fm-chip" title="${esc(t)}">${esc(nome(sg))}</span>`;
+    const fixo = plano.fixos[sg] !== undefined, erro = !!plano.violacoes[sg];
+    const t = `${nome(sg)} (${sg}), ${cur.creditos[sg]} ${cur.creditos[sg] === 1 ? 'crédito' : 'créditos'}${fixo ? ', fixada por você' : ''}${erro ? ', sem os requisitos antes' : ''}`;
+    const cls = `fm-chip${fixo ? ' is-fixo' : ''}${erro ? ' is-erro' : ''}`, dentro = `${fixo || erro ? ico(erro ? 'alert' : 'pin') : ''}<span>${esc(nome(sg))}</span>`;
+    return noHist.has(sg) ? `<button type="button" class="${cls}" data-disc-chip="${esc(sg)}" title="${esc(t)}">${dentro}</button>` : `<span class="${cls}" title="${esc(t)}">${dentro}</span>`;
   };
+  // escolhas que quebram requisito, no topo das notas
+  const avisos = Object.entries(plano.violacoes).slice(0, 3).map(([sg, f]) => `<span class="fm-alerta">${ico('alert')}<b>${esc(nome(sg))}</b> está fixada ${esc(reqPara(rot[plano.pos[sg]] || ''))}, mas ${f.length > 3 ? `faltam ${f.length} disciplinas antes dela` : 'precisa de ' + esc(f.map(x => `${nome(x.s)} (${REQ_TIPO[x.tipo]})`).join(', '))}.</span>`);
+  const nFix = Object.keys(plano.fixos).length;
   // disciplinas do curso que faltam e estão fora do quadro (estágio, trilha...): ficam fora da conta
   const foraDoQuadro = cur.semestres.flat().map(([sg]) => sg).filter(sg => !cur.creditos[sg] && noHist.has(sg) && situacao(STATE.historico.find(i => i.sigla === sg)) !== 'Aprovado');
   const notas = [];
@@ -5699,11 +5794,15 @@ function renderFormatura(){
     jogo = `<div class="fm-jogo${pesam.length ? ' is-alerta' : ''}"><div class="stat__label">${ico(pesam.length ? 'alert' : 'check')} O que está em jogo neste semestre</div><p>${frases.join(' ')}</p></div>`;
   }
   notas.push(`Feita com os pré e co-requisitos do currículo ${esc(cur.versao)}. A oferta de cada semestre e o limite da matrícula podem mudar a ordem. No mapa abaixo, ${ico('lock')} marca as disciplinas que ainda dependem de outras.`);
+  if(prev.inicioAbs !== null && faltam) notas.push(`<b>Meu plano:</b> toque numa disciplina para escolher em que semestre fazê-la; a previsão organiza o resto em volta.`);
+  notas.unshift(...avisos);
+  const conta = prev.fim !== null && prev.atual !== null && faltam ? reqContagem(prev.atual + prev.fim) : '';
   el.innerHTML = `<div class="panel panel--pad fm">
     <div class="fm-top">
       <div>
         <div class="stat__label">${ico('cap')} Formatura prevista</div>
         <div class="fm-quando">${esc(quando)}</div>
+        ${conta ? `<div class="fm-conta">${esc(conta)}</div>` : ''}
         <div class="fm-sub">${esc(sub)}</div>
       </div>
       ${faltam ? `<label class="gm-limite">Até <select id="fmLimite" aria-label="Créditos por semestre na previsão">${opcoes.map(o => `<option value="${o}"${o === limite ? ' selected' : ''}>${o}</option>`).join('')}</select> créditos por semestre</label>` : ''}
@@ -5721,11 +5820,19 @@ function renderFormatura(){
     </div>
     ${jogo}
     ${n && faltam ? `<div class="fm-sems">${plano.sems.map((sm, i) => `<div class="fm-sem${i === n - 1 ? ' is-fim' : ''}">
-      <div class="fm-sem__h">${esc(reqMaiuscula(rot[i]))}<small>${sm.creditos} créditos</small></div>
-      <div class="fm-chips">${sm.siglas.map(chip).join('')}</div>
+      <div class="fm-sem__h">${esc(reqMaiuscula(rot[i]))}<small${sm.creditos > limite ? ' class="is-excede"' : ''}>${sm.creditos} créditos${sm.creditos > limite ? `, acima de ${limite}` : ''}</small></div>
+      <div class="fm-chips">${sm.siglas.length ? sm.siglas.map(chip).join('') : '<span class="gm-nota">Nenhuma disciplina: as escolhidas para depois ainda esperam.</span>'}</div>
     </div>`).join('')}</div>` : ''}
     <div class="fm-notas">${notas.map(t => `<p class="gm-nota">${t}</p>`).join('')}</div>
+    ${nFix ? `<div class="fm-acoes"><span class="gm-nota">${ico('pin')} ${nFix === 1 ? '1 disciplina fixada' : `${nFix} disciplinas fixadas`} por você.</span><button type="button" class="link-btn" id="fmLimparPlano">Voltar tudo para o automático</button></div>` : ''}
   </div>`;
+  const limpar = document.getElementById('fmLimparPlano');
+  if(limpar) limpar.addEventListener('click', async () => {
+    if(!confirm('Voltar o plano para o automático? Os semestres que você escolheu para cada disciplina serão esquecidos.')) return;
+    STATE.config.planoCurso = {};
+    await storeSet('config', STATE.config);
+    renderMapaSucesso();
+  });
   const sel = document.getElementById('fmLimite');
   if(sel) sel.addEventListener('change', async () => {
     STATE.config.creditosSemestre = Number(sel.value);
@@ -5773,11 +5880,28 @@ function reqDetalheHtml(sigla, item){
       <div class="section-label" style="margin:0 0 8px;">Na formatura</div>
       <p class="gm-nota" style="font-size:12.5px;color:var(--${t.atraso ? 'amber' : 'text-dim'});">${t.html}</p>
     </div>` : '';
-  if(html) return jogo + `<div style="margin-bottom:16px;">
+  // falta fazer: em que semestre (Meu plano)
+  let meuPlano = '';
+  if(!aprovada && !cursandoEsta){
+    const prev = reqPrevisao(cur);
+    if(prev.inicioAbs !== null && prev.faltam){
+      const k = prev.plano.pos[sigla], fixo = (STATE.config.planoCurso || {})[sigla];
+      const rotAbs = abs => reqRotuloEm(abs - prev.atual), ate = Math.min(14, Math.max(prev.plano.sems.length, (k ?? 0) + 1) + 3);
+      const opcoes = Array.from({length: ate}, (_, i) => prev.inicioAbs + i)
+        .map(abs => `<option value="${abs}"${fixo === abs ? ' selected' : ''}>${esc(reqMaiuscula(rotAbs(abs)))}</option>`).join('');
+      const auto = k !== undefined && fixo === undefined ? ` (${esc(reqMeio(rotAbs(prev.inicioAbs + k)))})` : '';
+      meuPlano = `<div style="margin-bottom:16px;">
+      <div class="section-label" style="margin:0 0 8px;">No seu plano</div>
+      <label class="dd-plano"><span>Fazer em</span><select id="ddPlano" aria-label="Semestre em que vai fazer ${esc(item.disciplina)}"><option value=""${fixo === undefined ? ' selected' : ''}>Automático${auto}</option>${opcoes}</select></label>
+      <p class="gm-nota" id="ddPlanoInfo" style="font-size:12.5px;color:var(--text-dim);">${reqPlanoInfo(cur, prev, sigla)}</p>
+    </div>`;
+    }
+  }
+  if(html) return jogo + meuPlano + `<div style="margin-bottom:16px;">
       <div class="section-label" style="margin:0 0 8px;">Requisitos</div>
       ${html}${libera.length ? `<p class="gm-nota" style="font-size:12.5px;color:var(--text-dim);margin-top:10px;"><b style="color:var(--text)">Abre caminho para:</b> ${nomesLibera}.</p>` : ''}
     </div>`;
-  return jogo + (libera.length ? `<div style="margin-bottom:16px;">
+  return jogo + meuPlano + (libera.length ? `<div style="margin-bottom:16px;">
       <div class="section-label" style="margin:0 0 8px;">Abre caminho para</div>
       <p class="gm-nota" style="font-size:12.5px;color:var(--text-dim);">${nomesLibera}.</p>
     </div>` : '');
@@ -5877,13 +6001,19 @@ function arvSelecionar(cur){
   } else precisa = (r[sel] || []).map(x => `${nome(x.s)} (${REQ_TIPO[x.tipo]}${agora.aprov.has(x.s) ? ', ✓' : agora.cursando.has(x.s) ? '; você está cursando' : ''})`).join(', ');
   const diretas = (dep[sel] || []).filter(x => !reqEhGeral(cur, x.s)), depois = rede.desc.size - diretas.length;
   const t = st === 'cur' ? reqTextoAtraso(cur, sel) : null;
+  // falta fazer: o semestre em que está no plano
+  let noPlano = '';
+  if(st === 'livre' || st === 'bloq'){
+    const prev = reqPrevisao(cur), k = prev.plano.pos[sel];
+    if(k !== undefined) noPlano = `<p><b>No plano:</b> ${esc(reqMeio(reqRotuloEm((prev.comecaAgora ? 0 : 1) + k)))}${prev.plano.fixos[sel] !== undefined ? ' (fixada por você)' : ''}${prev.plano.violacoes[sel] ? ', <span class="fm-alerta">sem os requisitos antes</span>' : ''}.</p>`;
+  }
   if(t && t.atraso) info.classList.add('is-alerta');
   const temLinhas = ARV_ARESTAS.length > 0, tipos = new Set(ARV_ARESTAS.map(a => a.tipo));
   const linha = (tipo, txt) => tipos.has(tipo) ? `<span><svg width="24" height="8" aria-hidden="true"><line x1="1" y1="4" x2="23" y2="4" class="arv-l t-${tipo}"/></svg>${txt}</span>` : '';
   info.innerHTML = `<div class="arv-info__t"><b>${esc(nome(sel))}</b><span>${esc(sel)} · ${cr} ${cr === 1 ? 'crédito' : 'créditos'} · ${ARV_ROT[st]}</span></div>
     <p><b>Precisa de</b> ${precisa ? esc(precisa) : 'nada antes: não tem pré-requisito'}.</p>
     ${diretas.length ? `<p><b>Libera</b> ${esc(diretas.map(x => nome(x.s)).join(', '))}${depois > 0 ? ` e, depois ${diretas.length === 1 ? 'dela' : 'delas'}, mais ${depois}` : ''}.</p>` : reqEhGeral(cur, sel) ? '' : '<p><b>Libera</b> só o TCC (que pede todas).</p>'}
-    ${t ? `<p>${t.html}</p>` : ''}
+    ${t ? `<p>${t.html}</p>` : ''}${noPlano}
     <div class="arv-info__acoes">
       ${temLinhas ? `<span class="arv-linhas">${linha('I', 'aprovada antes')}${linha('II', 'cursada antes')}${linha('Co', 'antes ou junto')}</span>` : ''}
       ${STATE.historico.some(i => i.sigla === sel) ? `<button type="button" class="btn btn-sm" data-arv-ver="${esc(sel)}">Ver detalhes</button>` : ''}
@@ -7721,10 +7851,13 @@ function gMelhorGrade(){
   // pré-requisitos: só entram as que o quadro do curso libera. As cursando já estão matriculadas e entram
   // sempre; planejando o próximo semestre (já com horário), conta que a pessoa passe nelas.
   const cur = curriculoDoPerfil();
-  let valida = null, travadas = 0, altura = null;
+  let valida = null, travadas = 0, altura = null, planejada = () => false;
   if(cur){
     const base = reqBase(!semHorario), ids = new Set(cands.map(d => d.sigla));
     altura = reqAlturas(cur, base).altura;
+    // as que a pessoa fixou para o semestre desta grade (Meu plano) vêm antes das outras
+    const atual = semNum(STATE.config.semestre), alvo = atual === null ? null : atual + (semHorario ? 0 : 1), meu = STATE.config.planoCurso || {};
+    planejada = sg => alvo !== null && meu[sg] === alvo;
     const livre = sg => gStatus(sg) === 'cursando' || !cur.creditos[sg];
     const antes = cands.length;
     // co-requisito que falta: só se a outra também for candidata (a busca confere que vão juntas)
@@ -7732,12 +7865,13 @@ function gMelhorGrade(){
     travadas = antes - cands.length;
     valida = escolha => { const juntas = new Set(escolha.map(x => x.s)); return escolha.every(x => livre(x.s) || reqFaltando(cur, x.s, base, base.cursando).every(r => juntas.has(r.s))); };
   }
-  GM.req = cur ? {contouCursando: !semHorario && (STATE.config.disciplinasAtuais || []).length > 0} : null;
+  GM.req = cur ? {contouCursando: !semHorario && (STATE.config.disciplinasAtuais || []).length > 0, comPlano: cands.some(d => planejada(d.sigla))} : null;
   // por que nada foi escolhido: nenhuma no histórico, todas feitas, pré-requisitos, ou nenhuma nos horários marcados
   GM.motivo = !todas.some(d => gStatus(d.sigla) !== 'fora') ? 'desconhecidas' : !cands.length ? (travadas ? 'requisitos' : 'feitas') : 'horarios';
   // valor: cada disciplina vale ~100000 (mais disciplinas sempre vence); a altura (quantos semestres a
   // sequência dela ainda ocupa) desempata, e depois o período
-  const valor = d => altura ? 100000 + 100 * Math.min(altura(d.sigla), 50) - gPeriodo(d) : 1000 - gPeriodo(d);
+  // (1 milhão por disciplina: mesmo com os desempates somados, uma disciplina a mais sempre vence)
+  const valor = d => altura ? 1e6 + (planejada(d.sigla) ? 2e4 : 0) + 100 * Math.min(altura(d.sigla), 50) - gPeriodo(d) : 1000 - gPeriodo(d);
   GM.opcoes = cands.length ? gBuscar(cands.map(d => ({s: d.sigla, d, w: valor(d)})), p.turno, p.limite, valida).filter(o => o.esc.length) : [];
   GM.opIdx = 0;
   gAplicarOpcao();
@@ -7854,7 +7988,8 @@ function renderGradeFormatura(){
   if(!prev || !prev.faltam || prev.fim === null){ el.hidden = true; return; }
   // já com horário, a grade é a do próximo semestre; sem horário, a deste que está começando
   const proximo = gContaCursando();
-  const plano = reqPlano(cur, prev.limite, {primeiro: marcadas, contarCursando: proximo});
+  const atual = semNum(STATE.config.semestre);
+  const plano = reqPlano(cur, prev.limite, {primeiro: marcadas, contarCursando: proximo, fixos: reqFixos(cur, atual === null ? null : atual + (proximo ? 1 : 0))});
   if(plano.sobra.length){ el.hidden = true; return; }
   const fim = proximo ? plano.sems.length : plano.sems.length - 1, dif = fim - prev.fim;
   const qtd = k => `${k} ${k === 1 ? 'semestre' : 'semestres'}`;
@@ -7945,7 +8080,7 @@ function renderGradeAviso(){
   }
   if(GM.modo === 'auto'){
     const cur = curriculoDoPerfil(), cr = cur ? reqCred(cur, marcadas) : 0;
-    const req = GM.req ? ` Só entram as que os pré-requisitos liberam${GM.req.contouCursando ? ', contando que você passe nas que está cursando' : ''}.` : ' Ele não conhece os pré-requisitos: confira antes da matrícula.';
+    const req = GM.req ? ` Só entram as que os pré-requisitos liberam${GM.req.contouCursando ? ', contando que você passe nas que está cursando' : ''}${GM.req.comPlano ? '; as que você fixou para este semestre no seu plano vêm antes' : ''}.` : ' Ele não conhece os pré-requisitos: confira antes da matrícula.';
     aviso('ok', `<span><b>${marcadas.length} ${marcadas.length === 1 ? 'disciplina' : 'disciplinas'} sem choque</b>${cr ? ` (${cr} créditos)` : ''}, ${noCampus}. O app escolheu o máximo que cabe nos horários marcados, começando pelas ${GM.req ? 'que seguram a formatura' : 'dos primeiros períodos'}.${req}</span>`);
     return;
   }
