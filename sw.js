@@ -15,7 +15,10 @@ const SHELL = [
   './icons/icon-512.png',
   './icons/apple-touch-icon.png',
 ];
-const CDN_HOSTS = ['cdnjs.cloudflare.com', 'cdn.jsdelivr.net'];
+const CDN_HOSTS = ['cdnjs.cloudflare.com', 'cdn.jsdelivr.net', 'cdn.sheetjs.com'];
+// Libraries live in their own cache, outside the app version: their URLs pin an exact version, so
+// a copy never goes stale, and an app update no longer throws away pdf.js (1.4 MB) or the charts.
+const LIBS = 'cdn-libs-1';
 // The charts library loads only when the Notas tab opens; keep a copy so the tab also works offline.
 // The sync library too: without it an offline launch opens with sync off until the next reload.
 const OPTIONAL = [
@@ -25,7 +28,9 @@ const OPTIONAL = [
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE)
-    .then(c => c.addAll(SHELL).then(() => Promise.all(OPTIONAL.map(u => c.add(u).catch(() => {})))))
+    .then(c => c.addAll(SHELL))
+    .then(() => caches.open(LIBS))
+    .then(c => Promise.all(OPTIONAL.map(async u => { if (!(await c.match(u))) await c.add(u).catch(() => {}); })))
     .then(() => self.skipWaiting()));
 });
 
@@ -159,7 +164,9 @@ self.addEventListener('push', event => {
 // Tapping a notification opens the app (or focuses it) on the right screen
 self.addEventListener('notificationclick', event => {
   event.notification.close();
-  const url = new URL((event.notification.data && event.notification.data.url) || './', self.registration.scope).href;
+  // only pages of the app itself: a notification never opens another site
+  let url = new URL((event.notification.data && event.notification.data.url) || './', self.registration.scope).href;
+  if (!url.startsWith(self.registration.scope)) url = self.registration.scope;
   event.waitUntil((async () => {
     const wins = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
     const win = wins.find(w => w.url.startsWith(self.registration.scope));
@@ -208,11 +215,13 @@ self.addEventListener('fetch', event => {
 
   if (CDN_HOSTS.includes(url.hostname)) {
     event.respondWith(
-      caches.open(CACHE).then(async cache => {
+      caches.open(LIBS).then(async cache => {
         const cached = await cache.match(req);
-        if (cached) return cached;
+        // an opaque copy (from an old script tag) cannot answer a request that checks integrity
+        if (cached && (cached.type !== 'opaque' || req.mode === 'no-cors')) return cached;
         const res = await fetch(req);
-        if (res.ok || res.type === 'opaque') cache.put(req, res.clone());
+        // opaque responses are not kept: Chrome counts each one as ~7 MB of the storage quota
+        if (res.ok) cache.put(req, res.clone());
         return res;
       })
     );

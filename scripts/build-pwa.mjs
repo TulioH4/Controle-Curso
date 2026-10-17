@@ -30,6 +30,38 @@ const version = hash.digest('hex').slice(0, 10);
 const sw = readFileSync(join(root, 'sw.js'), 'utf8').replace(/const VERSION = '[^']*';/, `const VERSION = '${version}';`);
 writeFileSync(join(dist, 'sw.js'), sw);
 
+// Content Security Policy for the published app. Scripts run only from the app itself, from the
+// three pinned CDNs and the app's own inline script (allowed by its hash, computed here). A piece
+// of HTML that slipped into the page (a crafted backup, a synced field) cannot run code: inline
+// event handlers and injected <script> tags are blocked. Only the build adds it, so editing
+// index.html locally keeps working without recomputing hashes.
+const indexPath = join(dist, 'index.html');
+let html = readFileSync(indexPath, 'utf8');
+const inline = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => `'sha256-${createHash('sha256').update(m[1]).digest('base64')}'`);
+const supabase = (/url:\s*'(https:\/\/[^']+)'/.exec(readFileSync(join(root, 'sync.js'), 'utf8')) || [])[1];
+if (!supabase || / on[a-z]+="/.test(html)) {
+  console.error(!supabase ? 'ABORTED: Supabase URL not found in sync.js' : 'ABORTED: inline event handler (on...="") in index.html; the CSP would block it');
+  rmSync(dist, { recursive: true, force: true });
+  process.exit(1);
+}
+const csp = [
+  "default-src 'self'",
+  `script-src 'self' ${inline.join(' ')} https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.sheetjs.com`,
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob:",
+  "font-src 'self' data:",
+  `connect-src 'self' ${supabase} ${supabase.replace(/^https:/, 'wss:')} https://generativelanguage.googleapis.com`,
+  "worker-src 'self'",
+  "manifest-src 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+].join('; ');
+html = html.replace('<meta charset="UTF-8">', `<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="${csp}">`);
+if (!html.includes('Content-Security-Policy')) { console.error('ABORTED: could not add the CSP'); rmSync(dist, { recursive: true, force: true }); process.exit(1); }
+writeFileSync(indexPath, html);
+
 // Leak guard: no grade or exam from the personal data file may appear in dist/.
 // (Plain subject names are public curriculum info and may appear as placeholders.)
 const personalPath = join(root, 'dados_curso.js');

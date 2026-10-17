@@ -33,6 +33,12 @@ alter table public.push_log enable row level security;
 
 -- Run the function every 15 minutes. It decides what is due (morning summary,
 -- evening heads-up, exam in two hours) in each device's time zone.
+--
+-- Recommended: a secret that only this job knows, so nobody else can trigger the function
+-- (it would read every account on each call). Pick a long random text and:
+--   1. here, once:  select vault.create_secret('<the text>', 'lembretes_cron_secret');
+--   2. Edge Functions → Secrets:  CRON_SECRET = <the same text>
+-- Without the secret the job still works; the function then accepts any call, as before.
 create extension if not exists pg_cron;
 create extension if not exists pg_net;
 
@@ -42,7 +48,8 @@ select cron.schedule(
   '*/15 * * * *',
   $$ select net.http_post(
        url := 'https://ehcbkoxbqqwiibjyzhoy.supabase.co/functions/v1/lembretes',
-       headers := '{"Content-Type": "application/json"}'::jsonb,
+       headers := jsonb_build_object('Content-Type', 'application/json', 'x-cron-secret',
+         coalesce((select decrypted_secret from vault.decrypted_secrets where name = 'lembretes_cron_secret'), '')),
        body := '{}'::jsonb
      ) $$
 );

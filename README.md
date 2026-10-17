@@ -74,6 +74,7 @@ Atualizações chegam sozinhas: a cada nova versão publicada, o app instalado s
 - **Cada pessoa, sua conta:** para outra pessoa usar o app no mesmo aparelho, basta sair e entrar com a conta dela.
 - **Sem conta:** tudo fica só no navegador daquele aparelho.
 - **Backup:** em *Configurações → Backup dos dados*, exporte ou importe um arquivo `.json` com tudo do perfil.
+- **Proteção do app:** a versão publicada só executa scripts do próprio app e das bibliotecas que ele usa, cada uma conferida pela impressão digital do arquivo (Content Security Policy e SRI). Um trecho de HTML que chegue por um backup importado ou por um campo sincronizado não consegue rodar código, e uma biblioteca alterada no CDN não é aceita.
 - Este repositório é público, mas **não contém dados de ninguém**. A versão publicada leva apenas um modelo vazio (`dados_curso.template.js`), e o build é interrompido se encontrar dados pessoais no pacote.
 
 ## Como funciona
@@ -104,7 +105,7 @@ Gerar a versão de publicação em `dist/`:
 node scripts/build-pwa.mjs
 ```
 
-O build copia o app, troca os dados pelo modelo vazio e carimba o service worker com uma versão nova. Ao enviar para a branch `main`, o GitHub Actions faz o build e publica no GitHub Pages.
+O build copia o app, troca os dados pelo modelo vazio, carimba o service worker com uma versão nova e acrescenta a política de segurança (CSP) com a impressão digital do script do app. Abrindo o `index.html` direto, sem o build, ela não se aplica. Ao enviar para a branch `main`, o GitHub Actions faz o build e publica no GitHub Pages.
 
 Para usar um projeto Supabase próprio, rode [`supabase/schema.sql`](supabase/schema.sql) no SQL Editor e troque a URL e a chave pública no início de [`sync.js`](sync.js).
 

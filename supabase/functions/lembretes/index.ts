@@ -9,15 +9,24 @@
 // Days with nothing due send nothing. POST {"test": true} with a user's access token
 // sends a test notification to that user's devices only.
 //
-// Secrets (Edge Functions → Secrets): VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY.
-// "Verify JWT" must be off: cron calls it without a token, and every reminder is
-// logged in push_log, so extra calls never send anything twice.
+// Secrets (Edge Functions → Secrets): VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, and optionally
+// CRON_SECRET. "Verify JWT" must be off: cron calls it without a user token. Every reminder
+// is logged in push_log, so extra calls never send anything twice; with CRON_SECRET set,
+// only a call carrying it (header x-cron-secret, see push.sql) runs the reminders at all,
+// so nobody else can make the function read every account and push over and over.
 import webpush from 'npm:web-push@3.6.7';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
 // ---------------------------------------------------------------------------
 // Pure rules (no I/O), kept separate so they can be tested on their own
 // ---------------------------------------------------------------------------
+// a time zone the device sent; an invalid one would throw and stop the reminders of everyone after it
+export function safeTz(tz) {
+  try { new Intl.DateTimeFormat('en-CA', { timeZone: tz }); return tz; } catch (_) { return 'America/Sao_Paulo'; }
+}
+// push services of the browsers; any other endpoint is not a browser subscription
+const PUSH_HOST = /^https:\/\/([a-z0-9-]+\.)*(fcm\.googleapis\.com|push\.services\.mozilla\.com|notify\.windows\.com|push\.apple\.com)\//i;
+export const isPushEndpoint = (e) => typeof e === 'string' && PUSH_HOST.test(e);
 export function localNow(tz, now = new Date()) {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
@@ -174,10 +183,12 @@ if (typeof Deno !== 'undefined') {
     }
   };
 
+  const CRON_SECRET = Deno.env.get('CRON_SECRET') || '';
   Deno.serve(async (req) => {
     if (req.method === 'OPTIONS') return new Response(null, { headers: CORS });
     let body = {};
     try { body = await req.json(); } catch (_) { /* cron sends {} */ }
+    if (!body.test && CRON_SECRET && req.headers.get('x-cron-secret') !== CRON_SECRET) return json({ error: 'forbidden' }, 403);
 
     let onlyUser = null;
     if (body.test) {
@@ -193,7 +204,8 @@ if (typeof Deno !== 'undefined') {
     if (error) return json({ error: error.message }, 500);
 
     const byUser = new Map();
-    (subs || []).forEach((s) => { if (!byUser.has(s.user_id)) byUser.set(s.user_id, []); byUser.get(s.user_id).push(s); });
+    (subs || []).filter((s) => isPushEndpoint(s.endpoint))
+      .forEach((s) => { if (!byUser.has(s.user_id)) byUser.set(s.user_id, []); byUser.get(s.user_id).push(s); });
 
     let sent = 0;
     for (const [uid, devices] of byUser) {
@@ -201,16 +213,21 @@ if (typeof Deno !== 'undefined') {
         for (const s of devices) sent += await send(s, { title: 'Notificações funcionando', body: 'Você vai receber os lembretes de provas e tarefas por aqui.', tag: 'teste', url: './' });
         continue;
       }
-      const { data: rows } = await db.from('kv').select('key,value').eq('user_id', uid);
-      const kv = Object.fromEntries((rows || []).map((r) => [r.key, r.value]));
-      const now = localNow(devices[0].tz || 'America/Sao_Paulo');
-      for (const m of plan(collect(kv), now)) {
-        // claim the reminder first; if it was already claimed, skip
-        const { data: claimed } = await db.from('push_log')
-          .upsert({ user_id: uid, tag: m.tag }, { onConflict: 'user_id,tag', ignoreDuplicates: true })
-          .select('tag');
-        if (!claimed || !claimed.length) continue;
-        for (const s of devices) sent += await send(s, m);
+      // one account with odd data must not stop the reminders of the others
+      try {
+        const { data: rows } = await db.from('kv').select('key,value').eq('user_id', uid);
+        const kv = Object.fromEntries((rows || []).map((r) => [r.key, r.value]));
+        const now = localNow(safeTz(devices[0].tz || 'America/Sao_Paulo'));
+        for (const m of plan(collect(kv), now)) {
+          // claim the reminder first; if it was already claimed, skip
+          const { data: claimed } = await db.from('push_log')
+            .upsert({ user_id: uid, tag: m.tag }, { onConflict: 'user_id,tag', ignoreDuplicates: true })
+            .select('tag');
+          if (!claimed || !claimed.length) continue;
+          for (const s of devices) sent += await send(s, m);
+        }
+      } catch (e) {
+        console.error('reminders failed for one account', e && e.message);
       }
     }
     return json({ ok: true, devices: (subs || []).length, sent });

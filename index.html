@@ -14,7 +14,7 @@
 <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
 <script src="sync.js"></script>
 <script src="dados_curso.js"></script>
 <style>
@@ -2520,7 +2520,7 @@
     </div>
     <nav class="rail__nav" id="navRail"></nav>
     <div class="rail__actions">
-      <button class="rail-btn rail-btn-primary" onclick="openQuickAdd()" title="Atalho: Ctrl+K" data-ico="plus">
+      <button class="rail-btn rail-btn-primary" id="railQuickAdd" title="Atalho: Ctrl+K" data-ico="plus">
         Novo item <kbd class="rail-kbd">Ctrl K</kbd>
       </button>
       <div class="rail__toolbar">
@@ -2540,7 +2540,7 @@
 
   <!-- phone: tab bar, add button and the "Mais" sheet -->
   <nav class="mtabbar" id="mobileTabbar" aria-label="Navegação principal"></nav>
-  <button type="button" class="mfab" id="mobileFab" aria-label="Novo item" onclick="openQuickAdd()" data-ico="plus"></button>
+  <button type="button" class="mfab" id="mobileFab" aria-label="Novo item" data-ico="plus"></button>
   <div class="msheet-backdrop" id="moreBackdrop"></div>
   <div class="msheet" id="moreSheet" role="dialog" aria-modal="true" aria-label="Mais opções"></div>
 
@@ -2706,7 +2706,7 @@
 
       <div style="display:flex;gap:8px;margin-bottom:10px;">
         <input class="search" id="histSearch" placeholder="Buscar disciplina…" style="flex:1;margin-bottom:0;">
-        <select id="histFiltroSit" style="background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--r);color:var(--text);padding:8px 10px;font-size:12.5px;">
+        <select id="histFiltroSit" aria-label="Filtrar por situação" style="background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--r);color:var(--text);padding:8px 10px;font-size:12.5px;">
           <option value="">Todas</option>
           <option value="Aprovado">Aprovado</option>
           <option value="Cursando">Cursando</option>
@@ -2839,16 +2839,16 @@
           <button class="view-toggle-btn" id="btnViewKanban" title="Vista Kanban" data-ico="board">Kanban</button>
           <button class="btn btn-sm" id="fHoje" style="--accent:var(--amber);padding:5px 9px;font-size:12px;" title="Mostrar só tarefas de hoje e atrasadas">Hoje</button>
           <input id="fTarefaSearch" class="search" placeholder="Buscar…" style="width:110px; margin-bottom:0; padding:5px 9px; font-size:12px;">
-          <select id="fFiltroDisc" style="background:var(--bg-alt); border:1px solid var(--line); border-radius:var(--r); color:var(--text); padding:5px 9px; font-size:12px;">
+          <select id="fFiltroDisc" aria-label="Filtrar por disciplina" style="background:var(--bg-alt); border:1px solid var(--line); border-radius:var(--r); color:var(--text); padding:5px 9px; font-size:12px;">
             <option value="">Disciplina</option>
           </select>
-          <select id="fFiltroStatus" style="background:var(--bg-alt); border:1px solid var(--line); border-radius:var(--r); color:var(--text); padding:5px 9px; font-size:12px;">
+          <select id="fFiltroStatus" aria-label="Filtrar por status" style="background:var(--bg-alt); border:1px solid var(--line); border-radius:var(--r); color:var(--text); padding:5px 9px; font-size:12px;">
             <option value="Todas">Status</option>
             <option value="Pendente">Pendentes</option>
             <option value="Em andamento">Em andamento</option>
             <option value="Concluído">Concluídas</option>
           </select>
-          <select id="fFiltroCat" style="background:var(--bg-alt); border:1px solid var(--line); border-radius:var(--r); color:var(--text); padding:5px 9px; font-size:12px;">
+          <select id="fFiltroCat" aria-label="Filtrar por categoria" style="background:var(--bg-alt); border:1px solid var(--line); border-radius:var(--r); color:var(--text); padding:5px 9px; font-size:12px;">
             <option value="">Categoria</option>
             <option>Trabalho</option>
             <option>Relatório de Lab.</option>
@@ -2856,7 +2856,7 @@
             <option>Pessoal</option>
             <option>Outro</option>
           </select>
-          <select id="fFiltroPrio" style="background:var(--bg-alt); border:1px solid var(--line); border-radius:var(--r); color:var(--text); padding:5px 9px; font-size:12px;">
+          <select id="fFiltroPrio" aria-label="Filtrar por prioridade" style="background:var(--bg-alt); border:1px solid var(--line); border-radius:var(--r); color:var(--text); padding:5px 9px; font-size:12px;">
             <option value="">Prioridade</option>
             <option>Alta</option>
             <option>Média</option>
@@ -3471,7 +3471,7 @@ async function init(opts = {}){
   clearInterval(window._painelTimer);
   window._painelTimer = setInterval(() => {
     const painel = document.getElementById('tab-painel');
-    if(!painel.classList.contains('active')) return;
+    if(document.hidden || !painel.classList.contains('active')) return;
     // don't wipe something the user is typing (e.g. a post-it draft)
     const a = document.activeElement;
     if(a && painel.contains(a) && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return;
@@ -3536,23 +3536,36 @@ function ico(name, cls){
 }
 document.querySelectorAll('[data-ico]').forEach(el => el.insertAdjacentHTML('afterbegin', ico(el.dataset.ico)));
 
+// Bibliotecas carregadas só quando usadas. Cada uma leva a impressão digital (SRI) do arquivo
+// exato: se o CDN servir outra coisa, o navegador não roda. crossorigin: o service worker guarda
+// a cópia de verdade (não uma resposta opaca, que ocupa ~7 MB da cota cada no Chrome).
+const LIB_SRI = {
+  'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js': 'sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD',
+  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js': 'sha384-/1qUCSGwTur9vjf/z9lmu/eCUYbpOTgSjmpbMQZ1/CtX2v/WcAIKqRv+U1DUCG6e',
+  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js': 'sha384-SnzOobpRMLXZ52iJvZm/C0fYw0OQemTXzTjIsdsfMcrCtCEe9qgzxTd3RSklO5x2',
+  'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js': 'sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT',
+};
+function carregarScript(src){
+  return new Promise((ok, no) => {
+    const s = document.createElement('script');
+    s.src = src; s.crossOrigin = 'anonymous';
+    if(LIB_SRI[src]) s.integrity = LIB_SRI[src];
+    s.onload = ok;
+    s.onerror = () => { s.remove(); no(new Error('rede')); };
+    document.head.appendChild(s);
+  });
+}
 // Chart.js só é usado na aba Notas: carrega na primeira vez que ela abre, não na abertura do app
 const CHART_JS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js';
 let _chartJsLoading = null;
 function loadChartJs(){
   if(window.Chart) return Promise.resolve(window.Chart);
-  if(!_chartJsLoading) _chartJsLoading = new Promise((ok, no) => {
-    const s = document.createElement('script');
-    s.src = CHART_JS_URL;
-    s.onload = () => {
-      Chart.defaults.font.family = getComputedStyle(document.documentElement).getPropertyValue('--sans').trim() || 'system-ui, sans-serif';
-      // no celular a animação de entrada dos gráficos custa mais do que vale
-      if(matchMedia('(max-width:880px)').matches) Chart.defaults.animation = false;
-      ok(window.Chart);
-    };
-    s.onerror = () => { _chartJsLoading = null; s.remove(); no(new Error('Chart.js indisponível')); };
-    document.head.appendChild(s);
-  });
+  if(!_chartJsLoading) _chartJsLoading = carregarScript(CHART_JS_URL).then(() => {
+    Chart.defaults.font.family = getComputedStyle(document.documentElement).getPropertyValue('--sans').trim() || 'system-ui, sans-serif';
+    // no celular a animação de entrada dos gráficos custa mais do que vale
+    if(matchMedia('(max-width:880px)').matches) Chart.defaults.animation = false;
+    return window.Chart;
+  }).catch(() => { _chartJsLoading = null; throw new Error('Chart.js indisponível'); });
   return _chartJsLoading;
 }
 // Mostra um aviso no lugar do gráfico sem apagar o canvas, para o gráfico poder voltar depois
@@ -3592,9 +3605,9 @@ function renderNav(){
   const nav = document.getElementById('navRail');
   const cur = ((document.querySelector('.tab.active') || {}).id || 'tab-painel').slice(4);
   nav.innerHTML = TABS.filter(tabVisible).map(t => `
-    <button class="navbtn${t.id===cur?' active':''}" data-tab="${t.id}">
+    <button class="navbtn${t.id===cur?' active':''}" data-tab="${esc(t.id)}">
       <span class="ic">${ico(t.icon)}</span><span>${t.label}</span>
-      <span class="nav-badge" data-badge="${t.id}" style="display:none;"></span>
+      <span class="nav-badge" data-badge="${esc(t.id)}" style="display:none;"></span>
       <span class="led"></span>
     </button>`).join('');
   nav.querySelectorAll('.navbtn').forEach(btn => {
@@ -3666,7 +3679,7 @@ function openMoreSheet(){
       <span class="msheet__who"><b>${esc(name)}</b><span>${esc(STATE.config.curso || '')}</span><span class="msheet__sync">${esc(sync)}</span></span>
       ${document.getElementById('btnSwitchProfile').style.display === 'none' ? '' : `<button type="button" class="msheet__swap" id="moreSwap" aria-label="Trocar perfil">${ico('swap')}</button>`}
     </div>
-    <div class="msheet__grid">${outras.map(t => `<button type="button" class="msheet__tile${t.id === cur ? ' active' : ''}" data-more-tab="${t.id}">${ico(t.icon)}<span>${t.label}</span></button>`).join('')}</div>
+    <div class="msheet__grid">${outras.map(t => `<button type="button" class="msheet__tile${t.id === cur ? ' active' : ''}" data-more-tab="${esc(t.id)}">${ico(t.icon)}<span>${t.label}</span></button>`).join('')}</div>
     <div class="msheet__actions">
       <button type="button" class="msheet__act" data-more-act="timer">${ico('timer')}<span>Timer de estudo</span></button>
       <button type="button" class="msheet__act" data-more-act="tema">${ico(STATE.tema === 'light' ? 'moon' : 'sun')}<span>${STATE.tema === 'light' ? 'Tema escuro' : 'Tema claro'}</span></button>
@@ -3771,6 +3784,7 @@ function closeMoreSheet(){
 let _clockTimer = null;
 function startClock(){
   function tick(){
+    if(document.hidden) return;
     const now = new Date();
     const hh = String(now.getHours()).padStart(2,'0');
     const mm = String(now.getMinutes()).padStart(2,'0');
@@ -4009,9 +4023,9 @@ function renderPainel(){
   } else if(!proximaOuAtual){
     proxAula = 'Aulas de hoje encerradas';
   } else if(proximaOuAtual.inicio <= nowHM){
-    proxAula = `Agora: ${proximaOuAtual.disciplina}`;
+    proxAula = `Agora: ${esc(proximaOuAtual.disciplina)}`;
   } else {
-    proxAula = `Às ${proximaOuAtual.inicio}: ${proximaOuAtual.disciplina}`;
+    proxAula = `Às ${esc(proximaOuAtual.inicio)}: ${esc(proximaOuAtual.disciplina)}`;
   }
 
   document.getElementById('painelSub').innerHTML = `
@@ -4124,12 +4138,12 @@ function renderPainel(){
     const overdue = t.prazo && daysUntil(t.prazo) < 0;
     const stCls = overdue ? 'red' : (t.status==='Em andamento' ? 'amber' : 'gray');
     return `<div class="dash-task-row">
-      <div class="dash-task-check" data-dash-done="${t.id}" role="button" tabindex="0" aria-label="Concluir ${esc(t.nome)}"></div>
+      <div class="dash-task-check" data-dash-done="${esc(t.id)}" role="button" tabindex="0" aria-label="Concluir ${esc(t.nome)}"></div>
       <div class="dash-task-info">
         <div class="t">${esc(t.nome)}</div>
         <div class="s">${esc(t.categoria)}${t.prazo?', '+fmtDate(t.prazo)+(overdue?' (atrasado)':''):''}${t.disciplina?', '+esc(t.disciplina):''}</div>
       </div>
-      <span class="badge badge-${stCls}">${t.status}</span>
+      <span class="badge badge-${stCls}">${esc(t.status)}</span>
     </div>`;
   }).join('') : `<div class="empty" style="padding:14px;">Nenhuma tarefa pendente</div>`;
 
@@ -4378,10 +4392,10 @@ function renderLab(){
       <td>${esc(t.nome)}</td>
       <td class="mono">${t.prazo ? fmtDate(t.prazo) : '—'}</td>
       <td class="mono">${(t.status==='Concluído' || dr===null || dr<0) ? '—' : dr}</td>
-      <td><span class="badge badge-${stCls} status-btn" data-toggle-lab-task="${t.id}" tabindex="0" role="button" aria-label="Mudar status de ${esc(t.nome)}">${t.status}</span></td>
+      <td><span class="badge badge-${stCls} status-btn" data-toggle-lab-task="${esc(t.id)}" tabindex="0" role="button" aria-label="Mudar status de ${esc(t.nome)}">${esc(t.status)}</span></td>
       <td style="display:flex;gap:4px;align-items:center;">
-        <button class="btn btn-sm ${t.status==='Concluído'?'':'btn-primary'}" data-done-lab-task="${t.id}">${t.status==='Concluído'?'Reabrir':'Marcar concluído'}</button>
-        <button class="btn btn-ghost btn-sm" data-del-lab-task="${t.id}" title="Excluir" aria-label="Excluir ${esc(t.nome)}">✕</button>
+        <button class="btn btn-sm ${t.status==='Concluído'?'':'btn-primary'}" data-done-lab-task="${esc(t.id)}">${t.status==='Concluído'?'Reabrir':'Marcar concluído'}</button>
+        <button class="btn btn-ghost btn-sm" data-del-lab-task="${esc(t.id)}" title="Excluir" aria-label="Excluir ${esc(t.nome)}">✕</button>
       </td>
     </tr>`;
   }).join('');
@@ -4727,7 +4741,7 @@ function showDiscDetail(sigla){
     ${tarefasDisc.length ? `
     <div>
       <div class="section-label" style="margin:0 0 8px;">Tarefas pendentes</div>
-      ${tarefasDisc.map(t => `<div class="sim-row"><span class="sim-sigla" style="color:var(--text-dim);width:82px;">${t.prazo?fmtDate(t.prazo):'sem prazo'}</span><span class="sim-nome">${esc(t.nome)}</span><span class="badge badge-${t.prioridade==='Alta'?'red':t.prioridade==='Média'?'amber':'gray'}" style="flex-shrink:0;">${t.prioridade}</span></div>`).join('')}
+      ${tarefasDisc.map(t => `<div class="sim-row"><span class="sim-sigla" style="color:var(--text-dim);width:82px;">${t.prazo?fmtDate(t.prazo):'sem prazo'}</span><span class="sim-nome">${esc(t.nome)}</span><span class="badge badge-${t.prioridade==='Alta'?'red':t.prioridade==='Média'?'amber':'gray'}" style="flex-shrink:0;">${esc(t.prioridade)}</span></div>`).join('')}
     </div>` : ''}
     <div style="margin-top:16px;">
       <div class="section-label" style="margin:0 0 8px;">Anotações</div>
@@ -5679,10 +5693,10 @@ function renderKanban(){
       ${tasks.length ? tasks.map(t => {
         const overdue = t.prazo && daysUntil(t.prazo) < 0 && t.status !== 'Concluído';
         const prCls = t.prioridade==='Alta'?'red':t.prioridade==='Média'?'amber':'green';
-        return `<div class="kanban-card" data-kanban-move="${t.id}" title="Clique para avançar status">
+        return `<div class="kanban-card" data-kanban-move="${esc(t.id)}" title="Clique para avançar status">
           <div class="kc-name">${esc(t.nome)}</div>
           <div class="kc-meta">
-            <span class="badge badge-${prCls}" style="font-size:9px;">${t.prioridade}</span>
+            <span class="badge badge-${prCls}" style="font-size:9px;">${esc(t.prioridade)}</span>
             ${t.disciplina ? `, ${esc(t.disciplina)}` : ''}
             ${t.prazo ? `, ${fmtDate(t.prazo)}${overdue?' (atrasado)':''}` : ''}
           </div>
@@ -6217,8 +6231,8 @@ function renderTarefas(){
           <div class="field"><label>Prioridade</label><select id="tEditPrio_${t.id}">${prioOpts}</select></div>
         </div>
         <div style="display:flex;gap:8px;justify-content:flex-end;">
-          <button class="btn" data-cancel-edit-tarefa="${t.id}">Cancelar</button>
-          <button class="btn btn-primary" data-save-tarefa="${t.id}">Salvar</button>
+          <button class="btn" data-cancel-edit-tarefa="${esc(t.id)}">Cancelar</button>
+          <button class="btn btn-primary" data-save-tarefa="${esc(t.id)}">Salvar</button>
         </div>
       </div>`;
     }
@@ -6233,9 +6247,9 @@ function renderTarefas(){
         <div class="t">${esc(t.nome)}</div>
         <div class="meta">${esc(t.categoria)}${t.disciplina?(', '+esc(t.disciplina)):''}${t.prazo?(', '+fmtDate(t.prazo)+(overdue?' (atrasado)':'')):''}</div>
       </div>
-      <span class="badge badge-${stCls} status-btn" data-toggle="${t.id}" tabindex="0" role="button" aria-label="Mudar status de ${esc(t.nome)}, atual ${t.status}">${t.status}</span>
-      <button class="btn btn-ghost" data-edit-tarefa="${t.id}" title="Editar" aria-label="Editar ${esc(t.nome)}">${ico('edit')}</button>
-      <button class="btn btn-ghost" data-del="${t.id}" title="Excluir" aria-label="Excluir ${esc(t.nome)}">✕</button>
+      <span class="badge badge-${stCls} status-btn" data-toggle="${esc(t.id)}" tabindex="0" role="button" aria-label="Mudar status de ${esc(t.nome)}, atual ${esc(t.status)}">${esc(t.status)}</span>
+      <button class="btn btn-ghost" data-edit-tarefa="${esc(t.id)}" title="Editar" aria-label="Editar ${esc(t.nome)}">${ico('edit')}</button>
+      <button class="btn btn-ghost" data-del="${esc(t.id)}" title="Excluir" aria-label="Excluir ${esc(t.nome)}">✕</button>
     </div>`;
   };
 
@@ -7184,9 +7198,8 @@ function renderGradeResumo(){
 const PDFJS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
 let _pdfjs = null;
 function carregarPdfjs(){
-  const tag = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => no(new Error('rede')); document.head.appendChild(s); });
   // o worker vai como script comum, antes: o pdf.js então lê na própria página, sem Worker de outro site
-  if(!_pdfjs) _pdfjs = tag(PDFJS_URL + 'pdf.worker.min.js').then(() => tag(PDFJS_URL + 'pdf.min.js'))
+  if(!_pdfjs) _pdfjs = carregarScript(PDFJS_URL + 'pdf.worker.min.js').then(() => carregarScript(PDFJS_URL + 'pdf.min.js'))
     .then(() => { const lib = window.pdfjsLib || window['pdfjs-dist/build/pdf']; lib.GlobalWorkerOptions.workerSrc = PDFJS_URL + 'pdf.worker.min.js'; return lib; })
     .catch(err => { _pdfjs = null; throw err; });
   return _pdfjs;
@@ -7195,7 +7208,7 @@ async function lerPdfDeGrade(arquivo){
   GM.msg = `Lendo ${arquivo.name}…`; GM.erro = false; renderGradeFonte();
   try{
     const lib = await carregarPdfjs();
-    const doc = await lib.getDocument({data: new Uint8Array(await arquivo.arrayBuffer())}).promise;
+    const doc = await lib.getDocument({data: new Uint8Array(await arquivo.arrayBuffer()), isEvalSupported: false}).promise;
     const paginas = [];
     for(let n = 1; n <= doc.numPages; n++){
       const pag = await doc.getPage(n), alt = pag.view[3], tc = await pag.getTextContent();
@@ -7392,8 +7405,8 @@ function renderProvas(){
         </div>
         <div style="display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:end;">
           <div class="field edit-span" style="margin:0;"><label>Local</label><input id="pEditLocal_${p.id}" value="${esc(p.local||'')}" placeholder="ex: Lab A203"></div>
-          <button class="btn" data-cancel-edit-prova="${p.id}">Cancelar</button>
-          <button class="btn btn-primary" data-save-prova="${p.id}">Salvar</button>
+          <button class="btn" data-cancel-edit-prova="${esc(p.id)}">Cancelar</button>
+          <button class="btn btn-primary" data-save-prova="${esc(p.id)}">Salvar</button>
         </div>
       </div>`;
     }
@@ -7403,8 +7416,8 @@ function renderProvas(){
         <div class="t">${esc(p.disciplina)} <span class="badge badge-blue" style="margin-left:4px;">${esc(p.tipo)}</span></div>
         <div class="s">${(() => { const n = daysUntil(p.data); return n === 0 ? 'Hoje' : n === 1 ? 'Amanhã' : `Em ${n} dias`; })()}${p.hora ? ' às ' + esc(p.hora) : ''}${p.local ? ', ' + esc(p.local) : ''}</div>
       </div>
-      <button class="btn btn-ghost" data-edit-prova="${p.id}" title="Editar" aria-label="Editar prova">${ico('edit')}</button>
-      <button class="btn btn-ghost" data-del-prova="${p.id}" title="Excluir" aria-label="Excluir prova de ${esc(p.disciplina)}">✕</button>
+      <button class="btn btn-ghost" data-edit-prova="${esc(p.id)}" title="Editar" aria-label="Editar prova">${ico('edit')}</button>
+      <button class="btn btn-ghost" data-del-prova="${esc(p.id)}" title="Excluir" aria-label="Excluir prova de ${esc(p.disciplina)}">✕</button>
     </div>`;
   }).join('') : `<div class="empty">Nenhuma prova marcada ainda. ${matchMedia('(max-width:880px)').matches ? 'Toque no + ou num dia do calendário para marcar.' : 'Adicione a primeira acima.'}</div>`;
   if(_editingProvaId) linkFieldLabels(list);
@@ -7473,7 +7486,7 @@ function renderProvas(){
         <input class="cell-input prova-nota${nota === null ? ' is-empty' : ''}" type="text" inputmode="decimal" autocomplete="off" maxlength="5"
           data-prova-nota="${esc(p.id)}" value="${nota === null ? '' : esc(String(nota).replace('.', ','))}" placeholder="Nota"
           title="${esc(destino)}" aria-label="Nota de ${esc(p.tipo)} de ${esc(p.disciplina)}">
-        <button class="btn btn-ghost" data-del-prova="${p.id}" title="Excluir" aria-label="Excluir prova de ${esc(p.disciplina)}">✕</button>
+        <button class="btn btn-ghost" data-del-prova="${esc(p.id)}" title="Excluir" aria-label="Excluir prova de ${esc(p.disciplina)}">✕</button>
       </div>`;
     }).join('');
     passadasEl.querySelectorAll('[data-prova-nota]').forEach(inp => {
@@ -7812,7 +7825,7 @@ document.getElementById('fileImport').addEventListener('change', (e) => {
   reader.onload = async (ev) => {
     try{
       const backup = JSON.parse(ev.target.result);
-      if(!backup || typeof backup !== 'object' || !backup.config){
+      if(!backup || typeof backup !== 'object' || !backup.config || typeof backup.config !== 'object' || Array.isArray(backup.config)){
         showToast('Esse arquivo não é um backup deste painel.', 'error', 4000);
         return;
       }
@@ -7828,7 +7841,7 @@ document.getElementById('fileImport').addEventListener('change', (e) => {
         ACTIVE_PROFILE_ID = id;
         saveActiveProfileId(id);
       }
-      if(backup.base_data) await storeSet('base_data', backup.base_data);
+      if(backup.base_data && typeof backup.base_data === 'object' && !Array.isArray(backup.base_data)) await storeSet('base_data', backup.base_data);
       await storeSet('setup_done', true);
       // tudo o que o backup traz substitui o atual, inclusive valores vazios
       // (ex.: aulas_custom = null volta para o horário original em vez de manter o editado)
@@ -7836,7 +7849,17 @@ document.getElementById('fileImport').addEventListener('change', (e) => {
         'lab_concluido','provas','faltas','faltas_limites','faltas_registro','relatorios_ocultos','relatorios_overrides','horas_comp',
         'horas_global','aulas_custom','turmas_custom','notas_parciais','metas_notas','tema','lembretes',
         'pom_sessions','disc_notes','estudos_materiais','semestres','grade_oferta','grade_plano','labs'];
-      for(const k of BACKUP_KEYS){ if(k in backup) await storeSet(k, backup[k]); }
+      // o tipo de cada parte: lista, objeto, texto, ou "?" quando também pode ser vazio (null)
+      const TIPO = {config:'obj', historico_overrides:'obj', historico_custom:'arr', historico_removidos:'arr', tarefas:'arr',
+        lab_concluido:'obj', provas:'arr', faltas:'obj', faltas_limites:'obj', faltas_registro:'arr', relatorios_ocultos:'arr',
+        relatorios_overrides:'obj', horas_comp:'arr', horas_global:'obj', aulas_custom:'arr?', turmas_custom:'obj?', notas_parciais:'obj',
+        metas_notas:'obj', tema:'str', lembretes:'arr', pom_sessions:'arr', disc_notes:'obj', estudos_materiais:'arr', semestres:'arr',
+        grade_oferta:'obj?', grade_plano:'obj?', labs:'obj'};
+      const tipoOk = (v, t) => (t.endsWith('?') && v === null) || (t.startsWith('arr') ? Array.isArray(v)
+        : t.startsWith('obj') ? (v !== null && typeof v === 'object' && !Array.isArray(v)) : typeof v === 'string');
+      const ignoradas = BACKUP_KEYS.filter(k => k in backup && !tipoOk(backup[k], TIPO[k]));
+      for(const k of BACKUP_KEYS){ if(k in backup && !ignoradas.includes(k)) await storeSet(k, backup[k]); }
+      if(ignoradas.length) console.warn('backup: partes com formato errado foram ignoradas:', ignoradas);
       const msg = document.getElementById('importMsg'); msg.classList.add('show');
       setTimeout(()=>msg.classList.remove('show'), 1800);
       showToast('Backup restaurado! Recarregando…', 'success', 900);
@@ -8670,7 +8693,7 @@ function showProfilePicker(){
     const days = p.createdAt ? Math.floor((Date.now()-p.createdAt)/86400000) : null;
     const since = days===null ? '' : days===0 ? 'criado hoje' : `há ${days} dia${days===1?'':'s'}`;
     return `<div class="profile-card" data-profile-id="${esc(p.id)}">
-      <button class="pc-del-btn" data-del-id="${esc(p.id)}" title="Excluir perfil" aria-label="Excluir perfil de ${esc(displayName)}" onclick="event.stopPropagation(); confirmDeleteProfile(this.dataset.delId)">×</button>
+      <button class="pc-del-btn" data-del-id="${esc(p.id)}" title="Excluir perfil" aria-label="Excluir perfil de ${esc(displayName)}">×</button>
       <div class="pc-avatar">${esc(initials)||'?'}</div>
       <div class="pc-name">${esc(displayName)}</div>
       <div class="pc-curso">${esc(p.curso||'')}</div>
@@ -8683,6 +8706,7 @@ function showProfilePicker(){
   cards.querySelectorAll('.profile-card').forEach(card => {
     card.addEventListener('click', () => selectProfile(card.dataset.profileId));
   });
+  cards.querySelectorAll('.pc-del-btn').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); confirmDeleteProfile(b.dataset.delId); }));
   document.getElementById('profileNewBtn').addEventListener('click', () => {
     if(cloudUser()){ switchAccount(); return; }
     screen.style.display = 'none';
@@ -8713,10 +8737,12 @@ function confirmDeleteProfile(profileId){
       <p>Excluir perfil<br><span class="pc-confirm-name">${esc(p.name)}</span>?</p>
       <p style="font-size:11px; color:var(--text-faint);">Todos os dados serão apagados<br>e não poderão ser recuperados.</p>
       <div class="pc-confirm-btns">
-        <button class="del-yes" data-del-id="${esc(profileId)}" onclick="event.stopPropagation(); deleteProfile(this.dataset.delId)">Excluir</button>
-        <button class="del-no" onclick="event.stopPropagation(); showProfilePicker()">Cancelar</button>
+        <button class="del-yes" type="button">Excluir</button>
+        <button class="del-no" type="button">Cancelar</button>
       </div>
     </div>`;
+  card.querySelector('.del-yes').addEventListener('click', e => { e.stopPropagation(); deleteProfile(profileId); });
+  card.querySelector('.del-no').addEventListener('click', e => { e.stopPropagation(); showProfilePicker(); });
 }
 
 function deleteProfile(profileId){
@@ -8818,6 +8844,7 @@ function closeWizard(){
 // ============================================================
 // QUICK ADD (Ctrl+K)
 // ============================================================
+['railQuickAdd', 'mobileFab'].forEach(id => document.getElementById(id).addEventListener('click', () => openQuickAdd()));
 function openQuickAdd(tab, data){
   const overlay = document.getElementById('quickAddOverlay');
   if(STATE.config) fillProvaDiscSelect(document.getElementById('qaProvaDisciplina'), document.getElementById('qaProvaDiscCustom'));
@@ -8909,7 +8936,7 @@ function switchQATab(tab){
     document.getElementById('qaTarefaPrazo').value = '';
     closeQuickAdd();
     showToast('Tarefa adicionada!', 'success');
-    renderTarefas(); renderPainel(); renderLab();
+    renderTarefas(); renderPainel(); renderLab(); updateNavBadges();
   });
 
   document.getElementById('qaProvaData').addEventListener('keydown', e => {
@@ -8938,7 +8965,7 @@ function switchQATab(tab){
     document.getElementById('qaProvaLocal').value = '';
     closeQuickAdd();
     showToast('Prova adicionada!', 'success');
-    renderProvas(); renderPainel();
+    renderProvas(); renderPainel(); updateNavBadges();
   });
 })();
 
@@ -9238,12 +9265,14 @@ function renderImportArea(area, mode){
 
 function loadSheetJS(cb){
   if(SHEETJS_LOADED){ cb(); return; }
-  const s = document.createElement('script');
   // CDN oficial da SheetJS: a 0.18.5 do cdnjs (a última publicada lá) tem falhas de segurança conhecidas
-  s.src = 'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';
-  s.onload = () => { SHEETJS_LOADED = true; cb(); };
-  s.onerror = () => alert('Não foi possível carregar SheetJS (sem internet?). Use "Colar texto" ou "Digitar".');
-  document.head.appendChild(s);
+  carregarScript('https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js')
+    .then(() => { SHEETJS_LOADED = true; cb(); })
+    .catch(() => {
+      const st = document.getElementById('wizFileStatus');
+      if(st) st.textContent = 'Não deu para abrir o leitor de planilhas (sem internet?). Use "Colar tabela".';
+      showToast('Não deu para abrir o leitor de planilhas. Confira a internet ou use "Colar tabela".', 'error', 5000);
+    });
 }
 
 function handleWizFile(file){
@@ -9317,9 +9346,14 @@ function renderColMap(container){
     fields.map(f => `
       <label>${f.label}</label>
       <div class="arrow">→</div>
-      <select data-field="${f.key}" onchange="WIZARD_DATA.importMapping['${f.key}']=Number(this.value);applyMapping();renderGradePreview(document.getElementById('wizPreviewWrap'))">
+      <select data-field="${f.key}">
         ${['(ignorar)', ...WIZARD_DATA.importHeaders].map((h,i) => `<option value="${i-1}"${WIZARD_DATA.importMapping[f.key]===i-1?' selected':''}>${esc(h)}</option>`).join('')}
       </select>`).join('') + `</div>`;
+  container.querySelectorAll('select[data-field]').forEach(sel => sel.addEventListener('change', () => {
+    WIZARD_DATA.importMapping[sel.dataset.field] = Number(sel.value);
+    applyMapping();
+    renderGradePreview(document.getElementById('wizPreviewWrap'));
+  }));
   renderGradePreview(document.getElementById('wizPreviewWrap'));
 }
 
@@ -9781,7 +9815,7 @@ function renderLembretes(){
     ${notes.map(l => `
       <div class="postit">
         <div class="postit__text">${esc(l.text)}</div>
-        <button class="postit__del" data-del-lem="${l.id}" title="Remover lembrete" aria-label="Remover lembrete">✕</button>
+        <button class="postit__del" data-del-lem="${esc(l.id)}" title="Remover lembrete" aria-label="Remover lembrete">✕</button>
       </div>`).join('')}`;
 
   el.querySelectorAll('[data-del-lem]').forEach(btn => {
